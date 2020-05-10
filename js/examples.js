@@ -76,9 +76,9 @@ const openDialogBtn = document.createElement('button');
 openDialogBtn.innerHTML = 'Open Dialog';
 openDialogBtn.addEventListener('click', () => {
   dialog.show();
-  dialog.shadowRoot.querySelector('.dialog-content button').addEventListener('click', () => {
-    dialog.close();
-  });
+});
+dialog.shadowRoot.querySelector('.dialog-content button').addEventListener('click', () => {
+  dialog.close();
 });
 WRAPPER_EL.appendChild(openDialogBtn);
 
