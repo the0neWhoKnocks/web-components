@@ -21,7 +21,7 @@
   </custom-dialog>
   ```
   they should only have to worry about calling `document.getElementById('d1').show()`
-- [ ] Add in a `styles` node similar to `CustomAutoCompleteInput`.
+- [x] Add in a `styles` node similar to `CustomAutoCompleteInput`.
 - [ ] Focus the dialog on open
 
 ---
