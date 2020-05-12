@@ -7,6 +7,10 @@ class CustomFlyout extends HTMLElement {
     this._onClose = fn;
   }
   
+  set styles(styles) {
+    this.els.userStyles.textContent = styles;
+  }
+  
   set title(title) {
     if (title === '') this.els.flyoutNav.classList.add(this.MODIFIER__HIDDEN);
     else this.els.flyoutNav.classList.remove(this.MODIFIER__HIDDEN);
@@ -114,6 +118,7 @@ class CustomFlyout extends HTMLElement {
           background: #333;
         }
       </style>
+      <style id="userStyles"></style>
       
       <div class="flyout-mask"></div>
       <div class="flyout">
@@ -132,6 +137,7 @@ class CustomFlyout extends HTMLElement {
       flyoutBody: shadowRoot.querySelector('.flyout__body'),
       flyoutTitle: shadowRoot.querySelector('.flyout__title'),
       flyoutNav: shadowRoot.querySelector('.flyout__nav'),
+      userStyles: shadowRoot.querySelector('#userStyles'),
     };
     
     this.handleCloseClick = this.handleCloseClick.bind(this);

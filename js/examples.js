@@ -63,12 +63,12 @@ document.body.appendChild(filterInput);
 // CustomDialog ================================================================
 
 const dialog = document.createElement('custom-dialog');
+dialog.styles = `
+  .dialog-content {
+    padding: 1em;
+  }
+`;
 dialog.content = `
-  <style>
-    .dialog-content {
-      padding: 1em;
-    }
-  </style>
   <div class="dialog-content">
     Click button to close Dialog.
     <button>Close Dialog</button>
@@ -90,13 +90,13 @@ WRAPPER_EL.appendChild(openDialogBtn);
 // CustomFlyout ================================================================
 
 const markerFlyout = document.createElement('custom-flyout');
+markerFlyout.styles = `
+  .content {
+    width: 30vw;
+    padding: 1em;
+  }
+`;
 markerFlyout.content = `
-  <style>
-    .content {
-      width: 30vw;
-      padding: 1em;
-    }
-  </style>
   <div class="content">
     Hello
   </div>

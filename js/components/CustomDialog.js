@@ -78,6 +78,10 @@ class CustomDialog extends HTMLElement {
     this._onClose = fn;
   }
   
+  set styles(styles) {
+    this.els.userStyles.textContent = styles;
+  }
+  
   set title(title) {
     this.els.dialogTitle.innerHTML = title;
   }
@@ -90,6 +94,7 @@ class CustomDialog extends HTMLElement {
     const { shadowRoot } = this;
     shadowRoot.innerHTML = `
       <style>${STYLES}</style>
+      <style id="userStyles"></style>
       
       <div class="dialog-mask"></div>
       <dialog class="dialog" open>
@@ -107,6 +112,7 @@ class CustomDialog extends HTMLElement {
       dialogBGMask: shadowRoot.querySelector('.dialog-mask'),
       dialogBody: shadowRoot.querySelector('.dialog__body'),
       dialogTitle: shadowRoot.querySelector('.dialog__title'),
+      userStyles: shadowRoot.querySelector('#userStyles'),
     };
     
     this.handleCloseClick = this.handleCloseClick.bind(this);
