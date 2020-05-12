@@ -5,9 +5,9 @@
 ## CustomAutoCompleteInput
 
 - On selection of an option:
-  - [ ] Add that text to the input's value along with a clear button.
+  - [x] Add that text to the input's value along with a clear button.
 - While arrowing/hovering over options in the list:
-  - [ ] Update input overlay to display possible value. Has to be in an overlay
+  - [x] Update input overlay to display possible value. Has to be in an overlay
   otherwise the list the user is viewing would change.
 
 ---
@@ -22,6 +22,7 @@
   ```
   they should only have to worry about calling `document.getElementById('d1').show()`
 - [ ] Add in a `styles` node similar to `CustomAutoCompleteInput`.
+- [ ] Focus the dialog on open
 
 ---
 
@@ -29,3 +30,4 @@
 
 - [ ] Add in an `openFrom` prop to open from `TOP`, `BOTTOM`, `LEFT`, `RIGHT`.
 Currently it just opens from the left.
+- [ ] Focus the flyout on open

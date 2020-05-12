@@ -19,7 +19,12 @@ filterInput.styles = `
   .custom-autocomplete__list-item button * {
     pointer-events: none;
   }
-  .custom-autocomplete__list-item .icon {
+  .custom-autocomplete .icon {
+    width: 1em;
+    height: 1em;
+    border-radius: 100%;
+    margin-right: 0.5em;
+    background: pink;
     display: inline-block;
   }
 `;

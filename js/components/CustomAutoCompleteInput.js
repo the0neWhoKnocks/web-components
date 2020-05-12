@@ -28,8 +28,10 @@ class CustomAutoCompleteInput extends HTMLElement {
     this.visibleListItems = [];
     
     this.classes = {
+      CLEAR_BTN: `${this.ROOT_CLASS}__clear-btn`,
       LIST: `${this.ROOT_CLASS}__list`,
       LIST_ITEM: `${this.ROOT_CLASS}__list-item`,
+      LIST_ITEM_BTN: `${this.ROOT_CLASS}__list-item-btn`,
     };
     
     shadowRoot.innerHTML = `
@@ -48,10 +50,52 @@ class CustomAutoCompleteInput extends HTMLElement {
           position: relative;
         }
         
-        .${this.ROOT_CLASS}__input {
-          font-size: 1em;
+        .${this.ROOT_CLASS}__input-wrapper {
+          border: solid 1px;
+          position: relative;
+        }
+        
+        .${this.ROOT_CLASS}__input,
+        .${this.ROOT_CLASS}__input-overlay {
+          font: 400 1em system-ui;
           width: 100%;
           padding: 0.5em 1em;
+        }
+        
+        .${this.ROOT_CLASS}__input {
+          border: none;
+        }
+        
+        .${this.ROOT_CLASS}__input-overlay {
+          display: flex;
+          align-items: center;
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          right: 0;
+          pointer-events: none;
+        }
+        .${this.ROOT_CLASS}__input-overlay:not(:empty) {
+          background: #fff;
+        }
+        
+        .${this.ROOT_CLASS}__clear-btn {
+          width: 2em;
+          height: 2em;
+          padding: 0;
+          border: none;
+          border-radius: 100%;
+          background: #ddd;
+          position: absolute;
+          top: 0.5em;
+          right: 1em;
+          cursor: pointer;
+          display: none;
+        }
+        .${this.ROOT_CLASS}__input:not(:placeholder-shown) + .${this.ROOT_CLASS}__input-overlay:empty + .${this.ROOT_CLASS}__clear-btn,
+        .${this.ROOT_CLASS}__input-overlay:not(:empty) + .${this.ROOT_CLASS}__clear-btn {
+          display: block;
         }
         
         .${this.classes.LIST} {
@@ -82,7 +126,7 @@ class CustomAutoCompleteInput extends HTMLElement {
           background: transparent;
           cursor: pointer;
         }
-        .${this.classes.LIST_ITEM} button {
+        .${this.classes.LIST_ITEM_BTN} {
           width: 100%;
           font-size: 1rem;
           text-align: left;
@@ -94,8 +138,8 @@ class CustomAutoCompleteInput extends HTMLElement {
           appearance: none;
           -webkit-appearance: none;
         }
-        .${this.classes.LIST_ITEM} button:focus,
-        .${this.classes.LIST_ITEM} button:hover {
+        .${this.classes.LIST_ITEM_BTN}:focus,
+        .${this.classes.LIST_ITEM_BTN}:hover {
           background: #eee;
         }
       </style>
@@ -103,13 +147,18 @@ class CustomAutoCompleteInput extends HTMLElement {
       <style id="autocompleteStyles"></style>
       
       <div class="${this.ROOT_CLASS}">
-        <input class="${this.ROOT_CLASS}__input" type="text">
+        <div class="${this.ROOT_CLASS}__input-wrapper">
+          <input class="${this.ROOT_CLASS}__input" type="text">
+          <div class="${this.ROOT_CLASS}__input-overlay"></div>
+          <button class="${this.classes.CLEAR_BTN}" type="button">&#10005;</button>
+        </div>
         <ul class="${this.classes.LIST}"></ul>
       </div>
     `;
     
     this.els = {
       input: shadowRoot.querySelector(`.${this.ROOT_CLASS}__input`),
+      inputOverlay: shadowRoot.querySelector(`.${this.ROOT_CLASS}__input-overlay`),
       list: shadowRoot.querySelector(`.${this.classes.LIST}`),
       listStyles: shadowRoot.querySelector('#autocompleteStyles'),
       userStyles: shadowRoot.querySelector('#userStyles'),
@@ -122,9 +171,12 @@ class CustomAutoCompleteInput extends HTMLElement {
     
     this.handleArrowKeysInList = this.handleArrowKeysInList.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
+    this.handleClear = this.handleClear.bind(this);
+    this.handleClick = this.handleClick.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleItemSelection = this.handleItemSelection.bind(this);
     this.handleInputKeyDown = this.handleInputKeyDown.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
   
   connectedCallback() {
@@ -136,6 +188,10 @@ class CustomAutoCompleteInput extends HTMLElement {
     else {
       console.error('No `items` provided for autocomplete-input');
     }
+  }
+  
+  formatItemData(str) {
+    return str.toLowerCase().replace(/(\s|_)/g, '-');
   }
   
   setupListItems() {
@@ -150,25 +206,38 @@ class CustomAutoCompleteInput extends HTMLElement {
       return `
         <li
           class="${this.classes.LIST_ITEM}"
-          data-autocomplete-item="${_value.toLowerCase()}"
+          data-autocomplete-item="${this.formatItemData(_value)}"
         >
-          <button type="button" value="${_value}" ${atts}>${_label}</button>
+          <button 
+            class="${this.classes.LIST_ITEM_BTN}"
+            type="button"
+            value="${_value}"
+            tabindex="-1"
+            ${atts}
+          >${_label}</button>
         </li>
       `;
     }).join('');
   }
   
+  updateListStyles(rules = '') {
+    this.els.listStyles.textContent = rules;
+  }
+  
   handleInputChange(ev) {
+    const newInputValue = ev.currentTarget.value;
     let rules = '';
     
     if (ev.type === 'focus') {
+      this.els.input.addEventListener('blur', this.handleBlur);
       window.addEventListener('click', this.handleBlur);
     }
-    else if (ev.type !== 'closeList') {
+    
+    if (ev.type !== 'closeList') {
       const query = ev.currentTarget.value;
       const rule = (query !== '')
         ? `
-          .${this.classes.LIST} [data-autocomplete-item*="${query.toLowerCase()}"] {
+          .${this.classes.LIST} [data-autocomplete-item*="${this.formatItemData(query)}"] {
             display: block;
           }
         `
@@ -185,17 +254,19 @@ class CustomAutoCompleteInput extends HTMLElement {
         ${rule}
       `;
     }
-      
-    this.els.listStyles.textContent = rules;
+    
+    if (newInputValue !== this.currentInputValue) this.updateListStyles(rules);
     
     if (this.els.list.offsetHeight !== 0) {
       // find the first visible item in the drop down to select
-      const items = [...this.els.list.querySelectorAll(`.${this.classes.LIST_ITEM} button`)];
+      const items = [...this.els.list.querySelectorAll(`.${this.classes.LIST_ITEM_BTN}`)];
       this.visibleListItems = items.reduce((arr, item) => {
         if (item.offsetHeight !== 0) arr.push(item);
         return arr;
       }, []);
     }
+    
+    this.currentInputValue = newInputValue;
   }
   
   handleInputKeyDown(ev) {
@@ -223,9 +294,11 @@ class CustomAutoCompleteInput extends HTMLElement {
   handleBlur(ev) {
     window.requestAnimationFrame(() => {
       if (!this.shadowRoot.activeElement) {
-        this.els.input.value = '';
+        this.els.input.removeEventListener('blur', this.handleBlur);
         window.removeEventListener('click', this.handleBlur);
-        this.els.input.dispatchEvent(new CustomEvent('closeList'));
+        this.updateListStyles('');
+        this.updateInputOverlayText();
+        this.currentInputValue = undefined;
       }
     });
   }
@@ -247,13 +320,22 @@ class CustomAutoCompleteInput extends HTMLElement {
       case this.KEY_CODE__UP:
         this.itemIndex--;
         if (this.itemIndex < 0) {
+          this.updateInputOverlayText(this.els.input);
           this.els.input.focus();
           return;
         }
         break;
     }
+    
+    const currItem = this.visibleListItems[this.itemIndex];
+    
+    this.updateInputOverlayText(currItem);
+    currItem.focus();
+  }
   
-    this.visibleListItems[this.itemIndex].focus();
+  updateInputOverlayText(item = {}) {
+    const value = (item.nodeName === 'BUTTON') ? item.innerText : '';
+    this.els.inputOverlay.innerText = value;
   }
   
   handleItemSelection(ev) {
@@ -267,10 +349,16 @@ class CustomAutoCompleteInput extends HTMLElement {
     else {
       item = target;
       elements = [item];
+      this.els.input.value = item.innerText;
+      
+      if (this.shadowRoot.activeElement !== this.els.input) {
+        this.els.input.focus();
+      }
     }
     
-    this.els.input.value = '';
-    this.els.input.dispatchEvent(new CustomEvent('closeList'));
+    this.updateInputOverlayText();
+    this.updateListStyles('');
+    
     if (item) item.blur();
     
     setTimeout(() => {
@@ -278,14 +366,44 @@ class CustomAutoCompleteInput extends HTMLElement {
     }, 0);
   }
   
+  handleClear(ev) {
+    this.updateInputOverlayText();
+    this.updateListStyles('');
+    this.els.input.value = '';
+    
+    if (this.shadowRoot.activeElement !== this.els.input) {
+      this.els.input.focus();
+    }
+  }
+  
+  handleClick(ev) {
+    const el = ev.target;
+    
+    if (el.classList.contains(this.classes.LIST_ITEM_BTN)) this.handleItemSelection(ev);
+    else if (el.classList.contains(this.classes.CLEAR_BTN)) this.handleClear(ev);
+  }
+  
+  handleKeyDown(ev) {
+    const item = ev.target;
+    
+    if (item === this.els.input) {
+      this.handleInputKeyDown(ev);
+      
+      if (ev.keyCode === this.KEY_CODE__DOWN) {
+        this.itemIndex = -1;
+        this.handleArrowKeysInList(ev);
+      }
+    }
+    else {
+      this.handleArrowKeysInList(ev);
+    }
+  }
+  
   addListeners() {
-    this.els.input.addEventListener('change', this.handleInputChange);
-    this.els.input.addEventListener('closeList', this.handleInputChange);
     this.els.input.addEventListener('focus', this.handleInputChange);
     this.els.input.addEventListener('input', this.handleInputChange);
-    this.els.input.addEventListener('keydown', this.handleInputKeyDown);
-    this.els.list.addEventListener('keydown', this.handleArrowKeysInList);
-    this.els.list.addEventListener('click', this.handleItemSelection);
+    this.els.wrapper.addEventListener('click', this.handleClick);
+    this.els.wrapper.addEventListener('keydown', this.handleKeyDown);
   }
 }
 
