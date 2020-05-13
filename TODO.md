@@ -22,12 +22,14 @@
   ```
   they should only have to worry about calling `document.getElementById('d1').show()`
 - [x] Add in a `styles` node similar to `CustomAutoCompleteInput`.
-- [ ] Focus the dialog on open
+- [x] Focus the dialog on open
+- [x] `ESC` closes dialog
 
 ---
 
 ## CustomFlyout
 
-- [ ] Add in an `openFrom` prop to open from `TOP`, `BOTTOM`, `LEFT`, `RIGHT`.
+- [x] Add in an `openFrom` prop to open from `TOP`, `BOTTOM`, `LEFT`, `RIGHT`.
 Currently it just opens from the left.
-- [ ] Focus the flyout on open
+- [x] Focus the flyout on open
+- [x] `ESC` closes flyout
