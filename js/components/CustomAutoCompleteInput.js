@@ -42,6 +42,7 @@ class CustomAutoCompleteInput extends HTMLElement {
         
         :host {
           font: 16px Helvetica, Arial, sans-serif;
+          position: relative;
         }
         
         .${this.ROOT_CLASS} {
