@@ -58,7 +58,7 @@ filterInput.items = [
   value: txt.toLowerCase().replace(/\s/g, '-'),
 }));
 
-document.body.appendChild(filterInput);
+WRAPPER_EL.querySelector('#autoCompleteExample').appendChild(filterInput);
 
 // CustomDialog ================================================================
 
@@ -85,14 +85,15 @@ openDialogBtn.addEventListener('click', () => {
 dialog.shadowRoot.querySelector('.dialog-content button').addEventListener('click', () => {
   dialog.close();
 });
-WRAPPER_EL.appendChild(openDialogBtn);
+WRAPPER_EL.querySelector('#dialogExample').appendChild(openDialogBtn);
 
 // CustomFlyout ================================================================
 
 const markerFlyout = document.createElement('custom-flyout');
 markerFlyout.styles = `
   .content {
-    width: 30vw;
+    min-width: 80vw;
+    min-height: 80vh;
     padding: 1em;
   }
 `;
@@ -106,9 +107,34 @@ markerFlyout.onClose = () => {
 };
 markerFlyout.title = 'Marker Creator';
 
-const openFlyoutBtn = document.createElement('button');
-openFlyoutBtn.innerHTML = 'Open Flyout';
-openFlyoutBtn.addEventListener('click', () => {
+const openLeftFlyoutBtn = document.createElement('button');
+openLeftFlyoutBtn.innerHTML = 'Open Flyout from Left';
+openLeftFlyoutBtn.addEventListener('click', () => {
+  markerFlyout.openFrom = markerFlyout.DIRECTION__LEFT;
   markerFlyout.show();
 });
-WRAPPER_EL.appendChild(openFlyoutBtn);
+WRAPPER_EL.querySelector('#flyoutExample').appendChild(openLeftFlyoutBtn);
+
+const openRightFlyoutBtn = document.createElement('button');
+openRightFlyoutBtn.innerHTML = 'Open Flyout from Right';
+openRightFlyoutBtn.addEventListener('click', () => {
+  markerFlyout.openFrom = markerFlyout.DIRECTION__RIGHT;
+  markerFlyout.show();
+});
+WRAPPER_EL.querySelector('#flyoutExample').appendChild(openRightFlyoutBtn);
+
+const openTopFlyoutBtn = document.createElement('button');
+openTopFlyoutBtn.innerHTML = 'Open Flyout from Top';
+openTopFlyoutBtn.addEventListener('click', () => {
+  markerFlyout.openFrom = markerFlyout.DIRECTION__TOP;
+  markerFlyout.show();
+});
+WRAPPER_EL.querySelector('#flyoutExample').appendChild(openTopFlyoutBtn);
+
+const openBottomFlyoutBtn = document.createElement('button');
+openBottomFlyoutBtn.innerHTML = 'Open Flyout from Bottom';
+openBottomFlyoutBtn.addEventListener('click', () => {
+  markerFlyout.openFrom = markerFlyout.DIRECTION__BOTTOM;
+  markerFlyout.show();
+});
+WRAPPER_EL.querySelector('#flyoutExample').appendChild(openBottomFlyoutBtn);

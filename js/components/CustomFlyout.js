@@ -7,6 +7,14 @@ class CustomFlyout extends HTMLElement {
     this._onClose = fn;
   }
   
+  get openFrom() {
+    return this.getAttribute('open-from');
+  }
+  
+  set openFrom(direction) {
+    this.setAttribute('open-from', direction);
+  }
+  
   set styles(styles) {
     this.els.userStyles.textContent = styles;
   }
@@ -17,6 +25,28 @@ class CustomFlyout extends HTMLElement {
     this.els.flyoutTitle.innerHTML = title;
   }
   
+  static get observedAttributes() {
+    return ['open-from'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case 'open-from': {
+        const newModifier = `MODIFIER__OPEN_FROM_${newValue.toUpperCase()}`;
+        if (this[newModifier]) {
+          this.els.flyout.classList.remove(
+            this.MODIFIER__OPEN_FROM_BOTTOM,
+            this.MODIFIER__OPEN_FROM_LEFT,
+            this.MODIFIER__OPEN_FROM_RIGHT,
+            this.MODIFIER__OPEN_FROM_TOP
+          );
+          this.els.flyout.classList.add(this[newModifier]);
+        }
+        break;
+      }
+    }
+  }
+  
   constructor() {
     super();
     
@@ -24,8 +54,17 @@ class CustomFlyout extends HTMLElement {
     
     const { shadowRoot } = this;
     this.ANIM_DURATION = 300;
+    this.DIRECTION__BOTTOM = 'bottom';
+    this.DIRECTION__LEFT = 'left';
+    this.DIRECTION__RIGHT = 'right';
+    this.DIRECTION__TOP = 'top';
     this.MODIFIER__HIDDEN = 'is--hidden';
     this.MODIFIER__OPEN = 'is--open';
+    this.MODIFIER__OPEN_FROM_BOTTOM = 'open-from--bottom';
+    this.MODIFIER__OPEN_FROM_LEFT = 'open-from--left';
+    this.MODIFIER__OPEN_FROM_RIGHT = 'open-from--right';
+    this.MODIFIER__OPEN_FROM_TOP = 'open-from--top';
+    this['open-from'] = this.DIRECTION__LEFT;
     
     shadowRoot.innerHTML = `
       <style>
@@ -77,15 +116,46 @@ class CustomFlyout extends HTMLElement {
           display: flex;
           flex-direction: column;
           position: absolute;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          transform: translateX(-100%);
           transition: transform ${this.ANIM_DURATION}ms;
         }
         .flyout.${this.MODIFIER__OPEN} {
           box-shadow: 0 0.75em 2em 0.25em rgba(0, 0, 0, 0.75);
+        }
+        
+        .flyout.${this.MODIFIER__OPEN_FROM_LEFT},
+        .flyout.${this.MODIFIER__OPEN_FROM_RIGHT} {
+          top: 0;
+          bottom: 0;
+        }
+        .flyout.${this.MODIFIER__OPEN_FROM_LEFT} {
+          left: 0;
+          transform: translateX(-100%);
+        }
+        .flyout.${this.MODIFIER__OPEN_FROM_RIGHT} {
+          right: 0;
+          transform: translateX(100%);
+        }
+        .flyout.${this.MODIFIER__OPEN_FROM_LEFT}.${this.MODIFIER__OPEN},
+        .flyout.${this.MODIFIER__OPEN_FROM_RIGHT}.${this.MODIFIER__OPEN} {
           transform: translateX(0%);
+        }
+        
+        .flyout.${this.MODIFIER__OPEN_FROM_TOP},
+        .flyout.${this.MODIFIER__OPEN_FROM_BOTTOM} {
+          left: 0;
+          right: 0;
+        }
+        .flyout.${this.MODIFIER__OPEN_FROM_TOP} {
+          top: 0;
+          transform: translateY(-100%);
+        }
+        .flyout.${this.MODIFIER__OPEN_FROM_BOTTOM} {
+          bottom: 0;
+          transform: translateY(100%);
+        }
+        .flyout.${this.MODIFIER__OPEN_FROM_TOP}.${this.MODIFIER__OPEN},
+        .flyout.${this.MODIFIER__OPEN_FROM_BOTTOM}.${this.MODIFIER__OPEN} {
+          transform: translateY(0%);
         }
         
         .flyout__nav {
@@ -121,7 +191,7 @@ class CustomFlyout extends HTMLElement {
       <style id="userStyles"></style>
       
       <div class="flyout-mask"></div>
-      <div class="flyout">
+      <div class="flyout ${this.MODIFIER__OPEN_FROM_LEFT}">
         <nav class="flyout__nav is--hidden">
           <div class="flyout__title"></div>
           <button type="button" class="flyout__close-btn">&#10005;</button>
