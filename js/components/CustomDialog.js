@@ -97,7 +97,11 @@ class CustomDialog extends HTMLElement {
       <style id="userStyles"></style>
       
       <div class="dialog-mask"></div>
-      <dialog class="dialog" open>
+      <dialog
+        class="dialog"
+        tabindex="0"
+        open
+      >
         <nav class="dialog__nav">
           <div class="dialog__title">Title</div>
           <button type="button" class="dialog__close-btn">&#10005;</button>
@@ -105,6 +109,8 @@ class CustomDialog extends HTMLElement {
         <div class="dialog__body"></div>
       </dialog>
     `;
+    
+    this.KEY_CODE__ESC = 27;
     
     this.els = {
       closeBtn: shadowRoot.querySelector('.dialog__close-btn'),
@@ -116,17 +122,27 @@ class CustomDialog extends HTMLElement {
     };
     
     this.handleCloseClick = this.handleCloseClick.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleMaskClick = this.handleMaskClick.bind(this);
   }
   
   handleCloseClick() { this.close(); }
   handleMaskClick() { this.close(); }
   
+  handleKeyDown(ev) {
+    if (ev.keyCode === this.KEY_CODE__ESC) {
+      window.removeEventListener('keydown', this.handleKeyDown);
+      this.close();
+    }
+  }
+  
   show() {
     document.body.appendChild(this);
     this.els.closeBtn.addEventListener('click', this.handleCloseClick);
     this.els.dialogBGMask.addEventListener('click', this.handleMaskClick);
     window.customDialog = this;
+    this.els.dialog.focus();
+    window.addEventListener('keydown', this.handleKeyDown);
   }
   
   close() {

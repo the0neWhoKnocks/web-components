@@ -191,7 +191,10 @@ class CustomFlyout extends HTMLElement {
       <style id="userStyles"></style>
       
       <div class="flyout-mask"></div>
-      <div class="flyout ${this.MODIFIER__OPEN_FROM_LEFT}">
+      <div
+        class="flyout ${this.MODIFIER__OPEN_FROM_LEFT}"
+        tabindex="0"
+      >
         <nav class="flyout__nav is--hidden">
           <div class="flyout__title"></div>
           <button type="button" class="flyout__close-btn">&#10005;</button>
@@ -199,6 +202,8 @@ class CustomFlyout extends HTMLElement {
         <div class="flyout__body"></div>
       </div>
     `;
+    
+    this.KEY_CODE__ESC = 27;
     
     this.els = {
       closeBtn: shadowRoot.querySelector('.flyout__close-btn'),
@@ -211,11 +216,19 @@ class CustomFlyout extends HTMLElement {
     };
     
     this.handleCloseClick = this.handleCloseClick.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleMaskClick = this.handleMaskClick.bind(this);
   }
   
   handleCloseClick() { this.close(); }
   handleMaskClick() { this.close(); }
+  
+  handleKeyDown(ev) {
+    if (ev.keyCode === this.KEY_CODE__ESC) {
+      window.removeEventListener('keydown', this.handleKeyDown);
+      this.close();
+    }
+  }
   
   show() {
     document.body.appendChild(this);
@@ -226,7 +239,9 @@ class CustomFlyout extends HTMLElement {
     setTimeout(() => {
       this.els.flyoutBGMask.classList.add(this.MODIFIER__OPEN);
       this.els.flyout.classList.add(this.MODIFIER__OPEN);
-    }, 0);
+      this.els.flyout.focus();
+      window.addEventListener('keydown', this.handleKeyDown);
+    }, 10);
   }
   
   close() {
