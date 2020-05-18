@@ -241,7 +241,7 @@ class CustomFlyout extends HTMLElement {
       this.els.flyout.classList.add(this.MODIFIER__OPEN);
       this.els.flyout.focus();
       window.addEventListener('keydown', this.handleKeyDown);
-    }, 10);
+    }, 100);
   }
   
   close() {
