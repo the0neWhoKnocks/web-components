@@ -89,7 +89,9 @@ WRAPPER_EL.querySelector('#dialogExample').appendChild(openDialogBtn);
 
 // CustomFlyout ================================================================
 
+const FLYOUT_WRAPPER = WRAPPER_EL.querySelector('#flyoutExample');
 const markerFlyout = document.createElement('custom-flyout');
+
 markerFlyout.styles = `
   .content {
     min-width: 80vw;
@@ -99,42 +101,31 @@ markerFlyout.styles = `
 `;
 markerFlyout.content = `
   <div class="content">
-    Hello
+    Flyout content goes here.
   </div>
 `;
 markerFlyout.onClose = () => {
-  alert('closing flyout');
+  alert('flyout closed');
 };
-markerFlyout.title = 'Marker Creator';
+markerFlyout.title = 'Flyout Title';
 
-const openLeftFlyoutBtn = document.createElement('button');
-openLeftFlyoutBtn.innerHTML = 'Open Flyout from Left';
-openLeftFlyoutBtn.addEventListener('click', () => {
-  markerFlyout.openFrom = markerFlyout.DIRECTION__LEFT;
-  markerFlyout.show();
+Object.keys(markerFlyout).forEach((prop) => {
+  if (prop.startsWith('DIRECTION__')) {
+    const btn = document.createElement('button');
+    const dir = markerFlyout[prop];
+    btn.dataset.openFrom = dir;
+    btn.innerHTML = `Open From <b>${dir}</b>`;
+    
+    FLYOUT_WRAPPER.appendChild(btn);
+  }
 });
-WRAPPER_EL.querySelector('#flyoutExample').appendChild(openLeftFlyoutBtn);
 
-const openRightFlyoutBtn = document.createElement('button');
-openRightFlyoutBtn.innerHTML = 'Open Flyout from Right';
-openRightFlyoutBtn.addEventListener('click', () => {
-  markerFlyout.openFrom = markerFlyout.DIRECTION__RIGHT;
-  markerFlyout.show();
+FLYOUT_WRAPPER.addEventListener('click', (ev) => {
+  const el = ev.target;
+  const { openFrom } = el.dataset;
+  
+  if (openFrom) {
+    markerFlyout.openFrom = openFrom;
+    markerFlyout.show();
+  }
 });
-WRAPPER_EL.querySelector('#flyoutExample').appendChild(openRightFlyoutBtn);
-
-const openTopFlyoutBtn = document.createElement('button');
-openTopFlyoutBtn.innerHTML = 'Open Flyout from Top';
-openTopFlyoutBtn.addEventListener('click', () => {
-  markerFlyout.openFrom = markerFlyout.DIRECTION__TOP;
-  markerFlyout.show();
-});
-WRAPPER_EL.querySelector('#flyoutExample').appendChild(openTopFlyoutBtn);
-
-const openBottomFlyoutBtn = document.createElement('button');
-openBottomFlyoutBtn.innerHTML = 'Open Flyout from Bottom';
-openBottomFlyoutBtn.addEventListener('click', () => {
-  markerFlyout.openFrom = markerFlyout.DIRECTION__BOTTOM;
-  markerFlyout.show();
-});
-WRAPPER_EL.querySelector('#flyoutExample').appendChild(openBottomFlyoutBtn);
