@@ -1,4 +1,6 @@
 (() => {
+  const ANIM_DURATION = 300;
+  const MODIFIER__SHOW = 'show';
   const STYLES = `
     *, *::after, *::before {
       box-sizing: border-box;
@@ -32,6 +34,11 @@
       position: absolute;
       top: 0;
       left: 0;
+      opacity: 0;
+      transition: opacity ${ANIM_DURATION}ms
+    }
+    .dialog-mask.${MODIFIER__SHOW} {
+      opacity: 1;
     }
     
     .dialog {
@@ -43,9 +50,15 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -20%);
       box-shadow: 0 0.75em 2em 0.25em rgba(0, 0, 0, 0.75);
       background: #eee;
+      opacity: 0;
+      transition: opacity ${ANIM_DURATION}ms, transform ${ANIM_DURATION}ms;
+    }
+    .dialog.${MODIFIER__SHOW} {
+      opacity: 1;
+      transform: translate(-50%, -50%);
     }
     
     .dialog__nav {
@@ -144,14 +157,24 @@
       window.customDialog = this;
       this.els.dialog.focus();
       window.addEventListener('keydown', this.handleKeyDown);
+      
+      setTimeout(() => {
+        this.els.dialog.classList.add(MODIFIER__SHOW);
+        this.els.dialogBGMask.classList.add(MODIFIER__SHOW);
+      }, 100);
     }
     
     close() {
       this.els.closeBtn.removeEventListener('click', this.handleCloseClick);
       this.els.dialogBGMask.removeEventListener('click', this.handleMaskClick);
-      if (this._onClose) this._onClose();
-      delete window.customDialog;
-      this.remove();
+      this.els.dialog.classList.remove(MODIFIER__SHOW);
+      this.els.dialogBGMask.classList.remove(MODIFIER__SHOW);
+      
+      setTimeout(() => {
+        if (this._onClose) this._onClose();
+        delete window.customDialog;
+        this.remove();
+      }, ANIM_DURATION);
     }
   }
 
