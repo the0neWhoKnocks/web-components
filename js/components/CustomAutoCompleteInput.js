@@ -1,5 +1,8 @@
 (() => {
   class CustomAutoCompleteInput extends HTMLElement {
+    get items() {
+      return this.data.items;
+    }
     set items(items) {
       this.data.items = items;
       if (this.initialized) {
@@ -17,6 +20,37 @@
     
     set styles(styles) {
       this.els.userStyles.textContent = styles;
+    }
+    
+    static get observedAttributes() {
+      return ['items', 'onselect', 'placeholder', 'styles'];
+    }
+    
+    attributeChangedCallback(attr, oldVal, newVal) {
+      if (oldVal !== newVal) {
+        let _attr = attr;
+        let _newVal = newVal;
+        
+        switch (_attr) {
+          case 'items': {
+            if (typeof newVal === 'string') {
+              // JSON
+              if (newVal.startsWith('[')) _newVal = JSON.parse(newVal);
+              // Function name
+              else _newVal = eval(newVal);
+            }
+            break;
+          }
+          case 'onselect': {
+            _attr = 'onSelect';
+            // Function name
+            if (typeof newVal === 'string') _newVal = eval(newVal);
+            break;
+          }
+        }
+        
+        this[_attr] = _newVal;
+      }
     }
     
     constructor() {
