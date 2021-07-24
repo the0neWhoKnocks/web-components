@@ -32,6 +32,13 @@ Just point it to the folder for this repo, and start it up.
 General notes, and gotchas.
 
 - They go by many names. `web components`, `custom components`, `custom elements`, but MDN is a good place to start https://developer.mozilla.org/en-US/docs/Web/Web_Components for info.
+- Custom components can't self close, you always need to add a closing node.
+  ```html
+  <!-- invalid -->
+  <custom-component/>
+  <!-- valid -->
+  <custom-component></custom-component>
+  ```
 - Attribute names are hard. Imagine you want to implement something like a click handler. You can go with the below formats.
   | Format |   |
   | ------ | - |

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="example/examples.css">
     
     <script src="js/components/hybrid/CustomAutoCompleteInput.js"></script>
+    <script src="js/components/hybrid/CustomToggle.js"></script>
     <script src="js/components/js-only/CustomDialog.js"></script>
     <script src="js/components/js-only/CustomFlyout.js"></script>
   </head>
@@ -82,6 +83,42 @@
               label: txt, // `value` will equal `label`, and no icon will be present
             }))
           ];
+        </script>
+      </section>
+      <section>
+        <script>
+          function handleToggle() {
+            const formData = new FormData(toggleForm);
+            const output = [...formData.entries()]
+              .map(([name, value]) => `${name}: ${value}`)
+              .join('\n');
+            
+            togglesOutput.textContent = output;
+          }
+        </script>
+        <h2 class="title">Toggle</h2>
+        <div class="toggles">
+          <form id="toggleForm">
+            <!-- enabled on load -->
+            <custom-toggle enabled onToggle="handleToggle"></custom-toggle>
+            <!-- custom id and name -->
+            <custom-toggle id="custom" name="someName" onToggle="handleToggle"></custom-toggle>
+            <!-- nothing to see here -->
+            <custom-toggle onToggle="handleToggle"></custom-toggle>
+          </form>
+          <pre></pre>
+        </div>
+        <script>
+          const toggleForm = document.getElementById('toggleForm');
+          const togglesOutput = document.querySelector('#toggleForm + pre');
+          // Append any Custom Element data to Form data when it's requested.
+          // Only neccessary for Custom Elements using the Shadow DOM.
+          toggleForm.addEventListener('formdata', ({ formData }) => {
+            [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
+              formData.append(toggle.name, toggle.enabled);
+            });
+          });
+          handleToggle();
         </script>
       </section>
       <section id="dialogExample">
