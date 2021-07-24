@@ -14,7 +14,75 @@
   <body>
     <div id="wrapper">
       <section id="autoCompleteExample">
+        <script>
+          function handleAutoCompleteSelection({ elements: filters, value }) {
+            const matches = filters.map(({ dataset: { rawValue } }) => rawValue);
+            alert(`Matches for "${value}":\n${JSON.stringify(matches, null, 2)}`);
+          }
+          const autoCompleteItems = [
+            "Alligator Snapping Turtle",
+            "Baja California Pronghorn Buck",
+            "California Condor",
+            "Desert Bighorn Ram",
+            "Eastern Turkey Vulture",
+            "Fer-de-Lance Snake",
+            "Golden Crowned Sparrow",
+            "Hereford Bull",
+            "Java Chicken",
+            "Labrador Retriever",
+            "Mallard Duck",
+            "Neotropic Cormorant",
+            "Old Spot Pig",
+            "Pacific Loon",
+            "Rainbow Boa Snake",
+            "Sandhill Crane",
+            "Timber Rattlesnake",
+            "Virginia Opossum",
+            "Whooping Crane",
+          ].map((txt) => ({
+            attributes: { 'data-raw-value': txt },
+            label: `<span class="icon"></span>${txt}`,
+            value: txt.toLowerCase().replace(/\s/g, '-'),
+          }));
+        </script>
         <h2 class="title">Auto-Complete Inputs</h2>
+        <custom-auto-complete-input
+          items="autoCompleteItems"
+          onSelect="handleAutoCompleteSelection"
+          placeholder="Filter Animals"
+          styles="
+            .custom-autocomplete__list-item button {
+              margin: 0;
+              display: flex;
+              align-items: center;
+            }
+            .custom-autocomplete__list-item button * {
+              pointer-events: none;
+            }
+            .custom-autocomplete .icon {
+              width: 1em;
+              height: 1em;
+              border-radius: 100%;
+              margin-right: 0.5em;
+              background: pink;
+              display: inline-block;
+            }
+          "
+        ></custom-auto-complete-input>
+        <script>
+          const autoCompleteInput = document.querySelector('custom-auto-complete-input');
+          // add a couple more items to the existing list
+          autoCompleteInput.items = [
+            ...autoCompleteInput.items,
+            ...[
+              "Wild Boar",
+              "Yellow-billed Loon",
+            ].map((txt) => ({
+              attributes: { 'data-raw-value': txt },
+              label: txt, // `value` will equal `label`, and no icon will be present
+            }))
+          ];
+        </script>
       </section>
       <section id="dialogExample">
         <h2 class="title">Dialogs</h2>

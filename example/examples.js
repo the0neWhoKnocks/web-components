@@ -2,64 +2,6 @@
 
 const WRAPPER_EL = document.getElementById('wrapper');
 
-// CustomAutoCompleteInput =====================================================
-
-const filterInput = document.createElement('custom-auto-complete-input');
-filterInput.placeholder = 'Filter Animals';
-filterInput.onSelect = ({ elements: filters, value }) => {
-  const matches = filters.map(({ dataset: { rawValue } }) => rawValue);
-  alert(`Matches for "${value}":\n${JSON.stringify(matches, null, 2)}`);
-};
-filterInput.styles = `
-  .custom-autocomplete__list-item button {
-    margin: 0;
-    display: flex;
-    align-items: center;
-  }
-  .custom-autocomplete__list-item button * {
-    pointer-events: none;
-  }
-  .custom-autocomplete .icon {
-    width: 1em;
-    height: 1em;
-    border-radius: 100%;
-    margin-right: 0.5em;
-    background: pink;
-    display: inline-block;
-  }
-`;
-filterInput.items = [
-  "Alligator Snapping Turtle",
-  "Baja California Pronghorn Buck",
-  "California Condor",
-  "Desert Bighorn Ram",
-  "Eastern Turkey Vulture",
-  "Fer-de-Lance Snake",
-  "Golden Crowned Sparrow",
-  "Hereford Bull",
-  "Java Chicken",
-  "Labrador Retriever",
-  "Mallard Duck",
-  "Neotropic Cormorant",
-  "Old Spot Pig",
-  "Pacific Loon",
-  "Rainbow Boa Snake",
-  "Sandhill Crane",
-  "Timber Rattlesnake",
-  "Virginia Opossum",
-  "Whooping Crane",
-  "Wild Boar",
-  "Yellow-billed Loon",
-].map((txt) => ({
-  attributes: {
-    'data-raw-value': txt,
-  },
-  label: `<span class="icon"></span>${txt}`,
-  value: txt.toLowerCase().replace(/\s/g, '-'),
-}));
-
-WRAPPER_EL.querySelector('#autoCompleteExample').appendChild(filterInput);
-
 // CustomDialog ================================================================
 
 const dialog = document.createElement('custom-dialog');
@@ -74,7 +16,7 @@ dialog.content = `
     <button>Close Dialog</button>
   </div>
 `;
-dialog.onClose = () => { alert('Dialog is closing'); };
+dialog.onClose = () => { alert('Dialog closed'); };
 dialog.title = 'Dialog Title';
 
 const openDialogBtn = document.createElement('button');
@@ -105,7 +47,7 @@ markerFlyout.content = `
   </div>
 `;
 markerFlyout.onClose = () => {
-  alert('flyout closed');
+  alert('Flyout closed');
 };
 markerFlyout.title = 'Flyout Title';
 
