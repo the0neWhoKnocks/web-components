@@ -93,7 +93,7 @@
           }
           
           :host {
-            font: 16px Helvetica, Arial, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
             position: relative;
           }
           
@@ -106,10 +106,9 @@
             opacity: 0;
           }
           .${this.ROOT_CLASS} label {
-            overflow: hidden;
-            border: solid 1px;
+            border: solid 1px #d2d2d2;
             border-radius: 1em;
-            background-color: #ccc;
+            background: linear-gradient(180deg, #000000c4 4%, #0000006b 30%, #cccccc66 85%, #cccccc66);
             display: block;
             position: absolute;
             top: 0;
@@ -122,10 +121,11 @@
           .${this.ROOT_CLASS} label::after {
             content: '';
             width: 50%;
-            height: 80%;
-            border: solid 1px;
+            height: 100%;
+            border: solid 1px #797979;
             border-radius: 1em;
-            background-color: #eee;
+            box-shadow: 0 4px 4px 0px #00000080;
+            background: linear-gradient(180deg, #fff 5%, #d0d0d0 10%, #eee 39%, #eee 70%, #9e9e9e);
             display: block;
             transition: transform 300ms;
           }
@@ -133,7 +133,7 @@
             background-color: #00ffaf;
           }
           .${this.ROOT_CLASS} input:checked + label::after {
-            transform: translateX(85%);
+            transform: translateX(100%);
           }
         </style>
         <style id="userStyles"></style>
