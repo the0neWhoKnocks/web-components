@@ -2,7 +2,7 @@
 
 A collection of Web Components that I've built
 
-[Click here to view the examples page](https://the0newhoknocks.github.io/web-components/).
+[Click here to view the examples page][examplePage].
 
 ---
 
@@ -17,6 +17,8 @@ There are a couple types of Web Components in this repo.
 Usage examples are spread across a couple files:
 - [index.html](./index.html) demonstrates how to load a Web Component (via a `script` include). Also shows the `hybrid` approach with HTML components and it's attributes.
 - [examples.js](./example/examples.js) demonstrates how to create `js-only` components, assign their attributes, and add them to the DOM.
+
+If you want to load a file directly from GitHub (like in a CodePen), you can get the URLs from [the example page][examplePage]. An example is `https://the0newhoknocks.github.io/web-components/js/components/hybrid/CustomToggle.js`, so `https://the0newhoknocks.github.io/web-components/<PATH_TO_FILE>`. You can't link directly to a `raw.githubusercontent.com` file since GitHub serves up the files with a `text` header, but `github.io` pages serve files from a CDN with the correct headers.
 
 ---
 
@@ -76,3 +78,5 @@ General notes, and gotchas.
     }
   }
   ```
+
+[examplePage]: https://the0newhoknocks.github.io/web-components/
