@@ -7,6 +7,7 @@
     }
     set enabled(enable) {
       this._enabled = (enable === '' || enable === 'true' || enable === true);
+      if (this.els.input.checked !== this._enabled) this.els.input.checked = this._enabled;
       if (this._onToggle) this._onToggle(this.enabled);
     }
     
