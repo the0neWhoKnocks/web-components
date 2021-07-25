@@ -30,6 +30,11 @@
     }
     
     set onToggle(fn) {
+      // remove old listener if one was set
+      if (this._onToggle) this.els.toggle.removeEventListener('change', this.handleToggleChange);
+      // add new listener
+      if (typeof fn === 'function') this.els.toggle.addEventListener('change', this.handleToggleChange);
+      
       this._onToggle = fn;
     }
     
@@ -61,11 +66,6 @@
             _attr = 'onToggle';
             // get function from function name
             if (typeof newVal === 'string') _newVal = eval(newVal);
-            // remove old listener if one was set
-            if (this._onToggle) this.els.toggle.removeEventListener(this.handleToggleChange);
-            // add new listener
-            if (typeof _newVal === 'function') this.els.toggle.addEventListener('change', this.handleToggleChange);
-            
             break;
           }
         }
