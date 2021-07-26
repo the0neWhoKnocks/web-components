@@ -103,6 +103,15 @@
             height: 1em;
             position: relative;
           }
+          /*
+            This isn't great, but better than nothing. Still waiting for support
+            for something like ':has(> :focus-visible)', so that the focus state
+            is only visible when a child has focus via a keyboard.
+          */
+          .${this.ROOT_CLASS}:focus-within:not(:hover) {
+            border: solid 2px blue;
+            border-radius: 0.5em;
+          }
           .${this.ROOT_CLASS} input {
             opacity: 0;
           }
