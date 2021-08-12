@@ -17,7 +17,8 @@
 - [ ] countdown clock https://codepen.io/theOneWhoKnocks/pen/fedCk
 - [ ] split flap clock https://codepen.io/theOneWhoKnocks/pen/Ivneu
 - [ ] dir listing: https://github.com/the0neWhoKnocks/star-monkey-scripts/blob/master/scripts/github/Github_UI_Updates.user.js#L332-L497
-
+- [ ] toaster/notification
+- [ ] dialog/modal
 
 
 ## CustomAutoCompleteInput
