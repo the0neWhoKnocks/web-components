@@ -11,6 +11,15 @@ html, body {
   background: #eee;
 }
 
+button {
+  font-size: 1em;
+  cursor: pointer;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
 section {
   padding: 1em;
   border-radius: 1em;
@@ -23,13 +32,34 @@ section .title {
   border-bottom: solid 1px #ccc;
   margin-top: 0;
 }
-section button {
+section > button {
   font-size: 1em;
   padding: 0.5em 1em;
   border: solid 1px #ccc;
   border-radius: 0.5em;
   background: #eee;
   cursor: pointer;
+}
+section nav {
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  background: #ddd;
+}
+section nav * {
+  margin-right: 0.5em;
+}
+section nav input,
+section nav button {
+  font-size: 1em;
+}
+section nav input[type="number"] {
+  padding-left: 0.25em;
+}
+
+section > section {
+  border-radius: unset;
+  box-shadow: unset;
+  margin: 0;
 }
 
 #wrapper {
