@@ -8,12 +8,72 @@
     <link rel="stylesheet" href="example/examples.css">
     
     <script src="js/components/hybrid/CustomAutoCompleteInput.js"></script>
+    <script src="js/components/hybrid/CustomIconChevron.js"></script>
     <script src="js/components/hybrid/CustomToggle.js"></script>
     <script src="js/components/js-only/CustomDialog.js"></script>
     <script src="js/components/js-only/CustomFlyout.js"></script>
   </head>
   <body>
     <div id="wrapper">
+      <section>
+        <h2 class="title">Icons</h2>
+        <nav>
+          <button type="button" id="animateIcons">Animate</button>
+          <label>
+            Scale
+            <input type="number" id="scaleIcons" min="1" max="5" value="1" />
+          </label>
+          <label>
+            Stroke Color
+            <input type="color" id="iconsStrokeColor" value="#333333" />
+          </label>
+          <label>
+            Stroke Width
+            <input type="number" id="iconsStrokeWidth" min="0.1" max="1" value="0.2" step="0.1" />
+          </label>
+        </nav>
+        <section>
+          <h3 class="title">Chevron</h2>
+          <div class="size-wrapper">
+            <custom-icon-chevron direction="up"></custom-icon-chevron>
+            <custom-icon-chevron direction="down"></custom-icon-chevron>
+            <custom-icon-chevron direction="left"></custom-icon-chevron>
+            <custom-icon-chevron direction="right"></custom-icon-chevron>
+          </div>
+        </section>
+        <script>
+          const chevrons = [...document.querySelectorAll('custom-icon-chevron')];
+          const sizeWrappers = [...document.querySelectorAll('.size-wrapper')];
+          
+          document.getElementById('animateIcons').addEventListener('click', () => {
+            chevrons.forEach((chevron) => {
+              switch (chevron.direction) {
+                case 'up': { chevron.setAttribute('direction', 'down'); break; }
+                case 'down': { chevron.direction = 'up'; break; }
+                case 'left': { chevron.direction = 'right'; break; }
+                case 'right': { chevron.direction = 'left'; break; }
+              }
+            });
+          });
+          document.getElementById('scaleIcons').addEventListener('input', ({ currentTarget: { value } }) => {
+            sizeWrappers.forEach(el => {
+              el.style.fontSize = `${value}em`;
+            });
+          });
+          document.getElementById('iconsStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
+            chevrons.forEach((chevron, ndx) => {
+              if (ndx === 0) chevron.setAttribute('strokeColor', value);
+              else chevron.strokeColor = value;
+            });
+          });
+          document.getElementById('iconsStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
+            chevrons.forEach((chevron, ndx) => {
+              if (ndx === 0) chevron.setAttribute('strokeWidth', value);
+              else chevron.strokeWidth = value;
+            });
+          });
+        </script>
+      </section>
       <section id="autoCompleteExample">
         <script>
           function handleAutoCompleteSelection({ elements: filters, value }) {
