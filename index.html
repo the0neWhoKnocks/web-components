@@ -17,62 +17,87 @@
     <div id="wrapper">
       <section>
         <h2 class="title">Icons</h2>
-        <nav>
-          <button type="button" id="animateIcons">Animate</button>
-          <label>
-            Scale
-            <input type="number" id="scaleIcons" min="1" max="5" value="1" />
-          </label>
-          <label>
-            Stroke Color
-            <input type="color" id="iconsStrokeColor" value="#333333" />
-          </label>
-          <label>
-            Stroke Width
-            <input type="number" id="iconsStrokeWidth" min="0.1" max="1" value="0.2" step="0.1" />
-          </label>
-        </nav>
         <section>
           <h3 class="title">Chevron</h2>
-          <div class="size-wrapper">
-            <custom-icon-chevron direction="up"></custom-icon-chevron>
-            <custom-icon-chevron direction="down"></custom-icon-chevron>
-            <custom-icon-chevron direction="left"></custom-icon-chevron>
-            <custom-icon-chevron direction="right"></custom-icon-chevron>
-          </div>
-        </section>
-        <script>
-          const chevrons = [...document.querySelectorAll('custom-icon-chevron')];
-          const sizeWrappers = [...document.querySelectorAll('.size-wrapper')];
+            
+          <nav>
+            <button type="button" id="animateIcons">Animate</button>
+            <label>
+              Length
+              <input type="number" id="chevronLength" min="0.5" max="1" value="0.5" step="0.1" />
+            </label>
+            <label>
+              Scale
+              <input type="number" id="scaleIcons" min="1" max="5" value="1" />
+            </label>
+            <label>
+              Stroke Color
+              <input type="color" id="iconsStrokeColor" value="#333333" />
+            </label>
+            <label>
+              Stroke Width
+              <input type="number" id="iconsStrokeWidth" min="1" max="10" value="2" />
+            </label>
+          </nav>
           
-          document.getElementById('animateIcons').addEventListener('click', () => {
-            chevrons.forEach((chevron) => {
-              switch (chevron.direction) {
-                case 'up': { chevron.setAttribute('direction', 'down'); break; }
-                case 'down': { chevron.direction = 'up'; break; }
-                case 'left': { chevron.direction = 'right'; break; }
-                case 'right': { chevron.direction = 'left'; break; }
-              }
+          <div class="scale-wrapper">
+            <div class="icon-wrapper">
+              <custom-icon-chevron direction="up"></custom-icon-chevron>
+            </div>
+            <div class="icon-wrapper">
+              <custom-icon-chevron direction="down"></custom-icon-chevron>
+            </div>
+            <div class="icon-wrapper">
+              <custom-icon-chevron direction="left"></custom-icon-chevron>
+            </div>
+            <div class="icon-wrapper">
+              <custom-icon-chevron direction="right" fit></custom-icon-chevron>
+            </div>
+          </div>
+          
+          <style id="chevronStyles">
+            .icon-wrapper {
+              padding: 0.5em;
+              border: solid 1px;
+              vertical-align: middle;
+              display: inline-flex;
+              align-items: center;
+            }
+          </style>
+          <script>
+            const chevrons = [...document.querySelectorAll('custom-icon-chevron')];
+            const scaleWrappers = [...document.querySelectorAll('.scale-wrapper')];
+            
+            document.getElementById('animateIcons').addEventListener('click', () => {
+              chevrons.forEach((chevron) => {
+                chevron.toggle();
+              });
             });
-          });
-          document.getElementById('scaleIcons').addEventListener('input', ({ currentTarget: { value } }) => {
-            sizeWrappers.forEach(el => {
-              el.style.fontSize = `${value}em`;
+            document.getElementById('chevronLength').addEventListener('input', ({ currentTarget: { value } }) => {
+              chevrons.forEach((chevron, ndx) => {
+                if (ndx === 0) chevron.setAttribute('length', value);
+                else chevron.length = value;
+              });
             });
-          });
-          document.getElementById('iconsStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
-            chevrons.forEach((chevron, ndx) => {
-              if (ndx === 0) chevron.setAttribute('strokeColor', value);
-              else chevron.strokeColor = value;
+            document.getElementById('scaleIcons').addEventListener('input', ({ currentTarget: { value } }) => {
+              scaleWrappers.forEach(el => {
+                el.style.fontSize = `${value}em`;
+              });
             });
-          });
-          document.getElementById('iconsStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
-            chevrons.forEach((chevron, ndx) => {
-              if (ndx === 0) chevron.setAttribute('strokeWidth', value);
-              else chevron.strokeWidth = value;
+            document.getElementById('iconsStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
+              chevrons.forEach((chevron, ndx) => {
+                if (ndx === 0) chevron.setAttribute('strokeColor', value);
+                else chevron.strokeColor = value;
+              });
             });
-          });
-        </script>
+            document.getElementById('iconsStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
+              chevrons.forEach((chevron, ndx) => {
+                if (ndx === 0) chevron.setAttribute('strokeWidth', value);
+                else chevron.strokeWidth = value;
+              });
+            });
+          </script>
+        </section>
       </section>
       <section id="autoCompleteExample">
         <script>
