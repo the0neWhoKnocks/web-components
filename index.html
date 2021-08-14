@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="example/examples.css">
     
     <script src="js/components/hybrid/CustomAutoCompleteInput.js"></script>
+    <script src="js/components/hybrid/CustomIconCheck.js"></script>
     <script src="js/components/hybrid/CustomIconChevron.js"></script>
     <script src="js/components/hybrid/CustomToggle.js"></script>
     <script src="js/components/js-only/CustomDialog.js"></script>
@@ -17,26 +18,30 @@
     <div id="wrapper">
       <section>
         <h2 class="title">Icons</h2>
+        
+        <nav>
+          <button type="button" id="animateIcons">Animate</button>
+          <label>
+            Scale
+            <input type="number" id="iconScale" min="1" max="5" value="1" />
+          </label>
+          <label>
+            Stroke Color
+            <input type="color" id="iconStrokeColor" value="#333333" />
+          </label>
+          <label>
+            Stroke Width
+            <input type="number" id="iconStrokeWidth" min="1" max="10" value="2" />
+          </label>
+        </nav>
+        
         <section>
           <h3 class="title">Chevron</h2>
             
           <nav>
-            <button type="button" id="animateIcons">Animate</button>
             <label>
               Length
               <input type="number" id="chevronLength" min="0.5" max="1" value="0.5" step="0.1" />
-            </label>
-            <label>
-              Scale
-              <input type="number" id="scaleIcons" min="1" max="5" value="1" />
-            </label>
-            <label>
-              Stroke Color
-              <input type="color" id="iconsStrokeColor" value="#333333" />
-            </label>
-            <label>
-              Stroke Width
-              <input type="number" id="iconsStrokeWidth" min="1" max="10" value="2" />
             </label>
           </nav>
           
@@ -55,49 +60,73 @@
             </div>
           </div>
           
-          <style id="chevronStyles">
-            .icon-wrapper {
-              padding: 0.5em;
-              border: solid 1px;
-              vertical-align: middle;
-              display: inline-flex;
-              align-items: center;
-            }
-          </style>
-          <script>
-            const chevrons = [...document.querySelectorAll('custom-icon-chevron')];
-            const scaleWrappers = [...document.querySelectorAll('.scale-wrapper')];
-            
-            document.getElementById('animateIcons').addEventListener('click', () => {
-              chevrons.forEach((chevron) => {
-                chevron.toggle();
-              });
-            });
-            document.getElementById('chevronLength').addEventListener('input', ({ currentTarget: { value } }) => {
-              chevrons.forEach((chevron, ndx) => {
-                if (ndx === 0) chevron.setAttribute('length', value);
-                else chevron.length = value;
-              });
-            });
-            document.getElementById('scaleIcons').addEventListener('input', ({ currentTarget: { value } }) => {
-              scaleWrappers.forEach(el => {
-                el.style.fontSize = `${value}em`;
-              });
-            });
-            document.getElementById('iconsStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
-              chevrons.forEach((chevron, ndx) => {
-                if (ndx === 0) chevron.setAttribute('strokeColor', value);
-                else chevron.strokeColor = value;
-              });
-            });
-            document.getElementById('iconsStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
-              chevrons.forEach((chevron, ndx) => {
-                if (ndx === 0) chevron.setAttribute('strokeWidth', value);
-                else chevron.strokeWidth = value;
-              });
-            });
-          </script>
         </section>
+        <section>
+          <h3 class="title">Check</h2>
+          <div class="scale-wrapper">
+            <div class="icon-wrapper">
+              <custom-icon-check on></custom-icon-check>
+            </div>
+            <div class="icon-wrapper">
+              <custom-icon-check animate off></custom-icon-check>
+            </div>
+            <div class="icon-wrapper">
+              <custom-icon-check animate on></custom-icon-check>
+            </div>
+          </div>
+        </section>
+        
+        <style>
+          .icon-wrapper {
+            padding: 0.5em;
+            border: solid 1px;
+            vertical-align: middle;
+            display: inline-flex;
+            align-items: center;
+          }
+        </style>
+        
+        <script>
+          const checks = [...document.querySelectorAll('custom-icon-check')];
+          const chevrons = [...document.querySelectorAll('custom-icon-chevron')];
+          const scaleWrappers = [...document.querySelectorAll('.scale-wrapper')];
+          
+          document.getElementById('animateIcons').addEventListener('click', () => {
+            checks.forEach((check) => {
+              check.on = !check.on;
+            });
+            chevrons.forEach((chevron) => { chevron.toggle(); });
+          });
+          document.getElementById('chevronLength').addEventListener('input', ({ currentTarget: { value } }) => {
+            chevrons.forEach((chevron, ndx) => {
+              if (ndx === 0) chevron.setAttribute('length', value);
+              else chevron.length = value;
+            });
+          });
+          document.getElementById('iconScale').addEventListener('input', ({ currentTarget: { value } }) => {
+            scaleWrappers.forEach(el => { el.style.fontSize = `${value}em`; });
+          });
+          document.getElementById('iconStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
+            checks.forEach((check, ndx) => {
+              if (ndx === 0) check.setAttribute('strokeColor', value);
+              else check.strokeColor = value;
+            });
+            chevrons.forEach((chevron, ndx) => {
+              if (ndx === 0) chevron.setAttribute('strokeColor', value);
+              else chevron.strokeColor = value;
+            });
+          });
+          document.getElementById('iconStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
+            checks.forEach((check, ndx) => {
+              if (ndx === 0) check.setAttribute('strokeWidth', value);
+              else check.strokeWidth = value;
+            });
+            chevrons.forEach((chevron, ndx) => {
+              if (ndx === 0) chevron.setAttribute('strokeWidth', value);
+              else chevron.strokeWidth = value;
+            });
+          });
+        </script>
       </section>
       <section id="autoCompleteExample">
         <script>

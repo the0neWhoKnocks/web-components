@@ -1,10 +1,13 @@
 (() => {
-  const LAYOUT__HORIZONTAL = 'horizontal';
-  const LAYOUT__VERTICAL = 'vertical';
+  const ANIM_DURATION = 300;
+  const DEFAULT_SIZE = 16;
   const DIR__DOWN = 'down';
   const DIR__LEFT = 'left';
   const DIR__RIGHT = 'right';
   const DIR__UP = 'up';
+  const KEY_TIMES = [0, 0.75, 1];
+  const LAYOUT__HORIZONTAL = 'horizontal';
+  const LAYOUT__VERTICAL = 'vertical';
   
   class IconChevron extends HTMLElement {
     get direction() {
@@ -43,7 +46,7 @@
     }
     
     get strokeColor() {
-      return this._strokeWidth;
+      return this._strokeColor;
     }
     set strokeColor(value) {
       this._strokeColor = value;
@@ -61,7 +64,7 @@
     }
     
     static get observedAttributes() {
-      return ['direction', 'fit', 'length', 'scale', 'strokecolor', 'strokewidth'];
+      return ['direction', 'fit', 'length', 'strokecolor', 'strokewidth'];
     }
     
     attributeChangedCallback(attr, oldVal, newVal) {
@@ -70,7 +73,6 @@
           case 'direction': { this.direction = newVal; break; }
           case 'fit': { this.fit = newVal; break; }
           case 'length': { this.length = newVal; break; }
-          case 'scale': { this.scale = newVal; break; }
           case 'strokecolor': { this.strokeColor = newVal; break; }
           case 'strokewidth': { this.strokeWidth = newVal; break; }
         }
@@ -83,12 +85,10 @@
       this.attachShadow({ mode: 'open' });
       
       const { shadowRoot } = this;
-      this.ROOT_CLASS = 'custom-icon';
       this._direction = DIR__DOWN;
       this._length = 0.5;
       this._strokeColor = '#333';
       this._strokeWidth = 2;
-      this._animDuration = '300ms';
       
       shadowRoot.innerHTML = `
         <style>
@@ -106,27 +106,24 @@
         
         <svg xmlns="http://www.w3.org/2000/svg">
           <polyline fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <animate
-              id="animForward"
-              attributeName="points"
-              dur="${this._animDuration}"
-              begin="indefinite"
-              fill="freeze"
-            />
-            <animate
-              id="animReverse"
-              attributeName="points"
-              dur="${this._animDuration}"
-              begin="indefinite"
-              fill="freeze"
-            />
+            ${Array(2).fill('').map((_, ndx) => `
+              <animate
+                attributeName="points"
+                begin="indefinite"
+                calcMode="linear"
+                dur="${ANIM_DURATION / 2}ms"
+                fill="freeze"
+                id="animFrame${ndx + 1}"
+                keyTimes="${KEY_TIMES.join(' ; ')}"
+              />
+            `).join('\n')}
           </polyline>
         </svg>
       `;
       
       this.els = {
-        animForward: shadowRoot.getElementById('animForward'),
-        animReverse: shadowRoot.getElementById('animReverse'),
+        animFrame1: shadowRoot.getElementById('animFrame1'),
+        animFrame2: shadowRoot.getElementById('animFrame2'),
         polyline: shadowRoot.querySelector('polyline'),
         svg: shadowRoot.querySelector('svg'),
       };
@@ -135,8 +132,7 @@
     }
     
     render() {
-      const DEFAULT_SIZE = 16;
-      const offset = this._strokeWidth / 2;
+      const offset = this._strokeWidth;
       const fraction = 6;
       const factor = this.fit ? (fraction * 2) : fraction;
       const lengthPadding = (Math.round(DEFAULT_SIZE / fraction) * (this._strokeWidth / factor)) + this._length;
@@ -157,58 +153,128 @@
       }
       
       const pointsMap = {
-        down: `${offset},${offset} ${this._width / 2},${this._height - offset} ${this._width - offset},${offset}`,
-        left: `${this._width - offset},${offset} ${offset},${this._height / 2} ${this._width - offset},${this._height - offset}`,
-        right: `${offset},${offset} ${this._width - offset},${this._height / 2} ${offset},${this._height - offset}`,
-        up: `${offset},${this._height - offset} ${this._width / 2},${offset} ${this._width - offset},${this._height - offset}`,
+        down: [
+          [offset, offset],
+          [this._width / 2, this._height - offset],
+          [this._width - offset, offset],
+        ],
+        left: [
+          [this._width - offset, offset],
+          [offset, this._height / 2],
+          [this._width - offset, this._height - offset],
+        ],
+        right: [
+          [offset, offset],
+          [this._width - offset, this._height / 2],
+          [offset, this._height - offset],
+        ],
+        up: [
+          [offset, this._height - offset],
+          [this._width / 2, offset],
+          [this._width - offset, this._height - offset],
+        ],
+      };
+      
+      const genPoints = (points, pointDiffs, padMultiplier) => points
+        .map(([x, y], ndx) => {
+          let _x = x;
+          let _y = y;
+          
+          if (pointDiffs) {
+            const offset = this._strokeWidth / 1.5;
+            const xDiff = pointDiffs[ndx][0];
+            const yDiff = pointDiffs[ndx][1];
+            
+            _x += xDiff * padMultiplier;
+            _y += yDiff * padMultiplier;
+            
+            if (!xDiff) { // vertical
+              if (ndx === 0) _x -= offset;
+              else if (ndx === 2) _x += offset;
+            }
+            else { // horizontal
+              if (ndx === 0) _y -= offset;
+              else if (ndx === 2) _y += offset;
+            }
+          }
+          
+          return `${_x},${_y}`;
+        })
+        .join(' ');
+      
+      const genValues = (a, b) => {
+        const frames = [];
+        const pointDiffs = a.map(([aX, aY], ndx) => {
+          const [bX, bY] = b[ndx];
+          return [
+            (bX - aX) / (KEY_TIMES.length - 1),
+            (bY - aY) / (KEY_TIMES.length - 1),
+          ];
+        });
+        
+        for (let i=0; i<KEY_TIMES.length; i++) {
+          if (i === 0) frames.push(genPoints(a));
+          else if (i === KEY_TIMES.length - 1) frames.push(genPoints(b));
+          // extend ends for middle frame
+          else frames.push(genPoints(a, pointDiffs, i));
+        }
+        
+        return frames.join(' ; ');
       };
       
       let fromPoints;
       let toPoints;
+      let points;
+      let forwardValues;
+      let reverseValues;
       switch (this._direction) {
         case DIR__DOWN: {
-          fromPoints = pointsMap.down;
-          toPoints = pointsMap.up;
+          points = genPoints(pointsMap.down);
+          forwardValues = genValues(pointsMap.down, pointsMap.up);
+          reverseValues = genValues(pointsMap.up, pointsMap.down);
           break;
         }
         case DIR__LEFT: {
-          fromPoints = pointsMap.left;
-          toPoints = pointsMap.right;
+          points = genPoints(pointsMap.left);
+          forwardValues = genValues(pointsMap.left, pointsMap.right);
+          reverseValues = genValues(pointsMap.right, pointsMap.left);
           break;
         }
         case DIR__RIGHT: {
-          fromPoints = pointsMap.right;
-          toPoints = pointsMap.left;
+          points = genPoints(pointsMap.right);
+          forwardValues = genValues(pointsMap.right, pointsMap.left);
+          reverseValues = genValues(pointsMap.left, pointsMap.right);
           break;
         }
         case DIR__UP: {
-          fromPoints = pointsMap.up;
-          toPoints = pointsMap.down;
+          points = genPoints(pointsMap.up);
+          forwardValues = genValues(pointsMap.up, pointsMap.down);
+          reverseValues = genValues(pointsMap.down, pointsMap.up);
           break;
         }
       }
       
       this.els.svg.setAttribute('viewBox', `0 0 ${this._width} ${this._height}`);
-      this.els.polyline.setAttribute('points', fromPoints);
-      this.els.animForward.setAttribute('to', toPoints);
-      this.els.animReverse.setAttribute('to', fromPoints);
+      this.els.polyline.setAttribute('points', points);
+      this.els.animFrame1.setAttribute('values', forwardValues);
+      this.els.animFrame2.setAttribute('values', reverseValues);
       this.els.polyline.setAttribute('stroke', this._strokeColor);
       this.els.polyline.setAttribute('stroke-width', this._strokeWidth);
       
       // NOTE: Without this, the last animation state is cached, so if the point
       // values are updated due to dimension changes, and the below isn't run,
       // the User could see a clipped render.
-      if (this.animatedForward) this.els.animForward.beginElementAt(300);
-      else this.els.animReverse.beginElementAt(300);
+      if (this.animatedForward) this.els.animFrame1.beginElementAt(ANIM_DURATION);
+      else this.els.animFrame2.beginElementAt(ANIM_DURATION);
     }
     
     toggle() {
       if (this.animatedForward) {
-        this.els.animReverse.beginElement();
+        this.els.animFrame2.beginElement();
         this.animatedForward = false;
       }
       else {
-        this.els.animForward.beginElement();
+        this.els.animFrame1.beginElement();
         this.animatedForward = true;
       }
     }
