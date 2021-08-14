@@ -3,8 +3,6 @@
 ---
 
 - [ ] progress indicators
-- [ ] icons https://codepen.io/theOneWhoKnocks/pen/xMMXVR
-- [ ] timeline https://codepen.io/theOneWhoKnocks/pen/eQgjRr
 - [ ] carousel https://codepen.io/theOneWhoKnocks/pen/gjvdev
 - [ ] reviews https://codepen.io/theOneWhoKnocks/pen/ZXqzEd
   - ratings: default svg stars, allow slot for ratings-symbol
