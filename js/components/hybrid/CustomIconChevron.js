@@ -7,7 +7,7 @@
   const DIR__UP = 'up';
   const KEY_TIMES = [0, 0.75, 1];
   
-  class IconChevron extends HTMLElement {
+  class CustomIconChevron extends HTMLElement {
     get direction() {
       return this._direction;
     }
@@ -276,5 +276,12 @@
     }
   }
 
-  window.customElements.define('custom-icon-chevron', IconChevron);
+  const EL_NAME = 'custom-icon-chevron';
+  if (window.customElements.get(EL_NAME)) {
+    console.warn(`${EL_NAME} already defined`);
+  }
+  else {
+    window.customElements.define(EL_NAME, CustomIconChevron);
+    window.CustomIconChevron = CustomIconChevron;
+  }
 })();

@@ -24,7 +24,7 @@
     s: STATE__SUCCESSFUL,
   };
   
-  class Timeline extends HTMLElement {
+  class CustomTimeline extends HTMLElement {
     get points() {
       return +this.getAttribute('points') || DEFAULT__NUM_OF_POINTS;
     }
@@ -261,5 +261,12 @@
     }
   }
 
-  window.customElements.define('custom-timeline', Timeline);
+  const EL_NAME = 'custom-timeline';
+  if (window.customElements.get(EL_NAME)) {
+    console.warn(`${EL_NAME} already defined`);
+  }
+  else {
+    window.customElements.define(EL_NAME, CustomTimeline);
+    window.CustomTimeline = CustomTimeline;
+  }
 })();

@@ -259,5 +259,12 @@
     }
   }
 
-  window.customElements.define('custom-flyout', CustomFlyout);
+  const EL_NAME = 'custom-flyout';
+  if (window.customElements.get(EL_NAME)) {
+    console.warn(`${EL_NAME} already defined`);
+  }
+  else {
+    window.customElements.define(EL_NAME, CustomFlyout);
+    window.CustomFlyout = CustomFlyout;
+  }
 })();

@@ -178,5 +178,12 @@
     }
   }
 
-  window.customElements.define('custom-dialog', CustomDialog);
+  const EL_NAME = 'custom-dialog';
+  if (window.customElements.get(EL_NAME)) {
+    console.warn(`${EL_NAME} already defined`);
+  }
+  else {
+    window.customElements.define(EL_NAME, CustomDialog);
+    window.CustomDialog = CustomDialog;
+  }
 })();
