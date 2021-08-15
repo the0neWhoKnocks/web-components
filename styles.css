@@ -83,6 +83,7 @@ section > section {
   pointer-events: none;
 }
 #flyoutExample button {
+  border: solid 1px #777;
   padding: 1em;
   background: #fff;
   margin: 0;
