@@ -210,12 +210,36 @@
         </script>
       </section>
       <section id="autoCompleteExample">
+        <h2 class="title">Auto-Complete Inputs</h2>
+        <custom-auto-complete-input
+          placeholder="Filter Animals"
+          styles="
+            .custom-autocomplete__list-item button {
+              margin: 0;
+              display: flex;
+              align-items: center;
+            }
+            .custom-autocomplete__list-item button * {
+              pointer-events: none;
+            }
+            .custom-autocomplete .icon {
+              width: 1em;
+              height: 1em;
+              border-radius: 100%;
+              margin-right: 0.5em;
+              background: pink;
+              display: inline-block;
+            }
+          "
+        ></custom-auto-complete-input>
         <script>
-          function handleAutoCompleteSelection({ elements: filters, value }) {
+          const autoCompleteInput = document.querySelector('custom-auto-complete-input');
+          
+          autoCompleteInput.onSelect = ({ elements: filters, value }) => {
             const matches = filters.map(({ dataset: { rawValue } }) => rawValue);
             alert(`Matches for "${value}":\n${JSON.stringify(matches, null, 2)}`);
-          }
-          const autoCompleteItems = [
+          };
+          autoCompleteInput.items = [
             "Alligator Snapping Turtle",
             "Baja California Pronghorn Buck",
             "California Condor",
@@ -240,33 +264,7 @@
             label: `<span class="icon"></span>${txt}`,
             value: txt.toLowerCase().replace(/\s/g, '-'),
           }));
-        </script>
-        <h2 class="title">Auto-Complete Inputs</h2>
-        <custom-auto-complete-input
-          items="autoCompleteItems"
-          onSelect="handleAutoCompleteSelection"
-          placeholder="Filter Animals"
-          styles="
-            .custom-autocomplete__list-item button {
-              margin: 0;
-              display: flex;
-              align-items: center;
-            }
-            .custom-autocomplete__list-item button * {
-              pointer-events: none;
-            }
-            .custom-autocomplete .icon {
-              width: 1em;
-              height: 1em;
-              border-radius: 100%;
-              margin-right: 0.5em;
-              background: pink;
-              display: inline-block;
-            }
-          "
-        ></custom-auto-complete-input>
-        <script>
-          const autoCompleteInput = document.querySelector('custom-auto-complete-input');
+          
           // add a couple more items to the existing list
           autoCompleteInput.items = [
             ...autoCompleteInput.items,
@@ -276,12 +274,36 @@
             ].map((txt) => ({
               attributes: { 'data-raw-value': txt },
               label: txt, // `value` will equal `label`, and no icon will be present
-            }))
+            })),
           ];
         </script>
       </section>
       <section>
+        <h2 class="title">Toggle</h2>
+        <div class="toggles">
+          <form id="toggleForm">
+            <!-- enabled on load -->
+            <custom-toggle enabled></custom-toggle>
+            <!-- custom id and name -->
+            <custom-toggle id="custom" name="someName"></custom-toggle>
+            <!-- nothing to see here -->
+            <custom-toggle></custom-toggle>
+          </form>
+          <pre></pre>
+        </div>
         <script>
+          const toggleForm = document.getElementById('toggleForm');
+          const togglesOutput = document.querySelector('#toggleForm + pre');
+          const toggles = [...document.querySelectorAll('custom-toggle')];
+          
+          // Append any Custom Element data to Form data when it's requested.
+          // Only neccessary for Custom Elements using the Shadow DOM.
+          toggleForm.addEventListener('formdata', ({ formData }) => {
+            [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
+              formData.append(toggle.name, toggle.enabled);
+            });
+          });
+          
           function handleToggle() {
             const formData = new FormData(toggleForm);
             const output = [...formData.entries()]
@@ -290,29 +312,9 @@
             
             togglesOutput.textContent = output;
           }
-        </script>
-        <h2 class="title">Toggle</h2>
-        <div class="toggles">
-          <form id="toggleForm">
-            <!-- enabled on load -->
-            <custom-toggle enabled onToggle="handleToggle"></custom-toggle>
-            <!-- custom id and name -->
-            <custom-toggle id="custom" name="someName" onToggle="handleToggle"></custom-toggle>
-            <!-- nothing to see here -->
-            <custom-toggle onToggle="handleToggle"></custom-toggle>
-          </form>
-          <pre></pre>
-        </div>
-        <script>
-          const toggleForm = document.getElementById('toggleForm');
-          const togglesOutput = document.querySelector('#toggleForm + pre');
-          // Append any Custom Element data to Form data when it's requested.
-          // Only neccessary for Custom Elements using the Shadow DOM.
-          toggleForm.addEventListener('formdata', ({ formData }) => {
-            [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
-              formData.append(toggle.name, toggle.enabled);
-            });
-          });
+          
+          toggles.forEach(toggle => toggle.onToggle = handleToggle);
+          
           handleToggle();
         </script>
       </section>

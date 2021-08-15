@@ -1,0 +1,18 @@
+{
+  "name": "web-components",
+  "version": "1.0.0",
+  "description": "A collection of Web Components that I've built",
+  "scripts": {
+    "lint": "eslint \"./**/*.{html,js}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:the0neWhoKnocks/web-components.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-plugin-html": "^6.1.2"
+  }
+}

@@ -1,0 +1,8 @@
+# Folders
+.git
+node_modules
+
+# Files
+*.log
+*.patch
+.DS_STORE

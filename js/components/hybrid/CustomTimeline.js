@@ -255,9 +255,9 @@
       };
     }
     
-    connectedCallback(){
+    connectedCallback() {
       // set default if no `points` have been specified
-      if (!this.els.root.innerHTML) this.points = this.points;
+      if (!this.els.root.innerHTML) this.points = this.points; // eslint-disable-line no-self-assign
     }
   }
 
