@@ -1,7 +1,7 @@
 (() => {
   let toggleIDNdx = 1;
   
-  class Toggle extends HTMLElement {
+  class CustomToggle extends HTMLElement {
     get enabled() {
       return this._enabled || false;
     }
@@ -169,5 +169,12 @@
     }
   }
 
-  window.customElements.define('custom-toggle', Toggle);
+  const EL_NAME = 'custom-toggle';
+  if (window.customElements.get(EL_NAME)) {
+    console.warn(`${EL_NAME} already defined`);
+  }
+  else {
+    window.customElements.define(EL_NAME, CustomToggle);
+    window.CustomToggle = CustomToggle;
+  }
 })();

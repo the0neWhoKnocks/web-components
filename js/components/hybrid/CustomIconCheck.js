@@ -8,7 +8,7 @@
   const SVG_WIDTH = 16;
   const SVG_HEIGHT = 16;
   
-  class IconCheck extends HTMLElement {
+  class CustomIconCheck extends HTMLElement {
     get animate() {
       return this.hasAttribute('animate');
     }
@@ -129,6 +129,13 @@
       this.els.polyline.setAttribute('points', `${offset},${SVG_HEIGHT - (SVG_HEIGHT / 2.5)} ${SVG_WIDTH / 3},${SVG_HEIGHT - offset} ${SVG_WIDTH - offset},${offset}`);
     }
   }
-
-  window.customElements.define('custom-icon-check', IconCheck);
+  
+  const EL_NAME = 'custom-icon-check';
+  if (window.customElements.get(EL_NAME)) {
+    console.warn(`${EL_NAME} already defined`);
+  }
+  else {
+    window.customElements.define(EL_NAME, CustomIconCheck);
+    window.CustomIconCheck = CustomIconCheck;
+  }
 })();

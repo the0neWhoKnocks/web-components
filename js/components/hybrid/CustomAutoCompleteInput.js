@@ -440,6 +440,13 @@
       this.els.wrapper.addEventListener('keydown', this.handleKeyDown);
     }
   }
-
-  window.customElements.define('custom-auto-complete-input', CustomAutoCompleteInput);
+  
+  const EL_NAME = 'custom-auto-complete-input';
+  if (window.customElements.get(EL_NAME)) {
+    console.warn(`${EL_NAME} already defined`);
+  }
+  else {
+    window.customElements.define(EL_NAME, CustomAutoCompleteInput);
+    window.CustomAutoCompleteInput = CustomAutoCompleteInput;
+  }
 })();
