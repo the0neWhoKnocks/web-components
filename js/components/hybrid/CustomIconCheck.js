@@ -120,9 +120,9 @@
       
     }
     
-    connectedCallback(){
+    connectedCallback() {
       this.render();
-    };
+    }
     
     render() {
       const offset = this.strokeWidth / 2;

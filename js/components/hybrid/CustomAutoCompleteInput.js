@@ -218,12 +218,10 @@
     connectedCallback() {
       if (this.data.items && Array.isArray(this.data.items)) {
         this.setupListItems();
-        this.addListeners();
-        this.initialized = true;
       }
-      else {
-        console.error('No `items` provided for autocomplete-input');
-      }
+      
+      this.addListeners();
+      this.initialized = true;
     }
     
     formatItemData(str) {
@@ -327,7 +325,7 @@
       }
     }
     
-    handleBlur(ev) {
+    handleBlur() {
       window.requestAnimationFrame(() => {
         if (!this.shadowRoot.activeElement) {
           this.els.input.removeEventListener('blur', this.handleBlur);
@@ -339,7 +337,7 @@
       });
     }
     
-    handleArrowKeysInList(ev){
+    handleArrowKeysInList(ev) {
       if (
         ev.keyCode !== this.KEY_CODE__DOWN
         && ev.keyCode !== this.KEY_CODE__UP
@@ -347,7 +345,7 @@
     
       ev.preventDefault();
     
-      switch(ev.keyCode){
+      switch (ev.keyCode) {
         case this.KEY_CODE__DOWN:
           this.itemIndex += 1;
           if (this.itemIndex === this.visibleListItems.length) this.itemIndex = 0;
@@ -402,7 +400,7 @@
       }, 0);
     }
     
-    handleClear(ev) {
+    handleClear() {
       this.updateInputOverlayText();
       this.updateListStyles('');
       this.els.input.value = '';

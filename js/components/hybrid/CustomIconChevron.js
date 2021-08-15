@@ -6,8 +6,6 @@
   const DIR__RIGHT = 'right';
   const DIR__UP = 'up';
   const KEY_TIMES = [0, 0.75, 1];
-  const LAYOUT__HORIZONTAL = 'horizontal';
-  const LAYOUT__VERTICAL = 'vertical';
   
   class IconChevron extends HTMLElement {
     get direction() {
@@ -222,8 +220,6 @@
         return frames.join(' ; ');
       };
       
-      let fromPoints;
-      let toPoints;
       let points;
       let forwardValues;
       let reverseValues;
