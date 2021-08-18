@@ -1,55 +1,66 @@
 (() => {
+  const CSS_VAR__MAX_LIST_HEIGHT = '--max-list-height';
+  const DEFAULT__MAX_LIST_HEIGHT = '75vh';
+  const KEY_CODE__DOWN = 40;
+  const KEY_CODE__ENTER = 13;
+  const KEY_CODE__UP = 38;
+  
   class CustomAutoCompleteInput extends HTMLElement {
+    get customStyles() {
+      return this.els.customStyles.textContent;
+    }
+    set customStyles(styles) {
+      this.els.customStyles.textContent = styles;
+    }
+    
     get items() {
       return this.data.items;
     }
     set items(items) {
-      this.data.items = items;
-      if (this.initialized) {
-        this.setupListItems();
+      this.data.items = Array.isArray(items) ? items : [];
+      if (this.initialized) this.renderListItems();
+    }
+    
+    set onSelect(handler) {
+      if (!this.onSelectHandlers.includes(handler)) {
+        this.onSelectHandlers.push(handler);
       }
     }
     
-    set onSelect(fn) {
-      this._onSelect = fn;
+    get placeholder() {
+      return this.els.input.placeholder;
     }
-    
     set placeholder(text) {
+      this.setAttribute('placeholder', text);
       this.els.input.placeholder = text;
     }
     
-    set styles(styles) {
-      this.els.userStyles.textContent = styles;
-    }
-    
     static get observedAttributes() {
-      return ['items', 'onselect', 'placeholder', 'styles'];
+      return ['customstyles', 'items', 'onselect', 'placeholder'];
     }
     
     attributeChangedCallback(attr, oldVal, newVal) {
-      if (oldVal !== newVal) {
-        let _attr = attr;
+      const empty = oldVal === '' && (newVal === null || newVal === undefined);
+      
+      if (!empty && oldVal !== newVal) {
         let _newVal = newVal;
         
-        switch (_attr) {
+        switch (attr) {
+          case 'customstyles': { this.customStyles = _newVal; break; }
           case 'items': {
-            if (typeof newVal === 'string') {
-              // JSON
-              if (newVal.startsWith('[')) _newVal = JSON.parse(newVal);
-              // Function name
-              else _newVal = eval(newVal);
+            if (typeof _newVal === 'string' && _newVal.startsWith('[')) {
+              _newVal = JSON.parse(_newVal);
             }
+            
+            this[attr] = _newVal;
             break;
           }
           case 'onselect': {
-            _attr = 'onSelect';
-            // Function name
-            if (typeof newVal === 'string') _newVal = eval(newVal);
+            if (typeof _newVal === 'string') this.onSelect = eval(_newVal);
             break;
           }
+          default: { this[attr] = _newVal; }
         }
-        
-        this[_attr] = _newVal;
       }
     }
     
@@ -60,6 +71,7 @@
       const { shadowRoot } = this;
       this.ROOT_CLASS = 'custom-autocomplete';
       this.data = {};
+      this.onSelectHandlers = [];
       this.visibleListItems = [];
       
       this.classes = {
@@ -76,6 +88,8 @@
           }
           
           :host {
+            ${CSS_VAR__MAX_LIST_HEIGHT}: ${DEFAULT__MAX_LIST_HEIGHT};
+            
             font: 16px Helvetica, Arial, sans-serif;
             position: relative;
           }
@@ -123,11 +137,12 @@
             border: none;
             border-radius: 100%;
             background: #ddd;
-            position: absolute;
-            top: 0.5em;
-            right: 1em;
             cursor: pointer;
             display: none;
+            position: absolute;
+            top: 50%;
+            right: 0.5em;
+            transform: translateY(-50%);
           }
           .${this.ROOT_CLASS}__input:not(:placeholder-shown) + .${this.ROOT_CLASS}__input-overlay:empty + .${this.ROOT_CLASS}__clear-btn,
           .${this.ROOT_CLASS}__input-overlay:not(:empty) + .${this.ROOT_CLASS}__clear-btn {
@@ -136,7 +151,7 @@
           
           .${this.classes.LIST} {
             min-width: 100%;
-            max-height: var(--custom-autocomplete-max-list-height, 75vh);
+            max-height: var(${CSS_VAR__MAX_LIST_HEIGHT});
             overflow-y: auto;
             list-style: none;
             padding: 0;
@@ -179,7 +194,7 @@
             background: #eee;
           }
         </style>
-        <style id="userStyles"></style>
+        <style id="customStyles"></style>
         <style id="autocompleteStyles"></style>
         
         <div class="${this.ROOT_CLASS}">
@@ -193,17 +208,13 @@
       `;
       
       this.els = {
+        customStyles: shadowRoot.querySelector('#customStyles'),
         input: shadowRoot.querySelector(`.${this.ROOT_CLASS}__input`),
         inputOverlay: shadowRoot.querySelector(`.${this.ROOT_CLASS}__input-overlay`),
         list: shadowRoot.querySelector(`.${this.classes.LIST}`),
         listStyles: shadowRoot.querySelector('#autocompleteStyles'),
-        userStyles: shadowRoot.querySelector('#userStyles'),
         wrapper: shadowRoot.querySelector(`.${this.ROOT_CLASS}`),
       };
-      
-      this.KEY_CODE__DOWN = 40;
-      this.KEY_CODE__ENTER = 13;
-      this.KEY_CODE__UP = 38;
       
       this.handleArrowKeysInList = this.handleArrowKeysInList.bind(this);
       this.handleBlur = this.handleBlur.bind(this);
@@ -216,10 +227,7 @@
     }
     
     connectedCallback() {
-      if (this.data.items && Array.isArray(this.data.items)) {
-        this.setupListItems();
-      }
-      
+      this.renderListItems();
       this.addListeners();
       this.initialized = true;
     }
@@ -228,30 +236,32 @@
       return str.toLowerCase().replace(/(\s|_)/g, '-');
     }
     
-    setupListItems() {
-      this.els.list.innerHTML = this.data.items.map(({ attributes = {}, label = '', value = '' }) => {
-        const atts = Object.keys(attributes).map(att => `${att}="${attributes[att]}"`).join(' ');
-        let _label = label;
-        let _value = value;
-        
-        if (!_label && _value) _label = _value;
-        if (!_value && _label) _value = _label;
-        
-        return `
-          <li
-            class="${this.classes.LIST_ITEM}"
-            data-autocomplete-item="${this.formatItemData(_value)}"
-          >
-            <button 
-              class="${this.classes.LIST_ITEM_BTN}"
-              type="button"
-              value="${_value}"
-              tabindex="-1"
-              ${atts}
-            >${_label}</button>
-          </li>
-        `;
-      }).join('');
+    renderListItems() {
+      if (this.data.items && Array.isArray(this.data.items)) {
+        this.els.list.innerHTML = this.data.items.map(({ attributes = {}, label = '', value = '' }) => {
+          const atts = Object.keys(attributes).map(att => `${att}="${attributes[att]}"`).join(' ');
+          let _label = label;
+          let _value = value;
+          
+          if (!_label && _value) _label = _value;
+          if (!_value && _label) _value = _label;
+          
+          return `
+            <li
+              class="${this.classes.LIST_ITEM}"
+              data-autocomplete-item="${this.formatItemData(_value)}"
+            >
+              <button 
+                class="${this.classes.LIST_ITEM_BTN}"
+                type="button"
+                value="${_value}"
+                tabindex="-1"
+                ${atts}
+              >${_label}</button>
+            </li>
+          `;
+        }).join('');
+      }
     }
     
     updateListStyles(rules = '') {
@@ -305,21 +315,21 @@
     
     handleInputKeyDown(ev) {
       if (
-        ev.keyCode !== this.KEY_CODE__DOWN
-        & ev.keyCode !== this.KEY_CODE__ENTER
+        ev.keyCode !== KEY_CODE__DOWN
+        & ev.keyCode !== KEY_CODE__ENTER
       ) return;
     
       ev.preventDefault();
       
       switch (ev.keyCode) {
-        case this.KEY_CODE__DOWN:
+        case KEY_CODE__DOWN:
           if (this.visibleListItems.length) {
             this.itemIndex = 0;
             this.visibleListItems[0].focus();
           }
           break;
         
-        case this.KEY_CODE__ENTER:
+        case KEY_CODE__ENTER:
           this.handleItemSelection(ev);
           break;
       }
@@ -339,19 +349,19 @@
     
     handleArrowKeysInList(ev) {
       if (
-        ev.keyCode !== this.KEY_CODE__DOWN
-        && ev.keyCode !== this.KEY_CODE__UP
+        ev.keyCode !== KEY_CODE__DOWN
+        && ev.keyCode !== KEY_CODE__UP
       ) return;
     
       ev.preventDefault();
     
       switch (ev.keyCode) {
-        case this.KEY_CODE__DOWN:
+        case KEY_CODE__DOWN:
           this.itemIndex += 1;
           if (this.itemIndex === this.visibleListItems.length) this.itemIndex = 0;
           break;
     
-        case this.KEY_CODE__UP:
+        case KEY_CODE__UP:
           this.itemIndex--;
           if (this.itemIndex < 0) {
             this.updateInputOverlayText(this.els.input);
@@ -396,8 +406,12 @@
       if (item) item.blur();
       
       setTimeout(() => {
-        if (this._onSelect) this._onSelect({ elements, value });
-      }, 0);
+        if (this.onSelectHandlers.length) {
+          this.onSelectHandlers.forEach((handler) => {
+            handler({ elements, value });
+          });
+        }
+      }, 10);
     }
     
     handleClear() {
@@ -423,7 +437,7 @@
       if (item === this.els.input) {
         this.handleInputKeyDown(ev);
         
-        if (ev.keyCode === this.KEY_CODE__DOWN) {
+        if (ev.keyCode === KEY_CODE__DOWN) {
           this.itemIndex = -1;
           this.handleArrowKeysInList(ev);
         }
