@@ -1,8 +1,0 @@
-:root {
-  --custom-autocomplete-max-list-height: 30vh;
-}
-
-custom-auto-complete-input {
-  width: 70vw;
-  max-width: 600px;
-}

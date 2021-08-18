@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1 minimum-scale=1">
     
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="example/examples.css">
     
     <script src="js/components/hybrid/CustomAutoCompleteInput.js"></script>
     <script src="js/components/hybrid/CustomIconCheck.js"></script>
@@ -211,9 +210,9 @@
       </section>
       <section id="autoCompleteExample">
         <h2 class="title">Auto-Complete Inputs</h2>
+        
         <custom-auto-complete-input
-          placeholder="Filter Animals"
-          styles="
+          customStyles="
             .custom-autocomplete__list-item button {
               margin: 0;
               display: flex;
@@ -231,7 +230,19 @@
               display: inline-block;
             }
           "
+          placeholder="Filter Animals"
         ></custom-auto-complete-input>
+        
+        <style>
+          #autoCompleteExample custom-auto-complete-input {
+            --max-list-height: 30vh;
+            
+            width: 70vw;
+            max-width: 600px;
+            z-index: 1;
+          }
+        </style>
+        
         <script>
           const autoCompleteInput = document.querySelector('custom-auto-complete-input');
           
