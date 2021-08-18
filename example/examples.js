@@ -2,33 +2,6 @@
 
 const WRAPPER_EL = document.getElementById('wrapper');
 
-// CustomDialog ================================================================
-
-const dialog = document.createElement('custom-dialog');
-dialog.styles = `
-  .dialog-content {
-    padding: 1em;
-  }
-`;
-dialog.content = `
-  <div class="dialog-content">
-    Click button to close Dialog.
-    <button>Close Dialog</button>
-  </div>
-`;
-dialog.onClose = () => { alert('Dialog closed'); };
-dialog.title = 'Dialog Title';
-
-const openDialogBtn = document.createElement('button');
-openDialogBtn.innerHTML = 'Open Dialog';
-openDialogBtn.addEventListener('click', () => {
-  dialog.show();
-});
-dialog.shadowRoot.querySelector('.dialog-content button').addEventListener('click', () => {
-  dialog.close();
-});
-WRAPPER_EL.querySelector('#dialogExample').appendChild(openDialogBtn);
-
 // CustomFlyout ================================================================
 
 const FLYOUT_WRAPPER = WRAPPER_EL.querySelector('#flyoutExample');

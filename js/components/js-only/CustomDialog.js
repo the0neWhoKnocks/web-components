@@ -1,103 +1,95 @@
 (() => {
-  const ANIM_DURATION = 300;
-  const MODIFIER__SHOW = 'show';
-  const STYLES = `
-    *, *::after, *::before {
-      box-sizing: border-box;
-    }
-    
-    :host {
-      font: 16px Helvetica, Arial, sans-serif;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      z-index: 10;
-    }
-    
-    :host button,
-    :host input,
-    :host select,
-    :host textarea {
-      font-size: 1em;
-    }
-    
-    :host button {
-      cursor: pointer;
-    }
-    
-    .dialog-mask {
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 0;
-      transition: opacity ${ANIM_DURATION}ms
-    }
-    .dialog-mask.${MODIFIER__SHOW} {
-      opacity: 1;
-    }
-    
-    .dialog {
-      overflow: hidden;
-      padding: 0;
-      border: solid 1px;
-      border-radius: 0.5em;
-      margin: 0;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -20%);
-      box-shadow: 0 0.75em 2em 0.25em rgba(0, 0, 0, 0.75);
-      background: #eee;
-      opacity: 0;
-      transition: opacity ${ANIM_DURATION}ms, transform ${ANIM_DURATION}ms;
-    }
-    .dialog.${MODIFIER__SHOW} {
-      opacity: 1;
-      transform: translate(-50%, -50%);
-    }
-    
-    .dialog__nav {
-      font-size: 1.25em;
-      border-bottom: solid 1px;
-      display: flex;
-    }
-    
-    .dialog__title {
-      width: 100%;
-      color: #eee;
-      padding: 0.5em;
-      padding-right: 1em;
-      background: #333;
-    }
-    
-    .dialog__close-btn {
-      color: #eee;
-      padding: 0 1em;
-      border: none;
-      background: #333;
-    }
-  `;
+  const CSS_VAR__ANIM_DURATION = '--dialog-animDuration';
+  const CSS_VAR__COLOR__BODY = '--dialog--color--body';
+  const CSS_VAR__COLOR__BORDER = '--dialog--color--border';
+  const CSS_VAR__COLOR__TITLE__BG = '--dialog--color--title--bg';
+  const CSS_VAR__COLOR__TITLE__TEXT = '--dialog--color--title--text';
+  const DEFAULT__ANIM_DURATION = 300;
+  const DEFAULT__COLOR__BODY = '#eee';
+  const DEFAULT__COLOR__BORDER = '#000';
+  const DEFAULT__COLOR__TITLE__BG = '#333';
+  const DEFAULT__COLOR__TITLE__TEXT = '#eee';
+  const DEFAULT__BODY = '[BODY]';
+  const ROOT_CLASS = 'dialog';
 
   class CustomDialog extends HTMLElement {
-    set content(content) {
-      this.els.dialogBody.innerHTML = content;
+    get modal() {
+      return this.hasAttribute('modal');
+    }
+    set modal(value) {
+      if (value === '' || value === 'true' || value === true) {
+        this.setAttribute('modal', '');
+      }
+      else {
+        this.removeAttribute('modal');
+      }
+      
+      this.render();
     }
     
-    set onClose(fn) {
-      this._onClose = fn;
+    set onClose(handler) {
+      if (!this.onCloseClickHandlers.includes(handler)) {
+        this.onCloseClickHandlers.push(handler);
+      }
     }
     
-    set styles(styles) {
-      this.els.userStyles.textContent = styles;
+    get open() {
+      return this.hasAttribute('open');
+    }
+    set open(value) {
+      if (value === '' || value === 'true' || value === true) {
+        this.render();
+        
+        this.setAttribute('open', '');
+        this.els.dialog.setAttribute('open', '');
+        
+        this.els.wrapper.classList.add('in');
+        setTimeout(() => {
+          this.els.wrapper.addEventListener('click', this.handleCloseClick);
+          window.addEventListener('keydown', this.handleKeyDown);
+        }, DEFAULT__ANIM_DURATION);
+      }
+      else {
+        this.els.wrapper.removeEventListener('click', this.handleCloseClick);
+        window.removeEventListener('keydown', this.handleKeyDown);
+        
+        this.els.wrapper.classList.add('out');
+        setTimeout(() => {
+          this.els.wrapper.classList.remove('in', 'out');
+          
+          this.removeAttribute('open');  
+          this.els.dialog.removeAttribute('open');
+          
+          if (this.onCloseClickHandlers.length) {
+            this.onCloseClickHandlers.forEach((handler) => { handler(); });
+          }
+        }, DEFAULT__ANIM_DURATION);
+      } 
     }
     
-    set title(title) {
-      this.els.dialogTitle.innerHTML = title;
+    get titleText() {
+      return this.getAttribute('titleText') || '';
+    }
+    set titleText(value) {
+      this.setAttribute('titleText', value || '');
+    }
+    
+    static get observedAttributes() {
+      return ['modal', 'onclose', 'open', 'titletext'];
+    }
+    
+    attributeChangedCallback(attr, oldVal, newVal) {
+      const empty = oldVal === '' && (newVal === null || newVal === undefined);
+      
+      if (!empty && oldVal !== newVal) {
+        let _newVal = newVal;
+        
+        switch (attr) {
+          case 'onclose': { this.onClose = _newVal; break; }
+          case 'titletext': { this.titleText = _newVal; break; }
+          default: { this[attr] = _newVal; }
+        }
+      }
     }
     
     constructor() {
@@ -106,75 +98,234 @@
       this.attachShadow({ mode: 'open' });
       
       const { shadowRoot } = this;
+      this.onCloseClickHandlers = [];
+      
       shadowRoot.innerHTML = `
-        <style>${STYLES}</style>
-        <style id="userStyles"></style>
+        <style>
+          @keyframes dialogIn {
+            0% {
+              opacity: 0;
+              transform: translate(-50%, -90%);
+            }
+            100% {
+              opacity: 1;
+              transform: translate(-50%, -50%);
+            }
+          }
+          @keyframes dialogOut {
+            0% {
+              opacity: 1;
+              transform: translate(-50%, -50%);
+            }
+            100% {
+              opacity: 0;
+              transform: translate(-50%, -10%);
+            }
+          }
+          @keyframes maskIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+          }
+          @keyframes maskOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+          }
+          
+          *, *::after, *::before {
+            box-sizing: border-box;
+          }
+          
+          :host {
+            ${CSS_VAR__ANIM_DURATION}: ${DEFAULT__ANIM_DURATION}ms;
+            ${CSS_VAR__COLOR__BODY}: ${DEFAULT__COLOR__BODY};
+            ${CSS_VAR__COLOR__BORDER}: ${DEFAULT__COLOR__BORDER};
+            ${CSS_VAR__COLOR__TITLE__BG}: ${DEFAULT__COLOR__TITLE__BG};
+            ${CSS_VAR__COLOR__TITLE__TEXT}: ${DEFAULT__COLOR__TITLE__TEXT};
+            
+            font: 16px Helvetica, Arial, sans-serif;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            z-index: 10;
+          }
+          :host(:not([open])) {
+            display: none;
+          }
+          
+          button,
+          input,
+          select,
+          textarea {
+        		fill: orange;
+        	}
+          button:not(disabled) {
+            cursor: pointer;
+          }
+          
+          .${ROOT_CLASS}__body button {
+            color: #fff;
+            width: 100%;
+            padding: 0.75em 1em;
+            border: none;
+            border-radius: 0.25em;
+            background: #000;
+            position: relative;
+          }
+          .${ROOT_CLASS}__body button:focus {
+            outline: none;
+          }
+          .${ROOT_CLASS}__body button:focus::after {
+            content: '';
+            position: absolute;
+            border: solid 2px currentColor;
+            border-radius: 0.25em;
+            top: 2px;
+            left: 2px;
+            bottom: 2px;
+            right: 2px;
+          }
+          
+          .${ROOT_CLASS} {
+            max-height: 100vh;
+            overflow: hidden;
+            padding: 0;
+            border: solid 4px var(${CSS_VAR__COLOR__BORDER});
+            border-radius: 0.5em;
+            margin: 0;
+            background: var(${CSS_VAR__COLOR__BORDER});
+            box-shadow: 0 0.75em 2em 0.25em rgba(0, 0, 0, 0.75);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+          
+          .${ROOT_CLASS}__nav {
+            min-height: 2em;
+            font-size: 1.25em;
+            border-bottom: solid 1px;
+            background-color: var(${CSS_VAR__COLOR__TITLE__BG});
+            display: flex;
+          }
+          
+          .${ROOT_CLASS}__title {
+            width: 100%;
+            color: var(${CSS_VAR__COLOR__TITLE__TEXT});
+            padding: 0.5em;
+            padding-right: 1em;
+            background: var(${CSS_VAR__COLOR__TITLE__BG});
+          }
+          
+          .${ROOT_CLASS}__body {
+            background: var(${CSS_VAR__COLOR__BODY});
+          }
+          
+          .${ROOT_CLASS}__close-btn {
+            color: var(${CSS_VAR__COLOR__TITLE__TEXT});
+            padding: 0 1em;
+            border: none;
+            background: var(${CSS_VAR__COLOR__TITLE__BG});
+          }
+          :host([modal]) .${ROOT_CLASS}__close-btn {
+            display: none;
+          }
+          
+          .${ROOT_CLASS}-mask {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            position: absolute;
+            top: 0;
+            left: 0;
+            backdrop-filter: blur(10px);
+          }
+          
+          .${ROOT_CLASS}-wrapper.in .${ROOT_CLASS}-mask {
+            animation: maskIn ${DEFAULT__ANIM_DURATION}ms;
+          }
+          .${ROOT_CLASS}-wrapper.out .${ROOT_CLASS}-mask {
+            animation: maskOut ${DEFAULT__ANIM_DURATION}ms;
+          }
+          .${ROOT_CLASS}-wrapper.in .${ROOT_CLASS} {
+            animation: dialogIn ${DEFAULT__ANIM_DURATION}ms;
+          }
+          .${ROOT_CLASS}-wrapper.out .${ROOT_CLASS} {
+            animation: dialogOut ${DEFAULT__ANIM_DURATION}ms;
+          }
+        </style>
         
-        <div class="dialog-mask"></div>
-        <dialog
-          class="dialog"
-          tabindex="0"
-          open
-        >
-          <nav class="dialog__nav">
-            <div class="dialog__title">Title</div>
-            <button type="button" class="dialog__close-btn">&#10005;</button>
-          </nav>
-          <div class="dialog__body"></div>
-        </dialog>
+        <div class="${ROOT_CLASS}-wrapper">
+          <div class="${ROOT_CLASS}-mask"></div>
+          <dialog class="${ROOT_CLASS}" tabindex="0"></dialog>
+        </div>
       `;
       
-      this.KEY_CODE__ESC = 27;
-      
       this.els = {
-        closeBtn: shadowRoot.querySelector('.dialog__close-btn'),
-        dialog: shadowRoot.querySelector('.dialog'),
-        dialogBGMask: shadowRoot.querySelector('.dialog-mask'),
-        dialogBody: shadowRoot.querySelector('.dialog__body'),
-        dialogTitle: shadowRoot.querySelector('.dialog__title'),
-        userStyles: shadowRoot.querySelector('#userStyles'),
+        dialog: shadowRoot.querySelector(`.${ROOT_CLASS}`),
+        dialogMask: shadowRoot.querySelector(`.${ROOT_CLASS}-mask`),
+        wrapper: shadowRoot.querySelector(`.${ROOT_CLASS}-wrapper`),
       };
       
       this.handleCloseClick = this.handleCloseClick.bind(this);
       this.handleKeyDown = this.handleKeyDown.bind(this);
-      this.handleMaskClick = this.handleMaskClick.bind(this);
     }
     
-    handleCloseClick() { this.close(); }
-    handleMaskClick() { this.close(); }
+    handleCloseClick({ keyClose, target }) {
+      if (
+        !this.modal
+        && (
+          keyClose
+          || (
+            target
+            && (
+              target.classList.contains(`${ROOT_CLASS}-mask`)
+              || target.classList.contains(`${ROOT_CLASS}__close-btn`)
+            )
+          )
+        )
+      ) this.open = false;
+    }
     
-    handleKeyDown(ev) {
-      if (ev.keyCode === this.KEY_CODE__ESC) {
-        window.removeEventListener('keydown', this.handleKeyDown);
-        this.close();
+    handleKeyDown({ key }) {
+      switch (key) {
+        case 'Escape':
+          this.handleCloseClick({ keyClose: true });
+          break;
       }
     }
     
-    show() {
-      document.body.appendChild(this);
-      this.els.closeBtn.addEventListener('click', this.handleCloseClick);
-      this.els.dialogBGMask.addEventListener('click', this.handleMaskClick);
-      window.customDialog = this;
-      this.els.dialog.focus();
-      window.addEventListener('keydown', this.handleKeyDown);
+    render() {
+      let navMarkup = '';
       
-      setTimeout(() => {
-        this.els.dialog.classList.add(MODIFIER__SHOW);
-        this.els.dialogBGMask.classList.add(MODIFIER__SHOW);
-      }, 100);
-    }
-    
-    close() {
-      this.els.closeBtn.removeEventListener('click', this.handleCloseClick);
-      this.els.dialogBGMask.removeEventListener('click', this.handleMaskClick);
-      this.els.dialog.classList.remove(MODIFIER__SHOW);
-      this.els.dialogBGMask.classList.remove(MODIFIER__SHOW);
+      if (!this.modal || this.modal && this.titleText) {
+        let closeBtnMarkup = '';
+        
+        if (!this.modal) {
+          closeBtnMarkup = `
+            <button type="button" class="${ROOT_CLASS}__close-btn">
+              &#10005;
+            </button>
+          `;
+        }
+        
+        navMarkup = `
+          <nav class="${ROOT_CLASS}__nav">
+            <div class="${ROOT_CLASS}__title">
+              <slot name="dialogTitle">${this.titleText}</slot>
+            </div>
+            ${closeBtnMarkup}
+          </nav>
+        `;
+      }
       
-      setTimeout(() => {
-        if (this._onClose) this._onClose();
-        delete window.customDialog;
-        this.remove();
-      }, ANIM_DURATION);
+      this.els.dialog.innerHTML = `
+        ${navMarkup}
+        <div class="${ROOT_CLASS}__body">
+          <slot name="dialogBody">${DEFAULT__BODY}</slot>
+        </div>
+      `;
     }
   }
 
