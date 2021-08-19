@@ -291,17 +291,49 @@
       </section>
       <section>
         <h2 class="title">Toggle</h2>
+        
         <div class="toggles">
           <form id="toggleForm">
-            <!-- enabled on load -->
             <custom-toggle enabled></custom-toggle>
-            <!-- custom id and name -->
             <custom-toggle id="custom" name="someName"></custom-toggle>
-            <!-- nothing to see here -->
-            <custom-toggle></custom-toggle>
+            <custom-toggle circle solid></custom-toggle>
           </form>
           <pre></pre>
         </div>
+        
+        <style>
+          .toggles {
+            display: flex;
+            align-items: center;
+          }
+          .toggles form {
+            margin: 0;
+          }
+          .toggles pre {
+            width: 100%;
+            color: #eee;
+            font-size: 1.25em;
+            line-height: 1.4em;
+            padding: 0.5em 0.75em;
+            border-radius: 0.5em;
+            margin: 0;
+            margin-left: 1em;
+            background: #333;
+          }
+          .toggles custom-toggle {
+            display: block;
+          }
+          .toggles custom-toggle:not(:first-of-type) {
+            margin-top: 0.5em;
+          }
+          .toggles custom-toggle:nth-of-type(3) {
+            --color--disabled: #ffa4c8;
+            --color--enabled: #46ccff;
+            --color--focused: #009827;
+            --color--toggle: #daf6da;
+          }
+        </style>
+        
         <script>
           const toggleForm = document.getElementById('toggleForm');
           const togglesOutput = document.querySelector('#toggleForm + pre');
