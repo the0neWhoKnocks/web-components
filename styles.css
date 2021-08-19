@@ -120,24 +120,3 @@ section > section {
   border-right: none;
   right: 0;
 }
-
-.toggles {
-  display: flex;
-  align-items: center;
-}
-.toggles form {
-  margin: 0;
-}
-.toggles pre {
-  width: 100%;
-  color: #eee;
-  padding: 1em;
-  border-radius: 0.5em;
-  margin: 0;
-  margin-left: 1em;
-  background: #333;
-}
-.toggles custom-toggle {
-  margin: 0.25em 0;
-  display: block;
-}
