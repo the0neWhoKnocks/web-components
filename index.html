@@ -366,13 +366,15 @@
         <button id="openDialogBtn">Open Dialog</button>
         <button id="openModalBtn">Open Modal</button>
         
-        <custom-dialog titleText="Dialog Title">
+        <custom-dialog>
+          <div class="dialog-title" slot="dialogTitle">Dialog Title</div>
           <div class="dialog-content" slot="dialogBody">
             Click button to close Dialog.
             <button type="button">Close Dialog</button>
           </div>
         </custom-dialog>
-        <custom-dialog titleText="Modal Title" modal>
+        <custom-dialog modal>
+          <div class="dialog-title" slot="dialogTitle">Modal Title</div>
           <div class="dialog-content" slot="dialogBody">
             Click button to close Modal.
             <button type="button">Close Modal</button>
