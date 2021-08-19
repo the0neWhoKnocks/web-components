@@ -67,15 +67,8 @@
       } 
     }
     
-    get titleText() {
-      return this.getAttribute('titleText') || '';
-    }
-    set titleText(value) {
-      this.setAttribute('titleText', value || '');
-    }
-    
     static get observedAttributes() {
-      return ['modal', 'onclose', 'open', 'titletext'];
+      return ['modal', 'onclose', 'open'];
     }
     
     attributeChangedCallback(attr, oldVal, newVal) {
@@ -86,7 +79,6 @@
         
         switch (attr) {
           case 'onclose': { this.onClose = _newVal; break; }
-          case 'titletext': { this.titleText = _newVal; break; }
           default: { this[attr] = _newVal; }
         }
       }
@@ -297,9 +289,10 @@
     }
     
     render() {
+      const hasTitle = this.querySelector('[slot="dialogTitle"]');
       let navMarkup = '';
       
-      if (!this.modal || this.modal && this.titleText) {
+      if (!this.modal || this.modal && hasTitle) {
         let closeBtnMarkup = '';
         
         if (!this.modal) {
@@ -313,7 +306,7 @@
         navMarkup = `
           <nav class="${ROOT_CLASS}__nav">
             <div class="${ROOT_CLASS}__title">
-              <slot name="dialogTitle">${this.titleText}</slot>
+              <slot name="dialogTitle"></slot>
             </div>
             ${closeBtnMarkup}
           </nav>
