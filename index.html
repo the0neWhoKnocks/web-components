@@ -246,10 +246,12 @@
         <script>
           const autoCompleteInput = document.querySelector('custom-auto-complete-input');
           
-          autoCompleteInput.onSelect = ({ elements: filters, value }) => {
+          autoCompleteInput.addEventListener(window.CustomAutoCompleteInput.events.selected, ({
+            detail: { elements: filters, value },
+          }) => {
             const matches = filters.map(({ dataset: { rawValue } }) => rawValue);
-            alert(`Matches for "${value}":\n${JSON.stringify(matches, null, 2)}`);
-          };
+            console.log(`Matches for "${value}":\n${JSON.stringify(matches, null, 2)}`);
+          });
           autoCompleteInput.items = [
             "Alligator Snapping Turtle",
             "Baja California Pronghorn Buck",

@@ -1,9 +1,20 @@
 (() => {
   const CSS_VAR__MAX_LIST_HEIGHT = '--max-list-height';
-  const DEFAULT__MAX_LIST_HEIGHT = '75vh';
+  const EVENT__SELECTED = 'selected';
   const KEY_CODE__DOWN = 40;
   const KEY_CODE__ENTER = 13;
   const KEY_CODE__UP = 38;
+  const ROOT_CLASS = 'custom-autocomplete';
+  
+  const CSS_CLASS__CLEAR_BTN = `${ROOT_CLASS}__clear-btn`;
+  const CSS_CLASS__INPUT = `${ROOT_CLASS}__input`;
+  const CSS_CLASS__INPUT_OVERLAY = `${ROOT_CLASS}__input-overlay`;
+  const CSS_CLASS__INPUT_WRAPPER = `${ROOT_CLASS}__input-wrapper`;
+  const CSS_CLASS__LIST = `${ROOT_CLASS}__list`;
+  const CSS_CLASS__LIST_ITEM = `${ROOT_CLASS}__list-item`;
+  const CSS_CLASS__LIST_ITEM_BTN = `${ROOT_CLASS}__list-item-btn`;
+  
+  const DEFAULT__MAX_LIST_HEIGHT = '75vh';
   
   class CustomAutoCompleteInput extends HTMLElement {
     get customStyles() {
@@ -21,12 +32,6 @@
       if (this.initialized) this.renderListItems();
     }
     
-    set onSelect(handler) {
-      if (!this.onSelectHandlers.includes(handler)) {
-        this.onSelectHandlers.push(handler);
-      }
-    }
-    
     get placeholder() {
       return this.els.input.placeholder;
     }
@@ -36,7 +41,13 @@
     }
     
     static get observedAttributes() {
-      return ['customstyles', 'items', 'onselect', 'placeholder'];
+      return ['customstyles', 'items', 'placeholder'];
+    }
+    
+    static get events() {
+      return {
+        selected: EVENT__SELECTED,
+      };
     }
     
     attributeChangedCallback(attr, oldVal, newVal) {
@@ -55,10 +66,6 @@
             this[attr] = _newVal;
             break;
           }
-          case 'onselect': {
-            if (typeof _newVal === 'string') this.onSelect = eval(_newVal);
-            break;
-          }
           default: { this[attr] = _newVal; }
         }
       }
@@ -69,17 +76,8 @@
       this.attachShadow({ mode: 'open' });
       
       const { shadowRoot } = this;
-      this.ROOT_CLASS = 'custom-autocomplete';
       this.data = {};
-      this.onSelectHandlers = [];
       this.visibleListItems = [];
-      
-      this.classes = {
-        CLEAR_BTN: `${this.ROOT_CLASS}__clear-btn`,
-        LIST: `${this.ROOT_CLASS}__list`,
-        LIST_ITEM: `${this.ROOT_CLASS}__list-item`,
-        LIST_ITEM_BTN: `${this.ROOT_CLASS}__list-item-btn`,
-      };
       
       shadowRoot.innerHTML = `
         <style>
@@ -94,29 +92,29 @@
             position: relative;
           }
           
-          .${this.ROOT_CLASS} {
+          .${ROOT_CLASS} {
             width: 100%;
             display: inline-block;
             position: relative;
           }
           
-          .${this.ROOT_CLASS}__input-wrapper {
+          .${CSS_CLASS__INPUT_WRAPPER} {
             border: solid 1px;
             position: relative;
           }
           
-          .${this.ROOT_CLASS}__input,
-          .${this.ROOT_CLASS}__input-overlay {
+          .${CSS_CLASS__INPUT},
+          .${CSS_CLASS__INPUT_OVERLAY} {
             font: 400 1em system-ui;
             width: 100%;
             padding: 0.5em 1em;
           }
           
-          .${this.ROOT_CLASS}__input {
+          .${CSS_CLASS__INPUT} {
             border: none;
           }
           
-          .${this.ROOT_CLASS}__input-overlay {
+          .${CSS_CLASS__INPUT_OVERLAY} {
             display: flex;
             align-items: center;
             position: absolute;
@@ -126,11 +124,11 @@
             right: 0;
             pointer-events: none;
           }
-          .${this.ROOT_CLASS}__input-overlay:not(:empty) {
+          .${CSS_CLASS__INPUT_OVERLAY}:not(:empty) {
             background: #fff;
           }
           
-          .${this.ROOT_CLASS}__clear-btn {
+          .${CSS_CLASS__CLEAR_BTN} {
             width: 2em;
             height: 2em;
             padding: 0;
@@ -144,12 +142,12 @@
             right: 0.5em;
             transform: translateY(-50%);
           }
-          .${this.ROOT_CLASS}__input:not(:placeholder-shown) + .${this.ROOT_CLASS}__input-overlay:empty + .${this.ROOT_CLASS}__clear-btn,
-          .${this.ROOT_CLASS}__input-overlay:not(:empty) + .${this.ROOT_CLASS}__clear-btn {
+          .${CSS_CLASS__INPUT}:not(:placeholder-shown) + .${CSS_CLASS__INPUT_OVERLAY}:empty + .${CSS_CLASS__CLEAR_BTN},
+          .${CSS_CLASS__INPUT_OVERLAY}:not(:empty) + .${CSS_CLASS__CLEAR_BTN} {
             display: block;
           }
           
-          .${this.classes.LIST} {
+          .${CSS_CLASS__LIST} {
             min-width: 100%;
             max-height: var(${CSS_VAR__MAX_LIST_HEIGHT});
             overflow-y: auto;
@@ -163,10 +161,10 @@
             top: 100%;
             left: 0;
           }
-          .${this.classes.LIST} [data-autocomplete-item] {
+          .${CSS_CLASS__LIST} [data-autocomplete-item] {
             display: none;
           }
-          .${this.classes.LIST_ITEM} {
+          .${CSS_CLASS__LIST_ITEM} {
             color: #000;
             font-size: inherit;
             width: 100%;
@@ -177,7 +175,7 @@
             background: transparent;
             cursor: pointer;
           }
-          .${this.classes.LIST_ITEM_BTN} {
+          .${CSS_CLASS__LIST_ITEM_BTN} {
             width: 100%;
             font-size: 1rem;
             text-align: left;
@@ -189,31 +187,31 @@
             appearance: none;
             -webkit-appearance: none;
           }
-          .${this.classes.LIST_ITEM_BTN}:focus,
-          .${this.classes.LIST_ITEM_BTN}:hover {
+          .${CSS_CLASS__LIST_ITEM_BTN}:focus,
+          .${CSS_CLASS__LIST_ITEM_BTN}:hover {
             background: #eee;
           }
         </style>
         <style id="customStyles"></style>
         <style id="autocompleteStyles"></style>
         
-        <div class="${this.ROOT_CLASS}">
-          <div class="${this.ROOT_CLASS}__input-wrapper">
-            <input class="${this.ROOT_CLASS}__input" type="text">
-            <div class="${this.ROOT_CLASS}__input-overlay"></div>
-            <button class="${this.classes.CLEAR_BTN}" type="button">&#10005;</button>
+        <div class="${ROOT_CLASS}">
+          <div class="${CSS_CLASS__INPUT_WRAPPER}">
+            <input class="${CSS_CLASS__INPUT}" type="text">
+            <div class="${CSS_CLASS__INPUT_OVERLAY}"></div>
+            <button class="${CSS_CLASS__CLEAR_BTN}" type="button">&#10005;</button>
           </div>
-          <ul class="${this.classes.LIST}"></ul>
+          <ul class="${CSS_CLASS__LIST}"></ul>
         </div>
       `;
       
       this.els = {
         customStyles: shadowRoot.querySelector('#customStyles'),
-        input: shadowRoot.querySelector(`.${this.ROOT_CLASS}__input`),
-        inputOverlay: shadowRoot.querySelector(`.${this.ROOT_CLASS}__input-overlay`),
-        list: shadowRoot.querySelector(`.${this.classes.LIST}`),
+        input: shadowRoot.querySelector(`.${CSS_CLASS__INPUT}`),
+        inputOverlay: shadowRoot.querySelector(`.${CSS_CLASS__INPUT_OVERLAY}`),
+        list: shadowRoot.querySelector(`.${CSS_CLASS__LIST}`),
         listStyles: shadowRoot.querySelector('#autocompleteStyles'),
-        wrapper: shadowRoot.querySelector(`.${this.ROOT_CLASS}`),
+        wrapper: shadowRoot.querySelector(`.${ROOT_CLASS}`),
       };
       
       this.handleArrowKeysInList = this.handleArrowKeysInList.bind(this);
@@ -248,11 +246,11 @@
           
           return `
             <li
-              class="${this.classes.LIST_ITEM}"
+              class="${CSS_CLASS__LIST_ITEM}"
               data-autocomplete-item="${this.formatItemData(_value)}"
             >
               <button 
-                class="${this.classes.LIST_ITEM_BTN}"
+                class="${CSS_CLASS__LIST_ITEM_BTN}"
                 type="button"
                 value="${_value}"
                 tabindex="-1"
@@ -281,17 +279,17 @@
         const query = ev.currentTarget.value;
         const rule = (query !== '')
           ? `
-            .${this.classes.LIST} [data-autocomplete-item*="${this.formatItemData(query)}"] {
+            .${CSS_CLASS__LIST} [data-autocomplete-item*="${this.formatItemData(query)}"] {
               display: block;
             }
           `
           : `
-            .${this.classes.LIST} [data-autocomplete-item] {
+            .${CSS_CLASS__LIST} [data-autocomplete-item] {
               display: block;
             }
           `;
         rules = `
-          .${this.classes.LIST} {
+          .${CSS_CLASS__LIST} {
             display:block;
           }
           
@@ -303,7 +301,7 @@
       
       if (this.els.list.offsetHeight !== 0) {
         // find the first visible item in the drop down to select
-        const items = [...this.els.list.querySelectorAll(`.${this.classes.LIST_ITEM_BTN}`)];
+        const items = [...this.els.list.querySelectorAll(`.${CSS_CLASS__LIST_ITEM_BTN}`)];
         this.visibleListItems = items.reduce((arr, item) => {
           if (item.offsetHeight !== 0) arr.push(item);
           return arr;
@@ -406,11 +404,10 @@
       if (item) item.blur();
       
       setTimeout(() => {
-        if (this.onSelectHandlers.length) {
-          this.onSelectHandlers.forEach((handler) => {
-            handler({ elements, value });
-          });
-        }
+        this.dispatchEvent(new CustomEvent(EVENT__SELECTED, {
+          bubbles: true,
+          detail: { elements, value },
+        }));
       }, 10);
     }
     
@@ -427,8 +424,8 @@
     handleClick(ev) {
       const el = ev.target;
       
-      if (el.classList.contains(this.classes.LIST_ITEM_BTN)) this.handleItemSelection(ev);
-      else if (el.classList.contains(this.classes.CLEAR_BTN)) this.handleClear(ev);
+      if (el.classList.contains(CSS_CLASS__LIST_ITEM_BTN)) this.handleItemSelection(ev);
+      else if (el.classList.contains(CSS_CLASS__CLEAR_BTN)) this.handleClear(ev);
     }
     
     handleKeyDown(ev) {
