@@ -399,14 +399,22 @@
         </style>
         
         <script>
-          const [ dialog, modal ] = [...document.querySelectorAll('custom-dialog')];
+          const dE = document.getElementById('dialogExample');
+          const dialogs = [...document.querySelectorAll('custom-dialog')];
+          const [ dialog, modal ] = dialogs;
           const openDialogBtn = document.getElementById('openDialogBtn');
           const openModalBtn = document.getElementById('openModalBtn');
           
-          dialog.onClose = () => { console.log('Dialog closed'); };
-          dialog.querySelector('[slot] button').addEventListener('click', () => {
-            dialog.open = false;
+          dE.addEventListener(window.CustomDialog.events.closed, ({ detail: { modal } }) => {
+            console.log(`${modal ? 'Modal' : 'Dialog'} closed`);
           });
+          
+          dialogs.forEach((d) => {
+            d.querySelector('[slot] button').addEventListener('click', () => {
+              d.open = false;
+            });
+          });
+          
           let contentAdded;
           openDialogBtn.addEventListener('click', () => {
             dialog.open = true;
@@ -421,10 +429,6 @@
             }
           });
           
-          modal.onClose = () => { console.log('Modal closed'); };
-          modal.querySelector('[slot] button').addEventListener('click', () => {
-            modal.open = false;
-          });
           openModalBtn.addEventListener('click', () => {
             modal.open = true;
           });
