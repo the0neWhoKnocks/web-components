@@ -7,6 +7,7 @@
   const DEFAULT__COLOR__ENABLED = '#00ffaf';
   const DEFAULT__COLOR__FOCUSED = 'blue';
   const DEFAULT__COLOR__TOGGLE = '#eee';
+  const EVENT__TOGGLED = 'toggled';
   const ROOT_CLASS = 'custom-toggle';
   let toggleIDNdx = 1;
   
@@ -27,17 +28,22 @@
       return this.hasAttribute('enabled');
     }
     set enabled(value) {
-      if (value === '' || value === 'true' || value === true) {
-        this.setAttribute('enabled', '');
-      }
-      else {
-        this.removeAttribute('enabled');
-      }
+      const enabled = (value === '' || value === 'true' || value === true);
+      const changed = (
+        enabled !== this.enabled
+        || this.els.input.checked !== enabled
+      );
       
-      const enabled = this.enabled;
-      this.els.input.checked = enabled;
-      if (this.onToggleHandlers.length) {
-        this.onToggleHandlers.forEach((handler) => { handler(enabled); });
+      if (changed) {
+        if (enabled) this.setAttribute('enabled', '');
+        else this.removeAttribute('enabled');
+        
+        this.els.input.checked = enabled;
+        
+        this.dispatchEvent(new CustomEvent(EVENT__TOGGLED, {
+          bubbles: true,
+          detail: { enabled },
+        }));
       }
     }
     
@@ -60,14 +66,14 @@
       this.setAttribute('name', this._name);
     }
     
-    set onToggle(handler) {
-      if (!this.onToggleHandlers.includes(handler)) {
-        this.onToggleHandlers.push(handler);
-      }
+    static get observedAttributes() {
+      return ['circle', 'enabled', 'id', 'name'];
     }
     
-    static get observedAttributes() {
-      return ['circle', 'enabled', 'id', 'name', 'ontoggle'];
+    static get events() {
+      return {
+        toggled: EVENT__TOGGLED,
+      };
     }
     
     attributeChangedCallback(attr, oldVal, newVal) {
@@ -77,11 +83,6 @@
         let _newVal = newVal;
         
         switch (attr) {
-          case 'ontoggle': {
-            if (typeof _newVal === 'string') _newVal = eval(_newVal);
-            this.onToggle = _newVal;
-            break;
-          }
           default: { this[attr] = _newVal; }
         }
       }
@@ -93,7 +94,6 @@
       this.attachShadow({ mode: 'open' });
       
       const { shadowRoot } = this;
-      this.onToggleHandlers = [];
       this.ndx = toggleIDNdx;
       this._id = `toggle_${this.ndx}`;
       this._name = this._id;
