@@ -339,15 +339,6 @@
         <script>
           const toggleForm = document.getElementById('toggleForm');
           const togglesOutput = document.querySelector('#toggleForm + pre');
-          const toggles = [...document.querySelectorAll('custom-toggle')];
-          
-          // Append any Custom Element data to Form data when it's requested.
-          // Only neccessary for Custom Elements using the Shadow DOM.
-          toggleForm.addEventListener('formdata', ({ formData }) => {
-            [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
-              formData.append(toggle.name, toggle.enabled);
-            });
-          });
           
           function handleToggle() {
             const formData = new FormData(toggleForm);
@@ -358,7 +349,15 @@
             togglesOutput.textContent = output;
           }
           
-          toggles.forEach(toggle => toggle.onToggle = handleToggle);
+          // Append any Custom Element data to Form data when it's requested.
+          // Only neccessary for Custom Elements using the Shadow DOM.
+          toggleForm.addEventListener('formdata', ({ formData }) => {
+            [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
+              formData.append(toggle.name, toggle.enabled);
+            });
+          });
+          
+          toggleForm.addEventListener(window.CustomToggle.events.toggled, handleToggle);
           
           handleToggle();
         </script>
