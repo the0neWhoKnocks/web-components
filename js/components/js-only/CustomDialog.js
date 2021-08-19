@@ -4,13 +4,15 @@
   const CSS_VAR__COLOR__BORDER = '--dialog--color--border';
   const CSS_VAR__COLOR__TITLE__BG = '--dialog--color--title--bg';
   const CSS_VAR__COLOR__TITLE__TEXT = '--dialog--color--title--text';
+  const EVENT__CLOSED = 'dialogClosed';
+  const ROOT_CLASS = 'dialog';
+  
   const DEFAULT__ANIM_DURATION = 300;
   const DEFAULT__COLOR__BODY = '#eee';
   const DEFAULT__COLOR__BORDER = '#000';
   const DEFAULT__COLOR__TITLE__BG = '#333';
   const DEFAULT__COLOR__TITLE__TEXT = '#eee';
   const DEFAULT__BODY = '[BODY]';
-  const ROOT_CLASS = 'dialog';
 
   class CustomDialog extends HTMLElement {
     get modal() {
@@ -25,12 +27,6 @@
       }
       
       this.render();
-    }
-    
-    set onClose(handler) {
-      if (!this.onCloseClickHandlers.includes(handler)) {
-        this.onCloseClickHandlers.push(handler);
-      }
     }
     
     get open() {
@@ -60,15 +56,22 @@
           this.removeAttribute('open');  
           this.els.dialog.removeAttribute('open');
           
-          if (this.onCloseClickHandlers.length) {
-            this.onCloseClickHandlers.forEach((handler) => { handler(); });
-          }
+          this.dispatchEvent(new CustomEvent(EVENT__CLOSED, {
+            bubbles: true,
+            detail: { modal: this.modal },
+          }));
         }, DEFAULT__ANIM_DURATION);
       } 
     }
     
     static get observedAttributes() {
-      return ['modal', 'onclose', 'open'];
+      return ['modal', 'open'];
+    }
+    
+    static get events() {
+      return {
+        closed: EVENT__CLOSED,
+      };
     }
     
     attributeChangedCallback(attr, oldVal, newVal) {
@@ -78,7 +81,6 @@
         let _newVal = newVal;
         
         switch (attr) {
-          case 'onclose': { this.onClose = _newVal; break; }
           default: { this[attr] = _newVal; }
         }
       }
@@ -90,7 +92,6 @@
       this.attachShadow({ mode: 'open' });
       
       const { shadowRoot } = this;
-      this.onCloseClickHandlers = [];
       
       shadowRoot.innerHTML = `
         <style>
@@ -256,7 +257,6 @@
       
       this.els = {
         dialog: shadowRoot.querySelector(`.${ROOT_CLASS}`),
-        dialogMask: shadowRoot.querySelector(`.${ROOT_CLASS}-mask`),
         wrapper: shadowRoot.querySelector(`.${ROOT_CLASS}-wrapper`),
       };
       
@@ -297,7 +297,7 @@
         
         if (!this.modal) {
           closeBtnMarkup = `
-            <button type="button" class="${ROOT_CLASS}__close-btn">
+            <button type="button" class="${ROOT_CLASS}__close-btn" title="Close Dialog">
               &#10005;
             </button>
           `;
