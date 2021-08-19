@@ -1,49 +1,70 @@
 (() => {
+  const CSS_VAR__ANIM_DURATION = '--anim-duration';
+  const DIRECTION__BOTTOM = 'bottom';
+  const DIRECTION__LEFT = 'left';
+  const DIRECTION__RIGHT = 'right';
+  const DIRECTION__TOP = 'top';
+  const EVENT__CLOSED = 'flyoutClosed';
+  const ROOT_CLASS = 'flyout';
+  
+  const DEFAULT__ANIM_DURATION = 300;
+  const DEFAULT__FROM = DIRECTION__LEFT;
+  
   class CustomFlyout extends HTMLElement {
-    set content(content) {
-      this.els.flyoutBody.innerHTML = content;
+    get from() {
+      return this.getAttribute('from') || DEFAULT__FROM;
+    }
+    set from(value) {
+      if (value) this.setAttribute('from', value);
+      else this.removeAttribute('from');
     }
     
-    set onClose(fn) {
-      this._onClose = fn;
+    get open() {
+      return this.hasAttribute('open');
     }
-    
-    get openFrom() {
-      return this.getAttribute('open-from');
-    }
-    
-    set openFrom(direction) {
-      this.setAttribute('open-from', direction);
-    }
-    
-    set styles(styles) {
-      this.els.userStyles.textContent = styles;
-    }
-    
-    set title(title) {
-      if (title === '') this.els.flyoutNav.classList.add(this.MODIFIER__HIDDEN);
-      else this.els.flyoutNav.classList.remove(this.MODIFIER__HIDDEN);
-      this.els.flyoutTitle.innerHTML = title;
+    set open(value) {
+      if (value === '' || value === 'true' || value === true) {
+        this.setAttribute('open', '');
+        
+        setTimeout(() => {
+          this.shadowRoot.addEventListener('click', this.handleCloseClick);
+          window.addEventListener('keydown', this.handleKeyDown);
+        }, DEFAULT__ANIM_DURATION);
+      }
+      else {
+        this.shadowRoot.removeEventListener('click', this.handleCloseClick);
+        window.removeEventListener('keydown', this.handleKeyDown);
+        this.removeAttribute('open');
+        
+        setTimeout(() => {
+          this.dispatchEvent(new CustomEvent(EVENT__CLOSED, {
+            bubbles: true,
+            detail: {
+              from: this.from,
+            },
+          }));
+        }, DEFAULT__ANIM_DURATION);
+      } 
     }
     
     static get observedAttributes() {
-      return ['open-from'];
+      return ['from', 'open'];
+    }
+    
+    static get events() {
+      return {
+        closed: EVENT__CLOSED,
+      };
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-      switch (name) {
-        case 'open-from': {
-          const newModifier = `MODIFIER__OPEN_FROM_${newValue.toUpperCase()}`;
-          if (this[newModifier]) {
-            this.els.flyout.classList.remove(
-              this.MODIFIER__OPEN_FROM_BOTTOM,
-              this.MODIFIER__OPEN_FROM_LEFT,
-              this.MODIFIER__OPEN_FROM_RIGHT,
-              this.MODIFIER__OPEN_FROM_TOP
-            );
-            this.els.flyout.classList.add(this[newModifier]);
-          }
-          break;
+    attributeChangedCallback(attr, oldVal, newVal) {
+      const empty = oldVal === '' && (newVal === null || newVal === undefined);
+      
+      if (!empty && oldVal !== newVal) {
+        let _newVal = newVal;
+        
+        switch (attr) {
+          default: { this[attr] = _newVal; }
         }
       }
     }
@@ -54,18 +75,6 @@
       this.attachShadow({ mode: 'open' });
       
       const { shadowRoot } = this;
-      this.ANIM_DURATION = 300;
-      this.DIRECTION__BOTTOM = 'bottom';
-      this.DIRECTION__LEFT = 'left';
-      this.DIRECTION__RIGHT = 'right';
-      this.DIRECTION__TOP = 'top';
-      this.MODIFIER__HIDDEN = 'is--hidden';
-      this.MODIFIER__OPEN = 'is--open';
-      this.MODIFIER__OPEN_FROM_BOTTOM = 'open-from--bottom';
-      this.MODIFIER__OPEN_FROM_LEFT = 'open-from--left';
-      this.MODIFIER__OPEN_FROM_RIGHT = 'open-from--right';
-      this.MODIFIER__OPEN_FROM_TOP = 'open-from--top';
-      this['open-from'] = this.DIRECTION__LEFT;
       
       shadowRoot.innerHTML = `
         <style>
@@ -74,6 +83,8 @@
           }
           
           :host {
+            ${CSS_VAR__ANIM_DURATION}: ${DEFAULT__ANIM_DURATION}ms;
+            
             font: 16px Helvetica, Arial, sans-serif;
             position: fixed;
             top: 0;
@@ -81,20 +92,20 @@
             bottom: 0;
             right: 0;
             z-index: 10;
+            pointer-events: none;
           }
           
-          :host button,
-          :host input,
-          :host select,
-          :host textarea {
-            font-size: 1em;
+          :host,
+          :host(:not([open])) .${ROOT_CLASS},
+          :host(:not([open])) .${ROOT_CLASS}-mask {
+            pointer-events: none;
+          }
+          :host([open]) .${ROOT_CLASS},
+          :host([open]) .${ROOT_CLASS}-mask {
+            pointer-events: all;
           }
           
-          :host button {
-            cursor: pointer;
-          }
-          
-          .flyout-mask {
+          .${ROOT_CLASS}-mask {
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
@@ -102,13 +113,14 @@
             top: 0;
             left: 0;
             opacity: 0;
-            transition: opacity ${this.ANIM_DURATION}ms;
+            transition: opacity var(${CSS_VAR__ANIM_DURATION});
+            backdrop-filter: blur(10px);
           }
-          .flyout-mask.${this.MODIFIER__OPEN} {
+          :host([open]) .${ROOT_CLASS}-mask {
             opacity: 1;
           }
           
-          .flyout {
+          .${ROOT_CLASS} {
             overflow: hidden;
             padding: 0;
             border: solid 1px;
@@ -117,64 +129,61 @@
             display: flex;
             flex-direction: column;
             position: absolute;
-            transition: transform ${this.ANIM_DURATION}ms;
+            transition: transform var(${CSS_VAR__ANIM_DURATION});
           }
-          .flyout.${this.MODIFIER__OPEN} {
+          :host([open]) .${ROOT_CLASS} {
             box-shadow: 0 0.75em 2em 0.25em rgba(0, 0, 0, 0.75);
           }
           
-          .flyout.${this.MODIFIER__OPEN_FROM_LEFT},
-          .flyout.${this.MODIFIER__OPEN_FROM_RIGHT} {
+          :host([from="${DIRECTION__LEFT}"]) .${ROOT_CLASS},
+          :host([from="${DIRECTION__RIGHT}"]) .${ROOT_CLASS} {
             top: 0;
             bottom: 0;
           }
-          .flyout.${this.MODIFIER__OPEN_FROM_LEFT} {
+          :host([from="${DIRECTION__LEFT}"]) .${ROOT_CLASS} {
             left: 0;
             transform: translateX(-100%);
           }
-          .flyout.${this.MODIFIER__OPEN_FROM_RIGHT} {
+          :host([from="${DIRECTION__RIGHT}"]) .${ROOT_CLASS} {
             right: 0;
             transform: translateX(100%);
           }
-          .flyout.${this.MODIFIER__OPEN_FROM_LEFT}.${this.MODIFIER__OPEN},
-          .flyout.${this.MODIFIER__OPEN_FROM_RIGHT}.${this.MODIFIER__OPEN} {
+          :host([open][from="${DIRECTION__LEFT}"]) .${ROOT_CLASS},
+          :host([open][from="${DIRECTION__RIGHT}"]) .${ROOT_CLASS} {
             transform: translateX(0%);
           }
           
-          .flyout.${this.MODIFIER__OPEN_FROM_TOP},
-          .flyout.${this.MODIFIER__OPEN_FROM_BOTTOM} {
+          :host([from="${DIRECTION__TOP}"]) .${ROOT_CLASS},
+          :host([from="${DIRECTION__BOTTOM}"]) .${ROOT_CLASS} {
             left: 0;
             right: 0;
           }
-          .flyout.${this.MODIFIER__OPEN_FROM_TOP} {
+          :host([from="${DIRECTION__TOP}"]) .${ROOT_CLASS} {
             top: 0;
             transform: translateY(-100%);
           }
-          .flyout.${this.MODIFIER__OPEN_FROM_BOTTOM} {
+          :host([from="${DIRECTION__BOTTOM}"]) .${ROOT_CLASS} {
             bottom: 0;
             transform: translateY(100%);
           }
-          .flyout.${this.MODIFIER__OPEN_FROM_TOP}.${this.MODIFIER__OPEN},
-          .flyout.${this.MODIFIER__OPEN_FROM_BOTTOM}.${this.MODIFIER__OPEN} {
+          :host([open][from="${DIRECTION__TOP}"]) .${ROOT_CLASS},
+          :host([open][from="${DIRECTION__BOTTOM}"]) .${ROOT_CLASS} {
             transform: translateY(0%);
           }
           
-          .flyout__nav {
+          .${ROOT_CLASS}__nav {
             font-size: 1.25em;
             border-bottom: solid 1px;
             display: flex;
           }
-          .flyout__nav.${this.MODIFIER__HIDDEN} {
-            display: none;
-          }
           
-          .flyout__body {
+          .${ROOT_CLASS}__body {
             height: 100%;
             overflow-y: auto;
             margin-bottom: 1px;
           }
           
-          .flyout__title {
+          .${ROOT_CLASS}__title {
             width: 100%;
             color: #eee;
             padding: 0.5em 0.8em 0.5em;
@@ -182,80 +191,55 @@
             background: #333;
           }
           
-          .flyout__close-btn {
+          .${ROOT_CLASS}__close-btn {
             color: #eee;
             padding: 0 0.5em;
             border: none;
             background: #333;
+            cursor: pointer;
           }
         </style>
-        <style id="userStyles"></style>
         
-        <div class="flyout-mask"></div>
+        <div class="${ROOT_CLASS}-mask"></div>
         <div
-          class="flyout ${this.MODIFIER__OPEN_FROM_LEFT}"
+          class="${ROOT_CLASS}"
           tabindex="0"
         >
-          <nav class="flyout__nav is--hidden">
-            <div class="flyout__title"></div>
-            <button type="button" class="flyout__close-btn">&#10005;</button>
+          <nav class="${ROOT_CLASS}__nav">
+            <div class="${ROOT_CLASS}__title">
+              <slot name="flyoutTitle"></slot>
+            </div>
+            <button type="button" class="${ROOT_CLASS}__close-btn" title="Close Flyout">&#10005;</button>
           </nav>
-          <div class="flyout__body"></div>
+          <div class="${ROOT_CLASS}__body">
+            <slot name="flyoutBody"></slot>
+          </div>
         </div>
       `;
       
-      this.KEY_CODE__ESC = 27;
-      
-      this.els = {
-        closeBtn: shadowRoot.querySelector('.flyout__close-btn'),
-        flyout: shadowRoot.querySelector('.flyout'),
-        flyoutBGMask: shadowRoot.querySelector('.flyout-mask'),
-        flyoutBody: shadowRoot.querySelector('.flyout__body'),
-        flyoutTitle: shadowRoot.querySelector('.flyout__title'),
-        flyoutNav: shadowRoot.querySelector('.flyout__nav'),
-        userStyles: shadowRoot.querySelector('#userStyles'),
-      };
-      
       this.handleCloseClick = this.handleCloseClick.bind(this);
       this.handleKeyDown = this.handleKeyDown.bind(this);
-      this.handleMaskClick = this.handleMaskClick.bind(this);
     }
     
-    handleCloseClick() { this.close(); }
-    handleMaskClick() { this.close(); }
+    handleCloseClick({ keyClose, target }) {
+      if (
+        keyClose
+        || (
+          target
+          && (
+            target.classList.contains(`${ROOT_CLASS}-mask`)
+            || target.classList.contains(`${ROOT_CLASS}__close-btn`)
+          )
+        )
+      ) this.open = false;
+    }
     
-    handleKeyDown(ev) {
-      if (ev.keyCode === this.KEY_CODE__ESC) {
-        window.removeEventListener('keydown', this.handleKeyDown);
-        this.close();
+    handleKeyDown({ key }) {
+      switch (key) {
+        case 'Escape':
+          this.handleCloseClick({ keyClose: true });
+          break;
       }
-    }
-    
-    show() {
-      document.body.appendChild(this);
-      this.els.closeBtn.addEventListener('click', this.handleCloseClick);
-      this.els.flyoutBGMask.addEventListener('click', this.handleMaskClick);
-      window.customFlyout = this;
-      
-      setTimeout(() => {
-        this.els.flyoutBGMask.classList.add(this.MODIFIER__OPEN);
-        this.els.flyout.classList.add(this.MODIFIER__OPEN);
-        this.els.flyout.focus();
-        window.addEventListener('keydown', this.handleKeyDown);
-      }, 100);
-    }
-    
-    close() {
-      this.els.closeBtn.removeEventListener('click', this.handleCloseClick);
-      this.els.flyoutBGMask.removeEventListener('click', this.handleMaskClick);
-      this.els.flyoutBGMask.classList.remove(this.MODIFIER__OPEN);
-      this.els.flyout.classList.remove(this.MODIFIER__OPEN);
-      
-      setTimeout(() => {
-        this._onClose();
-        delete window.customFlyout;
-        this.remove();
-      }, this.ANIM_DURATION);
     }
   }
 

@@ -8,17 +8,13 @@ A collection of Web Components that I've built
 
 ## Usage
 
-There are a couple types of Web Components in this repo.
-| Type | Description |
-| ---- | ----------- |
-| `hybrid` | Can be used in raw HTML and in JS. These components may only need to be wired up during initial page load, or updated due to User interactions. |
-| `js-only` | Should only be used within JS. Think of these as on-demand components that shouldn't be added to a page until a User requests them. |
+Usage examples are in [index.html](./index.html). It demonstrates:
+- How to load a Web Component (via a `script` include).
+- Ways to style and override existing styles.
+- How to set up listeners.
+- What attributes are available for each Component.
 
-Usage examples are spread across a couple files:
-- [index.html](./index.html) demonstrates how to load a Web Component (via a `script` include). Also shows the `hybrid` approach with HTML components and it's attributes.
-- [examples.js](./example/examples.js) demonstrates how to create `js-only` components, assign their attributes, and add them to the DOM.
-
-If you want to load a file directly from GitHub (like in a CodePen), you can get the URLs from [the example page][examplePage]. An example is `https://the0newhoknocks.github.io/web-components/js/components/hybrid/CustomToggle.js`, so `https://the0newhoknocks.github.io/web-components/<PATH_TO_FILE>`. You can't link directly to a `raw.githubusercontent.com` file since GitHub serves up the files with a `text` header, but `github.io` pages serve files from a CDN with the correct headers.
+If you want to load a file directly from GitHub (like in a CodePen), you can get the URLs from [the example page][examplePage]. An example is `https://the0newhoknocks.github.io/web-components/js/components/CustomToggle.js`, so `https://the0newhoknocks.github.io/web-components/<PATH_TO_FILE>`. You can't link directly to a `raw.githubusercontent.com` file since GitHub serves up the files with a `text` header, but `github.io` pages serve files from a CDN with the correct headers.
 
 ---
 
@@ -41,6 +37,17 @@ General notes, and gotchas.
   <!-- valid -->
   <custom-component></custom-component>
   ```
+- `slot` content only effects the Light DOM. This seems like a given, but imagine a case where you insert this via a `slot`.
+  ```html
+  <div slot="name">
+    <style>
+      .custom-component-class-name {
+        color: pink;
+      }
+    </style>
+  </div>
+  ```
+  You might think "the `style` node's been inserted into the Component, so it should be able to effect that content", and you'd be wrong.
 - Attribute names are hard. Imagine you want to implement something like a click handler. You can go with the below formats.
   | Format |   |
   | ------ | - |
