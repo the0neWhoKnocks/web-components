@@ -7,7 +7,9 @@
 - [ ] reviews https://codepen.io/theOneWhoKnocks/pen/ZXqzEd
   - ratings: default svg stars, allow slot for ratings-symbol
 - [ ] file uploader https://codepen.io/theOneWhoKnocks/pen/KXZZLy
-- [ ] accordion menu https://codepen.io/theOneWhoKnocks/pen/rrkzzZ
+- accordion menu
+  - [x] persistent https://codepen.io/theOneWhoKnocks/pen/rrkzzZ
+  - [ ] non-persistent https://codepen.io/theOneWhoKnocks/pen/wzEddW
 - [ ] navs https://codepen.io/theOneWhoKnocks/pen/NGyjKR
   - https://codepen.io/theOneWhoKnocks/pen/ZYKebb
 - [ ] image editor
@@ -16,7 +18,6 @@
 - [ ] split flap clock https://codepen.io/theOneWhoKnocks/pen/Ivneu
 - [ ] dir listing: https://github.com/the0neWhoKnocks/star-monkey-scripts/blob/master/scripts/github/Github_UI_Updates.user.js#L332-L497
 - [ ] toaster/notification
-- [ ] dialog/modal
 
 
 ## CustomAutoCompleteInput

@@ -6,6 +6,7 @@
     
     <link rel="stylesheet" href="styles.css">
     
+    <script src="js/components/CustomAccordionMenu.js"></script>
     <script src="js/components/CustomAutoCompleteInput.js"></script>
     <script src="js/components/CustomDialog.js"></script>
     <script src="js/components/CustomFlyout.js"></script>
@@ -16,6 +17,40 @@
   </head>
   <body>
     <div id="wrapper">
+      <section id="accordionExample">
+        <h2 class="title">Accordion Menu</h2>
+        
+        <custom-accordion-menu>
+          <custom-accordion-menu-group>
+            <label slot="label">Menu group 1</label>
+            <a slot="item" href="#">Link 1</a>
+            <a slot="item" href="#">Link 2</a>
+          </custom-accordion-menu-group>
+          <custom-accordion-menu-group>
+            <div slot="label">Menu group 2</div>
+            <button slot="item">Button 1</button>
+            <button slot="item">Button 2</button>
+            <button slot="item">Button 3</button>
+          </custom-accordion-menu-group>
+        </custom-accordion-menu>
+        
+        <style>
+          custom-accordion-menu-group:nth-of-type(2) [slot="label"] {
+            font-weight: bold;
+            background: #d3eeff;
+          }
+        </style>
+        
+        <script>
+          document.getElementById('accordionExample').addEventListener('click', (ev) => {
+            const type = ev.target.nodeName.toLowerCase();
+            if (type === 'button' || type === 'a') {
+              ev.preventDefault();
+              console.log(`${type === 'a' ? 'Link' : 'Button'} clicked`);
+            }
+          });
+        </script>
+      </section>
       <section>
         <h2 class="title">Timeline</h2>
         
