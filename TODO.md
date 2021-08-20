@@ -7,9 +7,6 @@
 - [ ] reviews https://codepen.io/theOneWhoKnocks/pen/ZXqzEd
   - ratings: default svg stars, allow slot for ratings-symbol
 - [ ] file uploader https://codepen.io/theOneWhoKnocks/pen/KXZZLy
-- accordion menu
-  - [x] persistent https://codepen.io/theOneWhoKnocks/pen/rrkzzZ
-  - [ ] non-persistent https://codepen.io/theOneWhoKnocks/pen/wzEddW
 - [ ] navs https://codepen.io/theOneWhoKnocks/pen/NGyjKR
   - https://codepen.io/theOneWhoKnocks/pen/ZYKebb
 - [ ] image editor

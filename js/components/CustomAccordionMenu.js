@@ -2,6 +2,31 @@
   const ROOT_CLASS = 'accordion-menu';
   
   class CustomAccordionMenu extends HTMLElement {
+    get single() {
+      return this.hasAttribute('single');
+    }
+    set single(value) {
+      (value === '' || value === 'true' || value === true)
+        ? this.setAttribute('single', '')
+        : this.removeAttribute('single');
+    }
+    
+    static get observedAttributes() {
+      return ['single'];
+    }
+    
+    attributeChangedCallback(attr, oldVal, newVal) {
+      const empty = oldVal === '' && (newVal === null || newVal === undefined);
+      
+      if (!empty && oldVal !== newVal) {
+        let _newVal = newVal;
+        
+        switch (attr) {
+          default: { this[attr] = _newVal; }
+        }
+      }
+    }
+    
     constructor() {
       super();
       
@@ -14,6 +39,28 @@
           <slot></slot>
         </div>
       `;
+    }
+    
+    connectedCallback() {
+      if (this.single) {
+        this.addEventListener(
+          window.CustomAccordionMenuGroup.events.toggled,
+          ({ detail: { open }, target: updatedGroup }) => {
+            if (open) {
+              const groups = [...this.children];
+              
+              for (let i=0; i<groups.length; i++) {
+                const currGroup = groups[i];
+                
+                if (currGroup !== updatedGroup && currGroup.open) {
+                  currGroup.open = false;
+                  break;
+                }
+              }
+            }
+          }
+        );
+      }
     }
   }
 
@@ -34,6 +81,7 @@
   const CSS_VAR__COLOR__HOVER = '--color--hover';
   const CSS_VAR__INDICATOR_DIAMETER = '--indicator-diameter';
   const CSS_VAR__WIDTH__OUTER_BORDER = '--width--outer-border';
+  const EVENT__TOGGLED = 'toggled';
   const ROOT_CLASS = 'accordion-menu-group';
   
   const DEFAULT__ANIM_DURATION = '150ms';
@@ -51,6 +99,13 @@
       const open = value === '' || value === 'true' || value === true;
       const changed = open !== this.open;
       
+      const sendEvent = () => {
+        this.dispatchEvent(new CustomEvent(EVENT__TOGGLED, {
+          bubbles: true,
+          detail: { open },
+        }));
+      };
+      
       if (changed) {
         if (open) {
           this.setAttribute('open', '');
@@ -58,6 +113,7 @@
           // animation should only happen when mounted
           if (this.mounted) {
             this.els.items.classList.add('animating');
+            sendEvent();
             
             requestAnimationFrame(() => {
               this.els.items.addEventListener('transitionend', () => {
@@ -75,6 +131,7 @@
             
             requestAnimationFrame(() => {
               this.removeAttribute('open');
+              sendEvent();
               
               if (this.mounted) {
                 this.els.items.addEventListener('transitionend', () => {
@@ -95,6 +152,12 @@
     
     static get observedAttributes() {
       return ['open'];
+    }
+    
+    static get events() {
+      return {
+        toggled: EVENT__TOGGLED,
+      };
     }
     
     attributeChangedCallback(attr, oldVal, newVal) {
