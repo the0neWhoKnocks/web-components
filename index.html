@@ -22,12 +22,12 @@
         
         <custom-accordion-menu>
           <custom-accordion-menu-group>
-            <label slot="label">Menu group 1</label>
+            <label slot="label">Default group</label>
             <a slot="item" href="#">Link 1</a>
             <a slot="item" href="#">Link 2</a>
           </custom-accordion-menu-group>
-          <custom-accordion-menu-group>
-            <div slot="label">Menu group 2</div>
+          <custom-accordion-menu-group open>
+            <div slot="label">Custom group</div>
             <button slot="item">Button 1</button>
             <button slot="item">Button 2</button>
             <button slot="item">Button 3</button>
@@ -37,7 +37,8 @@
         <style>
           custom-accordion-menu-group:nth-of-type(2) [slot="label"] {
             font-weight: bold;
-            background: #d3eeff;
+            text-shadow: 0 2px 1px white;
+            background: linear-gradient(0deg, #dcdcdc, transparent);
           }
         </style>
         
