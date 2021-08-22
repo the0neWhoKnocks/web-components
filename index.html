@@ -12,11 +12,158 @@
     <script src="js/components/CustomFlyout.js"></script>
     <script src="js/components/CustomIconCheck.js"></script>
     <script src="js/components/CustomIconChevron.js"></script>
+    <script src="js/components/CustomRating.js"></script>
     <script src="js/components/CustomToggle.js"></script>
     <script src="js/components/CustomTimeline.js"></script>
   </head>
   <body>
     <div id="wrapper">
+      <section id="ratingsExample">
+        <h2 class="title">Rating</h2>
+        
+        <nav>
+          <div class="control">
+            <label>BG Color</label>
+            <input id="starBGColorInput" type="color" />
+          </div>
+          <div class="control">
+            <label>FG Colors</label>
+            <div class="fg-colors">
+              <input id="starFGColorInput1" type="color" />
+              <input id="starFGColorInput2" type="color" />
+            </div>
+          </div>
+          <div class="control">
+            <label>Stroke Color</label>
+            <input id="starStrokeColorInput" type="color" />
+          </div>
+          <div class="control">
+            <label>
+              Star Count
+              <span class="vals">
+                (<span id="starCount"></span>)
+              </span>
+            </label>
+            <input id="starCountRange" type="range" min="1" max="10">
+          </div>
+          <div class="control">
+            <label>
+              Star Inner Radius
+              <span class="vals">
+                (<span id="starInnerRadius"></span>)
+              </span>
+            </label>
+            <input id="starInnerRadiusRange" type="range" step="0.1">
+          </div>
+          <div class="control">
+            <label>
+              Star Points
+              <span class="vals">
+                (<span id="starPoints"></span>)
+              </span>
+            </label>
+            <input id="starPointsRange" type="range" min="2" max="30">
+          </div>
+          <div class="control">
+            <label>
+              Rating
+              <span class="vals">
+                (<span id="ratingCurrent"></span> / <span id="ratingMax"></span>)
+              </span>
+            </label>
+            <input id="ratingRange" type="range" min="0" max="100" step="5">
+          </div>
+        </nav>
+        
+        <custom-rating rating="2.5"></custom-rating>
+        <custom-rating bgColor="#000" gradientAngle="270" rating="4.5" strokeColor="black" strokeWidth="3"></custom-rating>
+        
+        <style>
+          custom-rating {
+            font-size: 2em;
+            padding: 0.25em 0.5em;
+            border: solid 1px #bbb;
+            border-radius: 0.25em;
+            margin-top: 0.25em;
+            display: inline-block;
+          }
+          custom-rating:not(:first-of-type) {
+            margin-left: 0.25em;
+          }
+        
+          .fg-colors {
+            display: flex;
+          }
+        </style>
+        
+        <script>
+          const bgColor = document.getElementById('starBGColorInput');
+          const fgColor1 = document.getElementById('starFGColorInput1');
+          const fgColor2 = document.getElementById('starFGColorInput2');
+          const ratingCurrent = document.getElementById('ratingCurrent');
+          const ratingMax = document.getElementById('ratingMax');
+          const ratingRange = document.getElementById('ratingRange');
+          const starCountTxt = document.getElementById('starCount');
+          const starCountRange = document.getElementById('starCountRange');
+          const starInnerRadiusRange = document.getElementById('starInnerRadiusRange');
+          const starInnerRadiusTxt = document.getElementById('starInnerRadius');
+          const starPointsRange = document.getElementById('starPointsRange');
+          const starPointsTxt = document.getElementById('starPoints');
+          const starStrokeColor = document.getElementById('starStrokeColorInput');
+          const dynamicRatings = document.querySelector('custom-rating:nth-of-type(2)');
+          
+          fgColor1.value = window.CustomRating.defaultFGColor;
+          fgColor2.value = '#FF0000';
+          ratingRange.value = (dynamicRatings.rating / dynamicRatings.starCount) * 100;
+          starCountRange.value = window.CustomRating.defaultStarCount;
+          starInnerRadiusRange.min = 0.1;
+          starInnerRadiusRange.max = 1;
+          starInnerRadiusRange.value = 0.5;
+          starPointsRange.value = window.CustomRating.defaultStarPoints;
+          starStrokeColor.value = dynamicRatings.strokeColor;
+          
+          bgColor.addEventListener('input', ({ currentTarget: { value } }) => {
+            dynamicRatings.bgColor = value;
+          });
+          document.querySelector('.fg-colors').addEventListener('input', () => {
+            const fg1 = fgColor1.value;
+            const fg2 = fgColor2.value;
+            dynamicRatings.fgColor = (fg1 === fg2) ? fg1 : `${fg1}|${fg2}`;
+          });
+          ratingRange.addEventListener('input', ({ currentTarget: { value } }) => {
+            const ratingsPerc = +value;
+            const rating = +(dynamicRatings.starCount * (ratingsPerc * 0.01)).toFixed(2);
+            
+            dynamicRatings.rating = rating;
+            ratingCurrent.innerText = rating;
+          });
+          starCountRange.addEventListener('input', ({ currentTarget: { value } }) => {
+            const count = +value;
+            
+            if (count) {
+              dynamicRatings.starCount = count;
+              ratingCurrent.innerText = ((ratingRange.value * 0.01) * count).toFixed(2);
+              ratingMax.innerText = count;
+              starCountTxt.innerText = count;
+            }
+          });
+          starInnerRadiusRange.addEventListener('input', ({ currentTarget: { value } }) => {
+            dynamicRatings.starInnerRadius = value;
+            starInnerRadiusTxt.innerText = value;
+          });
+          starPointsRange.addEventListener('input', ({ currentTarget: { value } }) => {
+            dynamicRatings.starPoints = value;
+            starPointsTxt.innerText = value;
+          });
+          starStrokeColor.addEventListener('input', ({ currentTarget: { value } }) => {
+            dynamicRatings.strokeColor = value;
+          });
+          
+          [...document.querySelectorAll('#ratingsExample nav input')].forEach((el) => {
+            el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+          });
+        </script>
+      </section>
       <section id="accordionExample">
         <h2 class="title">Accordion Menu</h2>
         
@@ -74,30 +221,30 @@
           });
         </script>
       </section>
-      <section>
+      <section id="timelineExample">
         <h2 class="title">Timeline</h2>
         
         <nav>
-          <label>
-            Points
+          <div class="control">
+            <label>Points</label>
             <input type="number" id="timelinePoints" min="2" max="20" value="2" />
-          </label>
-          <label>
-            Point Radius
+          </div>
+          <div class="control">
+            <label>Point Radius</label>
             <input type="number" id="timelinePointRadius" min="0.5" max="5" value="1.5" step="0.25" />
-          </label>
-          <label>
-            Scale
+          </div>
+          <div class="control">
+            <label>Scale</label>
             <input type="number" id="timelineScale" min="0.5" max="3" value="1" step="0.25" />
-          </label>
-          <label>
-            Stroke Color
+          </div>
+          <div class="control">
+            <label>Stroke Color</label>
             <input type="color" id="timelineStrokeColor" value="#dedede" />
-          </label>
-          <label>
-            Stroke Width
+          </div>
+          <div class="control">
+            <label>Stroke Width</label>
             <input type="number" id="timelineStrokeWidth" min="0.01" max="1" value="0.25" step="0.01" />
-          </label>
+          </div>
         </nav>
         
         <div class="timelines-wrapper">
@@ -154,33 +301,35 @@
           });
         </script>
       </section>
-      <section>
+      <section id="iconsExample">
         <h2 class="title">Icons</h2>
         
         <nav>
-          <button type="button" id="animateIcons">Animate</button>
-          <label>
-            Scale
+          <div class="control">
+            <button type="button" id="animateIcons">Animate</button>
+          </div>
+          <div class="control">
+            <label>Scale</label>
             <input type="number" id="iconScale" min="1" max="5" value="1" />
-          </label>
-          <label>
-            Stroke Color
+          </div>
+          <div class="control">
+            <label>Stroke Color</label>
             <input type="color" id="iconStrokeColor" value="#333333" />
-          </label>
-          <label>
-            Stroke Width
+          </div>
+          <div class="control">
+            <label>Stroke Width</label>
             <input type="number" id="iconStrokeWidth" min="1" max="10" value="2" />
-          </label>
+          </div>
         </nav>
         
         <section>
           <h3 class="title">Chevron</h2>
             
           <nav>
-            <label>
-              Length
+            <div class="control">
+              <label>Length</label>
               <input type="number" id="chevronLength" min="0.5" max="1" value="0.5" step="0.1" />
-            </label>
+            </div>
           </nav>
           
           <div class="scale-wrapper">
@@ -267,7 +416,7 @@
         </script>
       </section>
       <section id="autoCompleteExample">
-        <h2 class="title">Auto-Complete Inputs</h2>
+        <h2 class="title">Auto-Complete Input</h2>
         
         <custom-auto-complete-input
           customStyles="
@@ -349,7 +498,7 @@
           ];
         </script>
       </section>
-      <section>
+      <section id="toggleExample">
         <h2 class="title">Toggle</h2>
         
         <div class="toggles">
@@ -421,7 +570,7 @@
         </script>
       </section>
       <section id="dialogExample">
-        <h2 class="title">Dialogs</h2>
+        <h2 class="title">Dialog</h2>
         <button id="openDialogBtn">Open Dialog</button>
         <button id="openModalBtn">Open Modal</button>
         
@@ -493,10 +642,10 @@
           });
         </script>
       </section>
-      <section>
-        <h2 class="title">Flyouts</h2>
+      <section id="flyoutExample">
+        <h2 class="title">Flyout</h2>
         
-        <div id="flyoutExample">
+        <div id="flyouts">
           <button type="button" data-open-from="top">Open From <b>top</b></button>
           <custom-flyout from="top">
             <div class="title" slot="flyoutTitle">Top Flyout</div>
@@ -523,7 +672,7 @@
         </div>
         
         <style>
-          #flyoutExample {
+          #flyouts {
             width: 100%;
             height: 10em;
             background: #ddd;
@@ -536,10 +685,10 @@
             box-shadow: inset 0 5px 7px 0px #00000050;
             overflow: hidden;
           }
-          #flyoutExample button * {
+          #flyouts button * {
             pointer-events: none;
           }
-          #flyoutExample button {
+          #flyouts button {
             border: solid 1px #777;
             padding: 1em;
             background: #fff;
@@ -547,38 +696,38 @@
             box-shadow: 0 5px 7px 0px #00000050;
             position: absolute;
           }
-          #flyoutExample [data-open-from="top"],
-          #flyoutExample [data-open-from="bottom"] {
+          #flyouts [data-open-from="top"],
+          #flyouts [data-open-from="bottom"] {
             left: 50%;
             transform: translateX(-50%);
           }
-          #flyoutExample [data-open-from="top"] {
+          #flyouts [data-open-from="top"] {
             border-radius: 0 0 0.5em 0.5em;
             border-top: none;
             top: 0;
           }
-          #flyoutExample [data-open-from="bottom"] {
+          #flyouts [data-open-from="bottom"] {
             border-radius: 0.5em 0.5em 0 0;
             border-bottom: none;
             bottom: 0;
           }
-          #flyoutExample [data-open-from="left"],
-          #flyoutExample [data-open-from="right"] {
+          #flyouts [data-open-from="left"],
+          #flyouts [data-open-from="right"] {
             top: 50%;
             transform: translateY(-50%);
           }
-          #flyoutExample [data-open-from="left"] {
+          #flyouts [data-open-from="left"] {
             border-radius: 0 0.5em 0.5em 0;
             border-left: none;
             left: 0;
           }
-          #flyoutExample [data-open-from="right"] {
+          #flyouts [data-open-from="right"] {
             border-radius: 0.5em 0 0 0.5em;
             border-right: none;
             right: 0;
           }
         
-          #flyoutExample .content {
+          #flyouts .content {
             min-width: 80vw;
             min-height: 80vh;
             padding: 1em;
@@ -586,12 +735,12 @@
         </style>
         
         <script>
-          const fE = document.getElementById('flyoutExample');
+          const flyouts = document.getElementById('flyouts');
           
-          fE.addEventListener(window.CustomFlyout.events.closed, ({ detail: { from } }) => {
+          flyouts.addEventListener(window.CustomFlyout.events.closed, ({ detail: { from } }) => {
             console.log(`Closed "${from}" Flyout`);
           });
-          fE.addEventListener('click', ({ target: { dataset } }) => {
+          flyouts.addEventListener('click', ({ target: { dataset } }) => {
             const { openFrom } = dataset;
           
             if (openFrom) {
