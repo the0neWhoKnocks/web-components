@@ -43,17 +43,63 @@ section > button {
 section nav {
   padding: 0.5em;
   margin-bottom: 0.5em;
-  background: #ddd;
+  background: #202427;
+  display: flex;
 }
-section nav * {
-  margin-right: 0.5em;
+section nav .control {
+  color: #eee;
+  display: flex;
+  flex-direction: column;
 }
-section nav input,
-section nav button {
+section nav .control:not(:first-of-type) {
+  padding-left: 0.5em;
+  border-left: solid 1px rgba(255, 255, 255, 0.5);
+  margin-left: 0.5em;
+}
+section nav .control label {
+  font-weight: bold;
+  padding: 0 0.25em;
+  flex-shrink: 0;
+}
+section nav .control :not(label) {
+  height: 100%
+}
+section nav .control > :not(:first-child) {
+  margin-top: 0.5em;
+}
+section nav .control label .vals {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: normal;
+  font-size: 0.8em;
+  padding: 0 0.5em;
+  display: inline-block;
+  vertical-align: middle;
+}
+section nav .control label .vals span {
+  width: 3em;
+  text-align: center;
+  display: inline-block;
+  vertical-align: top;
+}
+section nav .control input,
+section nav .control button {
   font-size: 1em;
 }
-section nav input[type="number"] {
-  padding-left: 0.25em;
+section nav .control [type="number"] {
+  min-width: 100%;
+  color: currentColor;
+  font-size: 1.4em;
+  text-align: center;
+  border: solid 1px;
+  background: transparent;
+  display: block;
+}
+section nav .control [type="range"],
+section nav .control [type="color"] {
+  width: 100%;
+}
+section nav .control [type="color"] {
+  min-height: 2em;
 }
 
 section > section {
