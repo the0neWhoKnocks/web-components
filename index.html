@@ -9,6 +9,7 @@
     <script src="js/components/CustomAccordionMenu.js"></script>
     <script src="js/components/CustomAutoCompleteInput.js"></script>
     <script src="js/components/CustomDialog.js"></script>
+    <script src="js/components/CustomDirectoryListing.js"></script>
     <script src="js/components/CustomFlyout.js"></script>
     <script src="js/components/CustomIconCheck.js"></script>
     <script src="js/components/CustomIconChevron.js"></script>
@@ -18,6 +19,78 @@
   </head>
   <body>
     <div id="wrapper">
+      <section id="dirListingExample">
+        <h2 class="title">Directory Listing</h2>
+        
+        <div class="dir-listings">
+          <custom-directory-listing>
+            /
+              /bin
+            /root1
+              /sub1
+                - [file.js](#)
+                - file.txt
+              /sub2
+                - file.css
+              /sub3
+              /sub4
+                /sub4_1
+              - index.html
+            /root2
+            - .bashrc
+          </custom-directory-listing>
+          <custom-directory-listing
+            listData="[[&quot;&quot;,[[&quot;bin&quot;,[]]]],[&quot;root1&quot;,[[&quot;sub1&quot;,[{&quot;link&quot;:&quot;#&quot;,&quot;name&quot;:&quot;file.js&quot;},{&quot;name&quot;:&quot;file.txt&quot;}]],[&quot;sub2&quot;,[{&quot;name&quot;:&quot;file.css&quot;}]],[&quot;sub3&quot;,[]],[&quot;sub4&quot;,[[&quot;sub4_1&quot;,[]]]],{&quot;name&quot;:&quot;index.html&quot;}]],[&quot;root2&quot;,[]],{&quot;name&quot;:&quot;.bashrc&quot;}]"
+            expanded
+          ></custom-directory-listing>
+          <custom-directory-listing
+            customStyles="
+              .file[data-ext='css'] {
+                --file--color--fill: cyan;
+                --file--color--stroke: blue;
+              }
+              .file[data-ext='html'] {
+                --file--color--fill: #ffff6c;
+                --file--color--stroke: #8a6c00;
+              }
+              .file[data-ext='js'] {
+                --file--color--fill: orange;
+                --file--color--stroke: red;
+              }
+            "
+            listData="[[&quot;&quot;,[[&quot;bin&quot;,[]]]],[&quot;root1&quot;,[[&quot;sub1&quot;,[{&quot;link&quot;:&quot;#&quot;,&quot;name&quot;:&quot;file.js&quot;},{&quot;name&quot;:&quot;file.txt&quot;}]],[&quot;sub2&quot;,[{&quot;name&quot;:&quot;file.css&quot;}]],[&quot;sub3&quot;,[]],[&quot;sub4&quot;,[[&quot;sub4_1&quot;,[]]]],{&quot;name&quot;:&quot;index.html&quot;}]],[&quot;root2&quot;,[]],{&quot;name&quot;:&quot;.bashrc&quot;}]"
+            expanded
+          ></custom-directory-listing>
+        </div>
+        
+        <style>
+          .dir-listings {
+            display: flex;
+          }
+          
+          custom-directory-listing {
+            border: solid 1px #ccc;
+          }
+          custom-directory-listing:not(:first-of-type) {
+            margin-left: 1em;
+          }
+          custom-directory-listing:nth-of-type(3) {
+            --color--hover: #fff;
+            --color--text: #ddd;
+            --folder--color--fill: #333;
+            --folder--color--stroke: #eee;
+            
+            background: #333;
+          }
+        </style>
+        
+        <script>
+          document.getElementById('dirListingExample').addEventListener(window.CustomDirectoryListing.events.fileClick, (ev) => {
+            ev.preventDefault();
+            console.log(ev.detail);
+          });
+        </script>
+      </section>
       <section id="ratingsExample">
         <h2 class="title">Rating</h2>
         
@@ -76,7 +149,7 @@
         </nav>
         
         <custom-rating rating="2.5"></custom-rating>
-        <custom-rating bgColor="#000" gradientAngle="270" rating="4.5" strokeColor="black" strokeWidth="3"></custom-rating>
+        <custom-rating bgColor="#000" gradientAngle="270" rating="4.5" strokeColor="#000000" strokeWidth="3"></custom-rating>
         
         <style>
           custom-rating {
