@@ -8,6 +8,7 @@
     
     <script src="js/components/icons/CustomIconCheck.js"></script>
     <script src="js/components/icons/CustomIconChevron.js"></script>
+    <script src="js/components/indicators/CustomIndicatorLeapfrog.js"></script>
     <script src="js/components/indicators/CustomIndicatorSpinner.js"></script>
     <script src="js/components/CustomAccordionMenu.js"></script>
     <script src="js/components/CustomAutoCompleteInput.js"></script>
@@ -33,6 +34,13 @@
           </div>
         </nav>
         
+        <div data-indicator-type="leapfrog">
+          <div data-type="css">
+            <custom-indicator-leapfrog speed="700"></custom-indicator-leapfrog>
+            <custom-indicator-leapfrog></custom-indicator-leapfrog>
+          </div>
+        </div>
+        
         <div data-indicator-type="spinner">
           <div data-type="css">
             <custom-indicator-spinner speed="1000"></custom-indicator-spinner>
@@ -53,6 +61,10 @@
             margin-bottom: 0.5em;
             display: inline-block;
           }
+          #indicatorsExample [data-indicator-type]:not(:first-of-type) {
+            margin-top: 1em;
+          }
+          
           #indicatorsExample [data-type] {
             display: flex;
             align-items: center;
@@ -76,7 +88,10 @@
         </style>
         
         <script>
-          const indicators = document.querySelectorAll('custom-indicator-spinner');
+          const indicators = document.querySelectorAll(`
+            custom-indicator-leapfrog,
+            custom-indicator-spinner
+          `);
           
           document.getElementById('indicatorsPlayPause').addEventListener('click', ({ currentTarget: btn }) => {
             let btnText, play;
