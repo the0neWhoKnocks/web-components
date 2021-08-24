@@ -113,6 +113,11 @@
                 --file--color--fill: orange;
                 --file--color--stroke: red;
               }
+              
+              .folder[open]:not([empty]):hover > .folder__name .icon {
+                --folder--color--fill: #666;
+                --folder--color--stroke: #fff;
+              }
             "
             listData="[[&quot;&quot;,[[&quot;bin&quot;,[]]]],[&quot;root1&quot;,[[&quot;sub1&quot;,[{&quot;link&quot;:&quot;#&quot;,&quot;name&quot;:&quot;file.js&quot;},{&quot;name&quot;:&quot;file.txt&quot;}]],[&quot;sub2&quot;,[{&quot;name&quot;:&quot;file.css&quot;}]],[&quot;sub3&quot;,[]],[&quot;sub4&quot;,[[&quot;sub4_1&quot;,[]]]],{&quot;name&quot;:&quot;index.html&quot;}]],[&quot;root2&quot;,[]],{&quot;name&quot;:&quot;.bashrc&quot;}]"
             expanded
