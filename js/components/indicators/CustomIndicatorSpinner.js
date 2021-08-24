@@ -14,6 +14,15 @@
       this.renderCSSSpinner();
     }
     
+    get play() {
+      return this.hasAttribute('play');
+    }
+    set play(value) {
+      (value === '' || value === 'true' || value === true)
+        ? this.setAttribute('play', '')
+        : this.removeAttribute('play');
+    }
+    
     get speed() {
       return +(this.getAttribute('speed') || DEFAULT__SPEED);
     }
@@ -33,6 +42,7 @@
     static get observedAttributes() {
       return [
         'color',
+        'play',
         'speed',
         'type',
       ];
@@ -101,7 +111,10 @@
             border-right-color: transparent;
             border-bottom-color: transparent;
             border-left-color: transparent;
-            animation: spin ${this.speed}ms linear infinite;
+            animation: spin ${this.speed}ms linear infinite paused;
+          }
+          :host([play]) .${ROOT_CLASS}::after {
+            animation-play-state: running;
           }
         </style>
         
@@ -114,24 +127,33 @@
       const RADIUS = DIAMETER / 2;
       const STROKE_WIDTH = 4;
       const OFFSET = STROKE_WIDTH / 2;
+      const CURVE_MULTIPLIER = 0.55;
+      
+      const coordWithOffset = (c) => {
+        let _c = c;
+        if (_c < RADIUS) _c += OFFSET;
+        else if (_c > RADIUS) _c -= OFFSET;
+        return _c;
+      };
       
       const points = `0,${RADIUS} ${RADIUS},0`;
       const curve = points.split(' ').map((coords, ndx, arr) => {
         const [x, y] = coords.split(',');
-        let _x = x;
-        let _y = y;
-        
-        if (_x < RADIUS) _x += OFFSET;
-        else if (_x > RADIUS) _x -= OFFSET;
-        
-        if (_y < RADIUS) _y += OFFSET;
-        else if (_y > RADIUS) _y -= OFFSET;
+        const _x = coordWithOffset(x);
+        const _y = coordWithOffset(y);
         
         let _points = `M${_x},${_y}`;
         
         if (ndx > 0) {
           const [prevX, prevY] = arr[ndx - 1].split(',');
-          _points = `C${prevX + OFFSET},${Math.max(prevY, _y)/2} ${Math.max(prevX, _x)/2},${_y} ${_x},${_y}`;
+          const _prevX = coordWithOffset(prevX);
+          const _prevY = coordWithOffset(prevY);
+          
+          _points = [
+            `C${prevX + OFFSET},${Math.max(_prevY, _y) * CURVE_MULTIPLIER}`,
+            `${Math.max(_prevX, _x) * CURVE_MULTIPLIER},${_y}`,
+            `${_x},${_y}`,
+          ].join(' ');
         }
         
         return _points;
@@ -140,8 +162,8 @@
       this.shadowRoot.innerHTML = `
         <style>
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: rotate(45deg); }
+            100% { transform: rotate(405deg); }
           }
           
           svg {
@@ -160,7 +182,10 @@
             stroke: ${this.color};
             stroke-width: ${STROKE_WIDTH};
             transform-origin: center;
-            animation: spin ${this.speed}ms linear infinite;
+            animation: spin ${this.speed}ms linear infinite paused;
+          }
+          :host([play]) path {
+            animation-play-state: running;
           }
         </style>
         

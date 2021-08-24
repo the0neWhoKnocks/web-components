@@ -25,6 +25,9 @@
         
         <nav>
           <div class="control">
+            <button type="button" id="indicatorsPlayPause">Play</button>
+          </div>
+          <div class="control">
             <label>Color</label>
             <input id="indicatorColorInput" type="color" />
           </div>
@@ -61,6 +64,10 @@
           #indicatorsExample [data-type]:not(:first-of-type) {
             margin-top: 0.5em;
           }
+          
+          #indicatorsPlayPause {
+            width: 4em;
+          }
         
           custom-indicator-spinner {
             font-size: 2em;
@@ -70,6 +77,21 @@
         
         <script>
           const indicators = document.querySelectorAll('custom-indicator-spinner');
+          
+          document.getElementById('indicatorsPlayPause').addEventListener('click', ({ currentTarget: btn }) => {
+            let btnText, play;
+            if (btn.textContent === 'Play') {
+              btnText = 'Pause';
+              play = true;
+            }
+            else {
+              btnText = 'Play';
+              play = false;
+            }
+            
+            btn.textContent = btnText;
+            indicators.forEach(el => { el.play = play; });
+          });
           document.getElementById('indicatorColorInput').addEventListener('input', ({ currentTarget: { value } }) => {
             indicators.forEach(el => { el.color = value; });
           });
