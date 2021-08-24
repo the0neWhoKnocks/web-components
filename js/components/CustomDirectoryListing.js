@@ -279,19 +279,35 @@
     }
     
     connectedCallback() {
-      this.shadowRoot.addEventListener('click', ({ target }) => {
-        if (target.classList.contains('folder__name')) {
-          const folder = target.closest('.folder');
-          if (!folder.hasAttribute('empty')) {
-            if (folder.hasAttribute('open')) folder.removeAttribute('open');
-            else folder.setAttribute('open', '');
+      this.shadowRoot.addEventListener('click', (ev) => {
+        const { duplicate, target } = ev;
+        
+        if (!duplicate) {
+          if (target.classList.contains('folder__name')) {
+            const folder = target.closest('.folder');
+            if (!folder.hasAttribute('empty')) {
+              if (folder.hasAttribute('open')) folder.removeAttribute('open');
+              else folder.setAttribute('open', '');
+            }
           }
-        }
-        else if (target.classList.contains('file')) {
-          this.dispatchEvent(new CustomEvent(EVENT__FILE_CLICK, {
-            bubbles: true,
-            detail: { ...target.dataset },
-          }));
+          else if (target.classList.contains('file')) {
+            ev.preventDefault();
+            
+            const custEv = new CustomEvent(EVENT__FILE_CLICK, {
+              bubbles: true,
+              detail: { ...target.dataset },
+            });
+            let defaultPrevented;
+            custEv.preventDefault = () => { defaultPrevented = true; };
+            
+            this.dispatchEvent(custEv);
+            
+            if (!defaultPrevented) {
+              const origEv = new ev.constructor(ev.type, ev);
+              origEv.duplicate = true;
+              target.dispatchEvent(origEv);
+            }
+          }
         }
       });
       
