@@ -30,13 +30,26 @@
           </div>
         </nav>
         
-        <div data-type="css">
-          <custom-indicator-spinner speed="1000"></custom-indicator-spinner>
-          <custom-indicator-spinner></custom-indicator-spinner>
-          <custom-indicator-spinner speed="300"></custom-indicator-spinner>
+        <div data-indicator-type="spinner">
+          <div data-type="css">
+            <custom-indicator-spinner speed="1000"></custom-indicator-spinner>
+            <custom-indicator-spinner></custom-indicator-spinner>
+            <custom-indicator-spinner speed="300"></custom-indicator-spinner>
+          </div>
+          <div data-type="svg">
+            <custom-indicator-spinner type="svg" speed="1000"></custom-indicator-spinner>
+            <custom-indicator-spinner type="svg"></custom-indicator-spinner>
+            <custom-indicator-spinner type="svg" speed="300"></custom-indicator-spinner>
+          </div>
         </div>
         
         <style>
+          #indicatorsExample [data-indicator-type]::before {
+            content: 'Indicator Type: "'attr(data-indicator-type)'"';
+            border-bottom: solid 1px;
+            margin-bottom: 0.5em;
+            display: inline-block;
+          }
           #indicatorsExample [data-type] {
             display: flex;
             align-items: center;
@@ -44,6 +57,9 @@
           #indicatorsExample [data-type]::before {
             content: 'Type: "'attr(data-type)'"';
             margin-right: 0.5em;
+          }
+          #indicatorsExample [data-type]:not(:first-of-type) {
+            margin-top: 0.5em;
           }
         
           custom-indicator-spinner {
