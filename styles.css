@@ -49,7 +49,7 @@ section nav {
 section nav .control {
   color: #eee;
   display: flex;
-  flex-direction: column;
+  align-items: center;
 }
 section nav .control:not(:first-of-type) {
   padding-left: 0.5em;
@@ -64,8 +64,8 @@ section nav .control label {
 section nav .control :not(label) {
   height: 100%
 }
-section nav .control > :not(:first-child) {
-  margin-top: 0.5em;
+section nav .control:not(.vert) > :not(:first-child) {
+  margin-left: 0.5em;
 }
 section nav .control label .vals {
   color: rgba(255, 255, 255, 0.5);
@@ -86,19 +86,31 @@ section nav .control button {
   font-size: 1em;
 }
 section nav .control [type="number"] {
-  min-width: 100%;
   color: currentColor;
-  font-size: 1.4em;
   text-align: center;
   border: solid 1px;
   background: transparent;
-  display: block;
 }
-section nav .control [type="range"],
 section nav .control [type="color"] {
+  min-height: 1.5em;
+}
+
+section nav .control.vert {
+  flex-direction: column;
+}
+section nav .control.vert > :not(:first-child) {
+  margin-top: 0.5em;
+}
+section nav .control.vert [type="range"],
+section nav .control.vert [type="color"] {
   width: 100%;
 }
-section nav .control [type="color"] {
+section nav .control.vert [type="number"] {
+  min-width: 100%;
+  font-size: 1.4em;
+  display: block;
+}
+section nav .control.vert [type="color"] {
   min-height: 2em;
 }
 
