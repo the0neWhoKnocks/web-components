@@ -1,5 +1,6 @@
 (() => {
   const CSS_VAR__COLOR = '--color';
+  const CSS_VAR__SPEED = '--speed';
   const ROOT_CLASS = 'leapfrog';
   const TYPE__CSS = 'css';
   
@@ -29,6 +30,7 @@
     }
     set speed(value) {
       this.setAttribute('speed', value);
+      this.style.setProperty(CSS_VAR__SPEED, `${value}ms`);
     }
     
     get type() {
@@ -96,6 +98,7 @@
           
           :host {
             ${CSS_VAR__COLOR}: ${DEFAULT__COLOR};
+            ${CSS_VAR__SPEED}: ${DEFAULT__SPEED}ms;
           }
           
           *, *::before, *::after { box-sizing: border-box; }
@@ -128,7 +131,7 @@
             height: 100%;
             border-radius: 100%;
             background: var(${CSS_VAR__COLOR});
-            animation-duration: ${this.speed}ms;
+            animation-duration: var(${CSS_VAR__SPEED});
             animation-iteration-count: infinite;
             animation-play-state: paused;
           }

@@ -1,9 +1,12 @@
 (() => {
+  const CSS_VAR__COLOR = '--color';
+  const CSS_VAR__SPEED = '--speed';
+  const ROOT_CLASS = 'spinner';
+  const TYPE__FLAT = 'flat';
+  const TYPE__ROUNDED = 'rounded';
+  
   const DEFAULT__COLOR = '#000';
   const DEFAULT__SPEED = 500;
-  const ROOT_CLASS = 'spinner';
-  const TYPE__CSS = 'css';
-  const TYPE__SVG = 'svg';
   
   class CustomIndicatorSpinner extends HTMLElement {
     get color() {
@@ -11,7 +14,7 @@
     }
     set color(value) {
       this.setAttribute('color', value);
-      this.renderCSSSpinner();
+      this.style.setProperty(CSS_VAR__COLOR, value);
     }
     
     get play() {
@@ -28,15 +31,16 @@
     }
     set speed(value) {
       this.setAttribute('speed', value);
+      this.style.setProperty(CSS_VAR__SPEED, `${value}ms`);
     }
     
     get type() {
-      return this.getAttribute('type') || TYPE__CSS;
+      return this.getAttribute('type') || TYPE__FLAT;
     }
     set type(value) {
-      ([TYPE__CSS, TYPE__SVG].includes(value))
+      ([TYPE__FLAT, TYPE__ROUNDED].includes(value))
         ? this.setAttribute('type', value)
-        : this.setAttribute('type', TYPE__CSS);
+        : this.setAttribute('type', TYPE__FLAT);
     }
     
     static get observedAttributes() {
@@ -67,23 +71,28 @@
     
     connectedCallback() {
       switch (this.type) {
-        case TYPE__SVG:
-          this.renderSVGSpinner();
+        case TYPE__ROUNDED:
+          this.renderRoundedSpinner();
           break;
         
-        case TYPE__CSS:
+        case TYPE__FLAT:
         default:
-          this.renderCSSSpinner();
+          this.renderFlatSpinner();
           break;
       }
     }
     
-    renderCSSSpinner() {
+    renderFlatSpinner() {
       this.shadowRoot.innerHTML = `
         <style>
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+          }
+          
+          :host {
+            ${CSS_VAR__COLOR}: ${DEFAULT__COLOR};
+            ${CSS_VAR__SPEED}: ${DEFAULT__SPEED}ms;
           }
           
           *, *::before, *::after { box-sizing: border-box; }
@@ -98,7 +107,7 @@
             content: '';
             width: 100%;
             height: 100%;
-            border: solid 0.2em ${this.color};
+            border: solid 0.2em var(${CSS_VAR__COLOR});
             border-radius: 100%;
             position: absolute;
             top: 0;
@@ -111,7 +120,7 @@
             border-right-color: transparent;
             border-bottom-color: transparent;
             border-left-color: transparent;
-            animation: spin ${this.speed}ms linear infinite paused;
+            animation: spin var(${CSS_VAR__SPEED}) linear infinite paused;
           }
           :host([play]) .${ROOT_CLASS}::after {
             animation-play-state: running;
@@ -122,7 +131,7 @@
       `;
     }
     
-    renderSVGSpinner() {
+    renderRoundedSpinner() {
       const DIAMETER = 20;
       const RADIUS = DIAMETER / 2;
       const STROKE_WIDTH = 4;
@@ -166,6 +175,11 @@
             100% { transform: rotate(405deg); }
           }
           
+          :host {
+            ${CSS_VAR__COLOR}: ${DEFAULT__COLOR};
+            ${CSS_VAR__SPEED}: ${DEFAULT__SPEED}ms;
+          }
+          
           svg {
             width: 1em;
             height: 1em;
@@ -174,15 +188,15 @@
           circle {
             opacity: 0.15;
             fill: none;
-            stroke: ${this.color};
+            stroke: var(${CSS_VAR__COLOR});
             stroke-width: ${STROKE_WIDTH};
           }
           
           path {
-            stroke: ${this.color};
+            stroke: var(${CSS_VAR__COLOR});
             stroke-width: ${STROKE_WIDTH};
             transform-origin: center;
-            animation: spin ${this.speed}ms linear infinite paused;
+            animation: spin var(${CSS_VAR__SPEED}) linear infinite paused;
           }
           :host([play]) path {
             animation-play-state: running;
