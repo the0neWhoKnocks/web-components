@@ -2,7 +2,6 @@
 
 ---
 
-- [ ] progress indicators
 - [ ] carousel https://codepen.io/theOneWhoKnocks/pen/gjvdev
 - [ ] file uploader https://codepen.io/theOneWhoKnocks/pen/KXZZLy
 - [ ] navs https://codepen.io/theOneWhoKnocks/pen/NGyjKR

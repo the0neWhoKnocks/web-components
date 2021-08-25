@@ -1,5 +1,7 @@
 # Web Components
 
+[![Versioned GH Pages](https://github.com/the0neWhoKnocks/web-components/actions/workflows/versioned-gh-pages.yml/badge.svg?branch=master)](https://github.com/the0neWhoKnocks/web-components/actions/workflows/versioned-gh-pages.yml)
+
 A collection of Web Components that I've built
 
 [Click here to view the examples page][examplePage].
@@ -14,14 +16,14 @@ Usage examples are in [index.html](./index.html). It demonstrates:
 - How to set up listeners.
 - What attributes are available for each Component.
 
-If you want to load a file directly from GitHub (like in a CodePen), you can get the URLs from [the example page][examplePage]. An example is `https://the0newhoknocks.github.io/web-components/js/components/CustomToggle.js`, so `https://the0newhoknocks.github.io/web-components/<PATH_TO_FILE>`. You can't link directly to a `raw.githubusercontent.com` file since GitHub serves up the files with a `text` header, but `github.io` pages serve files from a CDN with the correct headers.
+If you want to load a file directly from GitHub (like in a CodePen), you can get the URLs from [the example page][examplePage]. An example is `https://the0newhoknocks.github.io/web-components/v1/js/components/CustomToggle.js`, so `https://the0newhoknocks.github.io/web-components/<VERSION>/<PATH_TO_FILE>`. You can't link directly to a `raw.githubusercontent.com` file since GitHub serves up the files with a `text` header, but `github.io` pages serve files from a CDN with the correct headers.
 
 ---
 
 ## Development
 
 For Local development I use the [Web Server for Chrome](https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb) extension.
-Just point it to the folder for this repo, and start it up.
+Just point it to the `src` folder in this repo, and start it up.
 
 ---
 

@@ -1,0 +1,41 @@
+name: Versioned GH Pages
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - master
+    inputs:
+      version:
+        description: 'Version (ex. "v1")'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      REPO_NAME: "${{ github.event.repository.name }}"
+      # NOTE: The fallback version value (v<NUMBER>) should be updated only when
+      # breaking changes occur. Changes like directory refactors, or functional
+      # API changes.
+      VERSION: "${{ github.event.inputs.version || 'v1' }}"
+    steps:
+      # https://github.com/actions/checkout
+      - name: 🛎️ Checkout
+        uses: actions/checkout@v2.3.4
+      
+      # - Copy code over to a versioned folder
+      # - Create a dynamic redirect file that points to the newest versioned folder
+      # NOTE: Pages have a `max-age` of `600 (10 minutes)`
+      - name: ⚙️ Build
+        run: |
+          mkdir -p "./dist/${VERSION}"
+          rsync -av ./src/ "./dist/${VERSION}"
+          echo "<head><meta http-equiv=\"Refresh\" content=\"0; url=/${REPO_NAME}/${VERSION}\" /></head>" > "./dist/index.html"
+
+      # https://github.com/JamesIves/github-pages-deploy-action
+      - name: 🚀 Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          clean: false # disabling to keep previous versioned folders
+          folder: "./dist"
