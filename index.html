@@ -35,22 +35,22 @@
         </nav>
         
         <div data-indicator-type="leapfrog">
-          <div data-type="css">
+          <div data-type="default">
             <custom-indicator-leapfrog speed="700"></custom-indicator-leapfrog>
             <custom-indicator-leapfrog></custom-indicator-leapfrog>
           </div>
         </div>
         
         <div data-indicator-type="spinner">
-          <div data-type="css">
+          <div data-type="default">
             <custom-indicator-spinner speed="1000"></custom-indicator-spinner>
             <custom-indicator-spinner></custom-indicator-spinner>
             <custom-indicator-spinner speed="300"></custom-indicator-spinner>
           </div>
-          <div data-type="svg">
-            <custom-indicator-spinner type="svg" speed="1000"></custom-indicator-spinner>
-            <custom-indicator-spinner type="svg"></custom-indicator-spinner>
-            <custom-indicator-spinner type="svg" speed="300"></custom-indicator-spinner>
+          <div data-type="rounded">
+            <custom-indicator-spinner type="rounded" speed="1000"></custom-indicator-spinner>
+            <custom-indicator-spinner type="rounded"></custom-indicator-spinner>
+            <custom-indicator-spinner type="rounded" speed="300"></custom-indicator-spinner>
           </div>
         </div>
         
@@ -71,6 +71,7 @@
           }
           #indicatorsExample [data-type]::before {
             content: 'Type: "'attr(data-type)'"';
+            min-width: 7.5em;
             margin-right: 0.5em;
           }
           #indicatorsExample [data-type]:not(:first-of-type) {
