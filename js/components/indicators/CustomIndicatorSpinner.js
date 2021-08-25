@@ -4,6 +4,7 @@
   const ROOT_CLASS = 'spinner';
   const TYPE__FLAT = 'flat';
   const TYPE__ROUNDED = 'rounded';
+  const TYPE__TRAIL = 'trail';
   
   const DEFAULT__COLOR = '#000';
   const DEFAULT__SPEED = 500;
@@ -15,6 +16,7 @@
     set color(value) {
       this.setAttribute('color', value);
       this.style.setProperty(CSS_VAR__COLOR, value);
+      if (this.type === TYPE__TRAIL) this.renderTrailSpinner();
     }
     
     get play() {
@@ -38,7 +40,11 @@
       return this.getAttribute('type') || TYPE__FLAT;
     }
     set type(value) {
-      ([TYPE__FLAT, TYPE__ROUNDED].includes(value))
+      ([
+        TYPE__FLAT,
+        TYPE__ROUNDED,
+        TYPE__TRAIL,
+      ].includes(value))
         ? this.setAttribute('type', value)
         : this.setAttribute('type', TYPE__FLAT);
     }
@@ -73,6 +79,10 @@
       switch (this.type) {
         case TYPE__ROUNDED:
           this.renderRoundedSpinner();
+          break;
+        
+        case TYPE__TRAIL:
+          this.renderTrailSpinner();
           break;
         
         case TYPE__FLAT:
@@ -208,6 +218,96 @@
           <path stroke-linecap="round" fill="none" d="${curve}"></path>
         </svg>
       `;
+    }
+    
+    renderTrailSpinner() {
+      const EM = parseFloat(getComputedStyle(this).fontSize);
+      const DIAMETER = EM * 2;
+      const STROKE_WIDTH = DIAMETER * 0.2;
+      
+      this.shadowRoot.innerHTML = `
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          
+          :host {
+            ${CSS_VAR__COLOR}: ${DEFAULT__COLOR};
+            ${CSS_VAR__SPEED}: ${DEFAULT__SPEED}ms;
+          }
+          
+          *, *::before, *::after { box-sizing: border-box; }
+          
+          .${ROOT_CLASS} {
+            width: 1em;
+            height: 1em;
+            position: relative;
+          }
+          
+          .${ROOT_CLASS}::before {
+            content: '';
+            width: 100%;
+            height: 100%;
+            border: solid 0.2em var(${CSS_VAR__COLOR});
+            border-radius: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+          }
+          .${ROOT_CLASS}::before {
+            opacity: 0.15;
+          }
+          
+          canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: spin var(${CSS_VAR__SPEED}) linear infinite paused;
+          }
+          :host([play]) canvas {
+            animation-play-state: running;
+          }
+        </style>
+        
+        <div class="${ROOT_CLASS}">
+          <canvas width="${DIAMETER}" height="${DIAMETER}"></canvas>
+        </div>
+      `;
+      
+      const ctx = this.shadowRoot.querySelector('canvas').getContext('2d');
+      ctx.lineJoin = ctx.lineCap = 'round';
+      ctx.strokeStyle = this.color;
+      
+      const drawPoint = (x, y, strokeWidth, alpha) => {
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = strokeWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+      
+      const render = (pointCount) => {
+        const step = Math.PI / pointCount;
+        const strokeInc = STROKE_WIDTH / pointCount;
+        let rot = Math.PI / 2 * 3;
+    
+        for (let i=0; i<pointCount; i++) {
+          const strokeWidth = i * strokeInc;
+          const strokeOffset = strokeWidth / 2;
+          const pointOffset = (DIAMETER - strokeWidth) / 2;
+          const x = ((Math.cos(rot) * pointOffset) + pointOffset) + strokeOffset;
+          const y = ((Math.sin(rot) * pointOffset) + pointOffset) + strokeOffset;
+          rot += step * 2;
+          
+          drawPoint(x, y, strokeWidth, i / pointCount);
+        }
+      };
+      
+      render(60);
     }
   }
 
