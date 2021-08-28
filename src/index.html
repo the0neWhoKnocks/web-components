@@ -12,6 +12,7 @@
     <script src="js/components/indicators/CustomIndicatorSpinner.js"></script>
     <script src="js/components/CustomAccordionMenu.js"></script>
     <script src="js/components/CustomAutoCompleteInput.js"></script>
+    <script src="js/components/CustomCarousel.js"></script>
     <script src="js/components/CustomDialog.js"></script>
     <script src="js/components/CustomDirectoryListing.js"></script>
     <script src="js/components/CustomFlyout.js"></script>
@@ -21,6 +22,162 @@
   </head>
   <body>
     <div id="wrapper">
+      <section id="carouselExample">
+        <h2 class="title">Carousel</h2>
+        
+        <nav>
+          <div class="control">
+            <button id="carouselRandomize">Randomize</button>
+          </div>
+          <div class="control">
+            <label>Item Count</label>
+            <input type="number" id="carouselItemCount" min="3" max="20" value="10" />
+          </div>
+          <div class="control">
+            <label for="carouselUseMockImgs">Use Images</label>
+            <input type="checkbox" id="carouselUseMockImgs" checked />
+          </div>
+          <div class="control">
+            <label for="carouselUseMockAnchors">Use Anchors</label>
+            <input type="checkbox" id="carouselUseMockAnchors" />
+          </div>
+          <div class="control">
+            <label for="carouselUseMockCards">Use Cards</label>
+            <input type="checkbox" id="carouselUseMockCards" />
+          </div>
+        </nav>
+        
+        <custom-carousel></custom-carousel>
+        
+        <script>
+          const CAROUSEL_ITEM_SLOT = 'item';
+          const genMockImg = (width, height) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            return canvas.toDataURL();
+          };
+          const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+          const aspectRatios = window.CustomCarousel.aspectRatios;
+          const mockImgs = {
+            [aspectRatios.landscape]: genMockImg(4, 3),
+            [aspectRatios.portrait]: genMockImg(3, 4),
+            [aspectRatios.square]: genMockImg(4, 4),
+          };
+          const templates = {
+            anchor: `
+              <a slot="${CAROUSEL_ITEM_SLOT}" href="#" ar="ASPECT_RATIO">
+                <img src="IMG_SRC" alt="image" />
+              </a>
+            `,
+            card: `
+              <div slot="${CAROUSEL_ITEM_SLOT}" class="card" ar="${aspectRatios.portrait}">
+                <h3>Card Title</h3>
+              </div>
+            `,
+            img: `<img slot="${CAROUSEL_ITEM_SLOT}" src="IMG_SRC" alt="image" ar="ASPECT_RATIO" />`,
+          };
+          const carousel = document.querySelector('custom-carousel');
+          const itemCountInput = document.getElementById('carouselItemCount');
+          const useMockImgsInput = document.getElementById('carouselUseMockImgs');
+          const useMockAnchorsInput = document.getElementById('carouselUseMockAnchors');
+          const useMockCardsInput = document.getElementById('carouselUseMockCards');
+          
+          carousel.customStyles = `
+            [ar="${aspectRatios.square}"] > a img,
+            [ar="${aspectRatios.square}"] > img {
+              width: 100%;
+            }
+            [ar="${aspectRatios.landscape}"] > a img,
+            [ar="${aspectRatios.landscape}"] > img,
+            [ar="${aspectRatios.portrait}"] > a img,
+            [ar="${aspectRatios.portrait}"] > img {
+              height: 100%;
+            }
+          
+            .carousel__item > a {
+              outline: solid 2px #0076ff;
+              outline-offset: -2px;
+            }
+            .carousel__item > img,
+            .carousel__item > a img {
+              background: #d5e0f3;
+            }
+            .carousel__item > .card {
+              padding: 0.25em;
+            }
+            .carousel__item > .card h3 {
+              margin-top: 0;
+            }
+          `;
+          
+          let randomItems = [];
+          
+          function render() {
+            const itemCount = +itemCountInput.value;
+            const imgTypes = Object.keys(mockImgs);
+            const templateNames = [];
+            
+            if (useMockImgsInput.checked) templateNames.push('img');
+            if (useMockAnchorsInput.checked) templateNames.push('anchor');
+            if (useMockCardsInput.checked) templateNames.push('card');
+            
+            carousel.innerHTML = Array(itemCount).fill('').map((_, ndx) => {
+              let markup = '';
+              
+              if (templateNames.length) {
+                if (!randomItems[ndx]) {
+                  randomItems[ndx] = {
+                    imgType: imgTypes[randomNumber(1, imgTypes.length) - 1],
+                    templateName: templateNames[randomNumber(1, templateNames.length) - 1],
+                  };
+                }
+                
+                const imgType = randomItems[ndx].imgType;
+                const templateName = randomItems[ndx].templateName;
+                let templateMarkup = templates[templateName];
+                
+                if (templateName === 'anchor' || templateName === 'img') {
+                  templateMarkup = templates[templateName]
+                    .replace('ASPECT_RATIO', imgType)
+                    .replace('IMG_SRC', mockImgs[imgType]);
+                }
+                
+                markup = templateMarkup;
+              }
+              
+              return markup;
+            }).join('');
+          }
+          
+          function handleNavUpdate({ target }) {
+            switch (target.id) {
+              case 'carouselItemCount':
+                render();
+                break;
+              
+              case 'carouselRandomize':
+              case 'carouselUseMockImgs':
+              case 'carouselUseMockAnchors':
+              case 'carouselUseMockCards':
+                randomItems = [];
+                render();
+                break;
+            }
+          }
+          
+          document.getElementById('carouselExample').addEventListener('change', handleNavUpdate);
+          document.getElementById('carouselExample').addEventListener('click', handleNavUpdate);
+          carousel.addEventListener(window.CustomCarousel.events.advanced, () => {
+            console.log('Carousel advanced');
+          });
+          carousel.addEventListener(window.CustomCarousel.events.regressed, () => {
+            console.log('Carousel regressed');
+          });
+          
+          render();
+        </script>
+      </section>
       <section id="indicatorsExample">
         <h2 class="title">Indicators</h2>
         
