@@ -34,6 +34,18 @@
             <input type="number" id="carouselItemCount" min="3" max="20" value="10" />
           </div>
           <div class="control">
+            <label for="carouselNav1">Nav 1</label>
+            <input type="checkbox" id="carouselNav1" checked />
+          </div>
+          <div class="control">
+            <label for="carouselNav2">Nav 2</label>
+            <input type="checkbox" id="carouselNav2" checked />
+          </div>
+          <div class="control">
+            <label for="carouselVertical">Vertical</label>
+            <input type="checkbox" id="carouselVertical" />
+          </div>
+          <div class="control">
             <label for="carouselMockImgs">Mock Images</label>
             <input type="checkbox" id="carouselMockImgs" checked />
           </div>
@@ -51,7 +63,7 @@
           </div>
         </nav>
         
-        <custom-carousel></custom-carousel>
+        <custom-carousel nav1 nav2></custom-carousel>
         
         <style>
           .carousel-card {
@@ -276,7 +288,19 @@
                   uniqueItems = [];
                   render();
                   break;
-                  
+                
+                case 'carouselNav1':
+                  carousel.nav1 = target.checked;
+                  break;
+                
+                case 'carouselNav2':
+                  carousel.nav2 = target.checked;
+                  break;
+                
+                case 'carouselVertical':
+                  carousel.vertical = target.checked;
+                  break;
+                
                 default: {
                   if (target.nodeName === 'A') ev.preventDefault();
                 }
