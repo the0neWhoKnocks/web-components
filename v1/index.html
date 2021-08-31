@@ -34,148 +34,267 @@
             <input type="number" id="carouselItemCount" min="3" max="20" value="10" />
           </div>
           <div class="control">
-            <label for="carouselUseMockImgs">Use Images</label>
-            <input type="checkbox" id="carouselUseMockImgs" checked />
+            <label for="carouselMockImgs">Mock Images</label>
+            <input type="checkbox" id="carouselMockImgs" checked />
           </div>
           <div class="control">
-            <label for="carouselUseMockAnchors">Use Anchors</label>
-            <input type="checkbox" id="carouselUseMockAnchors" />
+            <label for="carouselUseImgs">Use Images</label>
+            <input type="checkbox" id="carouselUseImgs" checked />
           </div>
           <div class="control">
-            <label for="carouselUseMockCards">Use Cards</label>
-            <input type="checkbox" id="carouselUseMockCards" />
+            <label for="carouselUseAnchors">Use Anchors</label>
+            <input type="checkbox" id="carouselUseAnchors" />
+          </div>
+          <div class="control">
+            <label for="carouselUseCards">Use Cards</label>
+            <input type="checkbox" id="carouselUseCards" />
           </div>
         </nav>
         
         <custom-carousel></custom-carousel>
         
+        <style>
+          .carousel-card {
+            width: 11em;
+            min-height: 100%;
+            padding: 0.25em;
+            border: solid 1px #666;
+            border-radius: 0.25em;
+            background: #fff;
+          }
+          .carousel-card h3 {
+            margin-top: 0;
+          }
+          
+          .carousel-link {
+            outline: solid 4px #0076ff;
+            outline-offset: -4px;
+          }
+          
+          .carousel-img,
+          .carousel-link img {
+            height: 100%;
+            pointer-events: none;
+          }
+          
+          custom-carousel > * {
+            display: inline-block;
+            vertical-align: top;
+          }
+          custom-carousel > *:not(:first-child) {
+            margin-left: 3px;
+          }
+        </style>
+        
         <script>
-          const CAROUSEL_ITEM_SLOT = 'item';
-          const genMockImg = (width, height) => {
+          // Generating all the random mock images is taxing, so let everything
+          // else load first, and then do all the heavy lifting.
+          window.addEventListener('load', () => {
+            const CAROUSEL_ITEM_SLOT = 'item';
+            const randomColor = () => {
+              const token = '000000';
+              const color = Math.floor(Math.random() * 16777215).toString(16);
+              return `#${token.substring(0, token.length - `${color}`.length) + color}`;
+            };
+            const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+            const randomColors = Array(20).fill('').map(() => randomColor());
             const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            return canvas.toDataURL();
-          };
-          const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-          const aspectRatios = window.CustomCarousel.aspectRatios;
-          const mockImgs = {
-            [aspectRatios.landscape]: genMockImg(4, 3),
-            [aspectRatios.portrait]: genMockImg(3, 4),
-            [aspectRatios.square]: genMockImg(4, 4),
-          };
-          const templates = {
-            anchor: `
-              <a slot="${CAROUSEL_ITEM_SLOT}" href="#" ar="ASPECT_RATIO">
-                <img src="IMG_SRC" alt="image" />
-              </a>
-            `,
-            card: `
-              <div slot="${CAROUSEL_ITEM_SLOT}" class="card" ar="${aspectRatios.portrait}">
-                <h3>Card Title</h3>
-              </div>
-            `,
-            img: `<img slot="${CAROUSEL_ITEM_SLOT}" src="IMG_SRC" alt="image" ar="ASPECT_RATIO" />`,
-          };
-          const carousel = document.querySelector('custom-carousel');
-          const itemCountInput = document.getElementById('carouselItemCount');
-          const useMockImgsInput = document.getElementById('carouselUseMockImgs');
-          const useMockAnchorsInput = document.getElementById('carouselUseMockAnchors');
-          const useMockCardsInput = document.getElementById('carouselUseMockCards');
-          
-          carousel.customStyles = `
-            [ar="${aspectRatios.square}"] > a img,
-            [ar="${aspectRatios.square}"] > img {
-              width: 100%;
-            }
-            [ar="${aspectRatios.landscape}"] > a img,
-            [ar="${aspectRatios.landscape}"] > img,
-            [ar="${aspectRatios.portrait}"] > a img,
-            [ar="${aspectRatios.portrait}"] > img {
-              height: 100%;
-            }
-          
-            .carousel__item > a {
-              outline: solid 2px #0076ff;
-              outline-offset: -2px;
-            }
-            .carousel__item > img,
-            .carousel__item > a img {
-              background: #d5e0f3;
-            }
-            .carousel__item > .card {
-              padding: 0.25em;
-            }
-            .carousel__item > .card h3 {
-              margin-top: 0;
-            }
-          `;
-          
-          let randomItems = [];
-          
-          function render() {
-            const itemCount = +itemCountInput.value;
-            const imgTypes = Object.keys(mockImgs);
-            const templateNames = [];
+            const ctx = canvas.getContext('2d');
+            const genMockImg = (width, height) => {
+              const grd = ctx.createLinearGradient(width, 0, width, height);
+              canvas.width = width;
+              canvas.height = height;
+              grd.addColorStop(0, randomColors[randomNumber(0, 19)]);
+              grd.addColorStop(1, randomColors[randomNumber(0, 19)]);
+              ctx.fillStyle = grd;
+              ctx.fillRect(0, 0, width, height);
+              return canvas.toDataURL();
+            };
+            const mockImgs = {
+              landscape: Array(20).fill('').map(() => genMockImg(4, 3)),
+              portrait: Array(20).fill('').map(() => genMockImg(3, 4)),
+              square: Array(20).fill('').map(() => genMockImg(4, 4)),
+            };
+            const realImgs = {
+              landscape: [
+                'https://images.unsplash.com/photo-1554773228-91f39c0e6cb4?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDF8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1530679361860-63f81c6e9268?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDN8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1494935362342-566c6d6e75b5?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629782326485-b9e296df3ce1?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1622144672176-4e8d4668455f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1615731439720-47878ecc1ac6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1616144848810-11eec385ddbd?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI4fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1617014673615-8e0e73b06d56?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDMwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1619364726002-dfd4fdaee5f2?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDMxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1619266465172-02a857c3556d?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDMyfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1627441943833-8d930796dde7?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDM0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629805775501-8cd814f233f8?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDQxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1621472124503-a760c1146f44?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDUxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1622357102666-c9f68f951fa6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDUzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1625242420602-a22dd7692b82?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDU3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1627719736178-dfadf8f370d9?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDYzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1518343265568-51eec52d40da?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY1fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1627896248725-0a4171d10d4d?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629463581929-1bb8a27e7bbb?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDcxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629464565884-123b6e6f90c1?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDczfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+              ],
+              portrait: [
+                'https://images.unsplash.com/photo-1619724509229-18c42de2bf77?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEyfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1591840813416-c1cf70cd4022?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1615631150931-d15f51273758?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDR8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1551740991-c2d498028d1c?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDV8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1551655510-0d9379924e92?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDh8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1605545255361-2e6bdc58ca55?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDl8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1620234912926-d35b5f9d0be0?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDd8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1610475562502-fe51f86be4ef?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1519707761676-d6e4bb96af7f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDExfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1622946802124-5f2bd4389468?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1511677254207-d2db235ccfe1?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629964208013-e1d5eea25b3e?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE2fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629959059803-0dc732a96d15?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE4fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1580110104531-6dbe72d63c40?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629995297911-2de2cf765ee6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE5fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629995419770-01ac34d94a2f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1630003738909-fdf1c664cdcd?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629878791291-c8fb23b25c42?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIyfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629576728726-23f557c8010f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI1fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629866035441-56f6a9fe2c51?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI2fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+              ],
+              square: [
+                'https://images.unsplash.com/photo-1576672418367-e8eeec036f43?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1525770473232-8ad750e600ee?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDU2fHJuU0tESHd3WVVrfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1629814213050-980e57db3c28?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDQwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1629516675579-9d3e908ebc17?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1628357146270-1baefa4ba018?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI0NHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1628155524928-35c02b8ac4d3?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI1NHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1618947102627-959d2d008dd5?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY5Nnw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1604580322940-fec5b19db68c?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDg2M3w2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1568563252466-c73a4e2f7e94?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDkwNHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                'https://images.unsplash.com/photo-1618661057302-8b01d93bd898?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEzOTN8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1617929912008-eaa24413b9ac?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE0MzB8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1617191519105-d07b98b10de6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1MDV8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1617128734662-66da6c1d3505?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1MDZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1550853024-fae8cd4be47f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE2ODB8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1615057638606-a678f5f27bda?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE3NzV8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1615114814213-a245ffc79e9a?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE3NzZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1481819613568-3701cbc70156?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE4NTN8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1613775970661-f45429c408d6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE5MTJ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1613759730654-3fa5a0146c03?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE5MTZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+                'https://images.unsplash.com/photo-1612256360570-2901427358af?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIxNjl8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
+              ],
+            };
+            const templates = {
+              anchor: `
+                <a slot="${CAROUSEL_ITEM_SLOT}" class="carousel-link" href="#" ar="ASPECT_RATIO" draggable="false">
+                  <img src="IMG_SRC" alt="image" draggable="false" />
+                </a>
+              `,
+              card: `
+                <div slot="${CAROUSEL_ITEM_SLOT}" class="carousel-card" ar="portrait">
+                  <h3>Card Title</h3>
+                </div>
+              `,
+              img: `<img slot="${CAROUSEL_ITEM_SLOT}" class="carousel-img" src="IMG_SRC" alt="image" ar="ASPECT_RATIO" draggable="false" />`,
+            };
+            const carousel = document.querySelector('custom-carousel');
+            const itemCountInput = document.getElementById('carouselItemCount');
+            const mockImgsInput = document.getElementById('carouselMockImgs');
+            const useImgsInput = document.getElementById('carouselUseImgs');
+            const useAnchorsInput = document.getElementById('carouselUseAnchors');
+            const useCardsInput = document.getElementById('carouselUseCards');
             
-            if (useMockImgsInput.checked) templateNames.push('img');
-            if (useMockAnchorsInput.checked) templateNames.push('anchor');
-            if (useMockCardsInput.checked) templateNames.push('card');
+            let randomItems = [];
+            let uniqueItems = [];
             
-            carousel.innerHTML = Array(itemCount).fill('').map((_, ndx) => {
-              let markup = '';
+            const getUniqueRandomItem = ({
+              imgType: type,
+              imgTypes,
+              templateName: template,
+              templateNames,
+            }) => {
+              const imgNdx = randomNumber(0, 19);
+              const imgType = type || imgTypes[randomNumber(0, imgTypes.length - 1)];
+              const templateName = template || templateNames[randomNumber(0, templateNames.length - 1)];
+              const currItem = `[${templateName}][${imgType}][${imgNdx}]`;
               
-              if (templateNames.length) {
-                if (!randomItems[ndx]) {
-                  randomItems[ndx] = {
-                    imgType: imgTypes[randomNumber(1, imgTypes.length) - 1],
-                    templateName: templateNames[randomNumber(1, templateNames.length) - 1],
-                  };
-                }
-                
-                const imgType = randomItems[ndx].imgType;
-                const templateName = randomItems[ndx].templateName;
-                let templateMarkup = templates[templateName];
-                
-                if (templateName === 'anchor' || templateName === 'img') {
-                  templateMarkup = templates[templateName]
-                    .replace('ASPECT_RATIO', imgType)
-                    .replace('IMG_SRC', mockImgs[imgType]);
-                }
-                
-                markup = templateMarkup;
+              if (!uniqueItems.includes(currItem)) {
+                uniqueItems.push(currItem);
+                return { imgNdx, imgType, templateName };
               }
               
-              return markup;
-            }).join('');
-          }
-          
-          function handleNavUpdate({ target }) {
-            switch (target.id) {
-              case 'carouselItemCount':
-                render();
-                break;
+              return getUniqueRandomItem({ imgType, imgTypes, templateName, templateNames });
+            };
+            
+            function render() {
+              const itemCount = +itemCountInput.value;
+              const imgMap = (mockImgsInput.checked) ? mockImgs : realImgs;
+              const imgTypes = Object.keys(imgMap);
+              const templateNames = [];
               
-              case 'carouselRandomize':
-              case 'carouselUseMockImgs':
-              case 'carouselUseMockAnchors':
-              case 'carouselUseMockCards':
-                randomItems = [];
-                render();
-                break;
+              if (useImgsInput.checked) templateNames.push('img');
+              if (useAnchorsInput.checked) templateNames.push('anchor');
+              if (useCardsInput.checked) templateNames.push('card');
+              
+              carousel.innerHTML = Array(itemCount).fill('').map((_, ndx) => {
+                let markup = '';
+                
+                if (templateNames.length) {
+                  if (!randomItems[ndx]) {
+                    randomItems[ndx] = getUniqueRandomItem({ imgTypes, templateNames });
+                  }
+                  
+                  const { imgNdx, imgType, templateName } = randomItems[ndx];
+                  let templateMarkup = templates[templateName];
+                  
+                  if (templateName === 'anchor' || templateName === 'img') {
+                    templateMarkup = templates[templateName]
+                      .replace('ASPECT_RATIO', imgType)
+                      .replace('IMG_SRC', imgMap[imgType][imgNdx]);
+                  }
+                  
+                  markup = templateMarkup;
+                }
+                
+                return markup;
+              }).join('');
             }
-          }
-          
-          document.getElementById('carouselExample').addEventListener('change', handleNavUpdate);
-          document.getElementById('carouselExample').addEventListener('click', handleNavUpdate);
-          carousel.addEventListener(window.CustomCarousel.events.advanced, () => {
-            console.log('Carousel advanced');
+            
+            function handleNavUpdate(ev) {
+              const { target } = ev;
+              
+              switch (target.id) {
+                case 'carouselItemCount':
+                  render();
+                  break;
+                
+                case 'carouselMockImgs':
+                case 'carouselRandomize':
+                case 'carouselUseImgs':
+                case 'carouselUseAnchors':
+                case 'carouselUseCards':
+                  randomItems = [];
+                  uniqueItems = [];
+                  render();
+                  break;
+                  
+                default: {
+                  if (target.nodeName === 'A') ev.preventDefault();
+                }
+              }
+            }
+            
+            document.getElementById('carouselExample').addEventListener('change', handleNavUpdate);
+            document.getElementById('carouselExample').addEventListener('click', handleNavUpdate);
+            carousel.addEventListener(window.CustomCarousel.events.advanced, () => {
+              console.log('Carousel advanced');
+            });
+            carousel.addEventListener(window.CustomCarousel.events.regressed, () => {
+              console.log('Carousel regressed');
+            });
+            
+            render();
           });
-          carousel.addEventListener(window.CustomCarousel.events.regressed, () => {
-            console.log('Carousel regressed');
-          });
           
-          render();
         </script>
       </section>
       <section id="indicatorsExample">
