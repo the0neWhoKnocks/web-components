@@ -4,6 +4,8 @@
   const CSS_VAR__COLOR__BTN__FG = '--color--btn--fg';
   const EVENT__ADVANCED = 'carouselAdvanced';
   const EVENT__REGRESSED = 'carouselRegressed';
+  const MODIFIER__NAV1 = 'has--nav1';
+  const MODIFIER__NAV2 = 'has--nav2';
   const ROOT_CLASS = 'carousel';
   
   const DEFAULT__CAROUSEL_HEIGHT = '15em';
@@ -19,9 +21,45 @@
       this.style.setProperty(CSS_VAR__CAROUSEL_HEIGHT, value);
     }
     
+    get nav1() {
+      return this.hasAttribute('nav1');
+    }
+    set nav1(value) {
+      (value === '' || value === 'true' || value === true)
+        ? this.setAttribute('nav1', '')
+        : this.removeAttribute('nav1');
+        
+      this.reset();
+      this.setNav1Listeners();
+    }
+    
+    get nav2() {
+      return this.hasAttribute('nav2');
+    }
+    set nav2(value) {
+      (value === '' || value === 'true' || value === true)
+        ? this.setAttribute('nav2', '')
+        : this.removeAttribute('nav2');
+      
+      this.reset();
+      this.setNav2Listeners();
+    }
+    
+    get vertical() {
+      return this.hasAttribute('vertical');
+    }
+    set vertical(value) {
+      (value === '' || value === 'true' || value === true)
+        ? this.setAttribute('vertical', '')
+        : this.removeAttribute('vertical');
+    }
+    
     static get observedAttributes() {
       return [
         'height',
+        'nav1',
+        'nav2',
+        'vertical',
       ];
     }
     
@@ -69,10 +107,10 @@
           }
           
           .${ROOT_CLASS}-wrapper {
-            height: calc(var(${CSS_VAR__CAROUSEL_HEIGHT}) + (var(--section-nav-item-diameter) + var(--section-nav-spacing)));
-          }
-          .${ROOT_CLASS}-wrapper.no-nav {
             height: var(${CSS_VAR__CAROUSEL_HEIGHT});
+          }
+          .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} {
+            height: calc(var(${CSS_VAR__CAROUSEL_HEIGHT}) + (var(--section-nav-item-diameter) + var(--section-nav-spacing)));
           }
           
           .${ROOT_CLASS} {
@@ -84,6 +122,9 @@
             width: 100%;
             overflow: hidden;
             white-space: nowrap;
+          }
+          :host(:not([nav1]):not([nav2])) .${ROOT_CLASS}__items-container {
+            overflow: auto;
           }
           
           .${ROOT_CLASS}__items {
@@ -103,19 +144,27 @@
             background: var(${CSS_VAR__COLOR__BTN__BG});
             cursor: pointer;
             pointer-events: all;
+            display: none;
             transition: opacity 0.25s;
           }
           .${ROOT_CLASS}__ui-btn:disabled {
             opacity: 0.25;
             cursor: default;
           }
-          .${ROOT_CLASS}.has--nav .${ROOT_CLASS}__ui-btn:disabled {
+          .${ROOT_CLASS}-wrapper.${MODIFIER__NAV1} .${ROOT_CLASS}__ui-btn {
+            display: block;
+          }
+          .${ROOT_CLASS}-wrapper.${MODIFIER__NAV1} .${ROOT_CLASS}__ui-btn:disabled {
             opacity: 0.25;
           }
           
           .${ROOT_CLASS}-sections-nav {
             text-align: center;
             margin-top: var(--section-nav-spacing);
+            display: none;
+          }
+          .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+            display: block;
           }
           .${ROOT_CLASS}-sections-nav button {
             width: var(--section-nav-item-diameter);
@@ -134,16 +183,10 @@
           .${ROOT_CLASS}-sections-nav button:not(:disabled) {
             cursor: pointer;
           }
-          
-          
-          .${ROOT_CLASS}-wrapper.no-nav .${ROOT_CLASS}__ui-btn,
-          .${ROOT_CLASS}-wrapper.no-nav .${ROOT_CLASS}-sections-nav {
-            display: none;
-          }
         </style>
         <style id="customStyles"></style>
         
-        <div class="${ROOT_CLASS}-wrapper no-nav">
+        <div class="${ROOT_CLASS}-wrapper">
           <div class="${ROOT_CLASS}">
             <button type="button" class="${ROOT_CLASS}__ui-btn is--prev">&lt;</button>
             <div class="${ROOT_CLASS}__items-container">
@@ -161,6 +204,7 @@
         carousel: shadowRoot.querySelector(`.${ROOT_CLASS}`),
         customStyles: shadowRoot.getElementById('customStyles'),
         items: shadowRoot.querySelector(`.${ROOT_CLASS}__items`),
+        itemsContainer: shadowRoot.querySelector(`.${ROOT_CLASS}__items-container`),
         itemSlot: shadowRoot.querySelector('slot[name="item"]'),
         nextBtn: shadowRoot.querySelector(`.${ROOT_CLASS}__ui-btn.is--next`),
         prevBtn: shadowRoot.querySelector(`.${ROOT_CLASS}__ui-btn.is--prev`),
@@ -170,6 +214,8 @@
     }
     
     connectedCallback() {
+      this.mounted = true;
+      
       this.handleNextClick = this.handleNextClick.bind(this);
       this.handlePrevClick = this.handlePrevClick.bind(this);
       this.handlePointerDown = this.handlePointerDown.bind(this);
@@ -179,15 +225,14 @@
       this.handleSlotChange = this.handleSlotChange.bind(this);
       this.renderNav = this.renderNav.bind(this);
       this.reset = this.reset.bind(this);
+      this.update = this.update.bind(this);
       
       window.addEventListener('resize', this.reset);
       this.shadowRoot.addEventListener('slotchange', this.handleSlotChange);
-      this.els.nextBtn.addEventListener('click', this.handleNextClick);
-      this.els.prevBtn.addEventListener('click', this.handlePrevClick);
-      this.els.items.addEventListener('pointerdown', this.handlePointerDown);
-      this.els.sectionsNav.addEventListener('click', this.handleSectionIndicatorClick);
       
       this.renderNav();
+      this.setNav1Listeners();
+      this.setNav2Listeners();
     }
     
     disconnectedCallback() {
@@ -273,30 +318,53 @@
       this.navDebounce = setTimeout(() => {
         const itemsViewWidth = this.els.items.offsetWidth;
         const itemsFullWidth = this.els.items.scrollWidth;
+        const addNav = (
+          (itemsFullWidth > itemsViewWidth)
+          && (this.nav1 || this.nav2)
+        );
+        let domUpdateRequired = false;
         this.sectionsCount = 1;
         this.sectionOffsets = [0];
+        
+        if (
+          this.nav1
+          && !this.els.wrapper.classList.contains(MODIFIER__NAV1)
+        ) {
+          this.els.wrapper.classList.add(MODIFIER__NAV1);
+          domUpdateRequired = true;
+        }
+        else if (
+          !this.nav1
+          && this.els.wrapper.classList.contains(MODIFIER__NAV1)
+        ) {
+          this.els.wrapper.classList.remove(MODIFIER__NAV1);
+          domUpdateRequired = true;
+        }
+        
+        if (
+          this.nav2
+          && !this.els.wrapper.classList.contains(MODIFIER__NAV2)
+        ) {
+          this.els.wrapper.classList.add(MODIFIER__NAV2);
+          domUpdateRequired = true;
+        }
+        else if (
+          !this.nav2
+          && this.els.wrapper.classList.contains(MODIFIER__NAV2)
+        ) {
+          this.els.wrapper.classList.remove(MODIFIER__NAV2);
+          domUpdateRequired = true;
+        }
         
         // NOTE: Since adding or removing the nav can cause a shift in dimensions,
         // don't proceed after the update, just wait, and then try to render the
         // nav again, but with the proper dimensions.
-        if (
-          itemsFullWidth > itemsViewWidth
-          && this.els.wrapper.classList.contains('no-nav')
-        ) {
-          this.els.wrapper.classList.remove('no-nav');
-          requestAnimationFrame(this.renderNav);
-          return;
-        }
-        else if (
-          itemsFullWidth <= itemsViewWidth
-          && !this.els.wrapper.classList.contains('no-nav')
-        ) {
-          this.els.wrapper.classList.add('no-nav');
+        if (domUpdateRequired) {
           requestAnimationFrame(this.renderNav);
           return;
         }
         
-        if (!this.els.wrapper.classList.contains('no-nav')) {
+        if (addNav) {
           let x = 0;
           let sectionWidth = 0;
           this.els.itemSlot.assignedNodes().forEach((item, ndx, items) => {
@@ -324,21 +392,31 @@
             x += width;
           });
           
-          // only render indicators when number of sections have changed
-          if (
-            !this.els.sectionsNav.childNodes.length
-            || (this.els.sectionsNav.childNodes.length !== this.sectionsCount)
-          ) {
-            this.els.sectionsNav.innerHTML = Array(this.sectionsCount).fill('').map((_, ndx) => {
-              return `<button title="Section ${ndx + 1}" data-ndx="${ndx}"></button>`;
-            }).join('');
+          if (this.nav1) {
+            this.els.prevBtn.disabled = this.sectionNdx === 0;
+            this.els.nextBtn.disabled = this.sectionNdx === (this.sectionOffsets.length - 1);
           }
           
-          this.els.prevBtn.disabled = this.sectionNdx === 0;
-          this.els.nextBtn.disabled = this.sectionNdx === (this.sectionOffsets.length - 1);
-          this.els.sectionsNav.childNodes.forEach((indicator, ndx) => {
-            indicator.disabled = ndx === this.sectionNdx;
-          });
+          if (this.nav2) {
+            // only render indicators when number of sections have changed
+            if (
+              !this.els.sectionsNav.childNodes.length
+              || (this.els.sectionsNav.childNodes.length !== this.sectionsCount)
+            ) {
+              this.els.sectionsNav.innerHTML = Array(this.sectionsCount).fill('').map((_, ndx) => {
+                return `<button title="Section ${ndx + 1}" data-ndx="${ndx}"></button>`;
+              }).join('');
+            }
+            
+            this.els.sectionsNav.childNodes.forEach((indicator, ndx) => {
+              indicator.disabled = ndx === this.sectionNdx;
+            });
+          }
+          
+          this.els.itemsContainer.addEventListener('pointerdown', this.handlePointerDown);
+        }
+        else {
+          this.els.itemsContainer.removeEventListener('pointerdown', this.handlePointerDown);
         }
       }, 100);
     }
@@ -373,6 +451,30 @@
         }, { once: true });
         
         this.els.items.style.transform = newTransform;
+      }
+    }
+    
+    setNav1Listeners() {
+      if (this.mounted) {
+        if (this.nav1) {
+          this.els.nextBtn.addEventListener('click', this.handleNextClick);
+          this.els.prevBtn.addEventListener('click', this.handlePrevClick);
+        }
+        else {
+          this.els.nextBtn.removeEventListener('click', this.handleNextClick);
+          this.els.prevBtn.removeEventListener('click', this.handlePrevClick);
+        }
+      }
+    }
+    
+    setNav2Listeners() {
+      if (this.mounted) {
+        if (this.nav2) {
+          this.els.sectionsNav.addEventListener('click', this.handleSectionIndicatorClick);
+        }
+        else {
+          this.els.sectionsNav.removeEventListener('click', this.handleSectionIndicatorClick);
+        }
       }
     }
     
