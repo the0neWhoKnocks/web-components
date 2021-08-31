@@ -32,6 +32,18 @@
       };
     }
     
+    attributeChangedCallback(attr, oldVal, newVal) {
+      const empty = oldVal === '' && (newVal === null || newVal === undefined);
+      
+      if (!empty && oldVal !== newVal) {
+        let _newVal = newVal;
+        
+        switch (attr) {
+          default: { this[attr] = _newVal; }
+        }
+      }
+    }
+    
     constructor() {
       super();
       
