@@ -34,29 +34,57 @@
             <input type="number" id="carouselItemCount" min="3" max="20" value="10" />
           </div>
           <div class="control">
+            <label for="carouselNav1">Nav 1</label>
+            <input type="checkbox" id="carouselNav1" checked />
+          </div>
+          <div class="control">
+            <label for="carouselNav2">Nav 2</label>
+            <input type="checkbox" id="carouselNav2" checked />
+          </div>
+          <div class="control">
+            <label for="carouselNav2Position">Nav 2 Position</label>
+            <select id="carouselNav2Position">
+              <option value="before">Before</option>
+              <option value="after" selected>After</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="carouselVertical">Vertical</label>
+            <input type="checkbox" id="carouselVertical" />
+          </div>
+          <div class="control">
             <label for="carouselMockImgs">Mock Images</label>
             <input type="checkbox" id="carouselMockImgs" checked />
           </div>
           <div class="control">
-            <label for="carouselUseImgs">Use Images</label>
+            <label for="carouselUseImgs">Images</label>
             <input type="checkbox" id="carouselUseImgs" checked />
           </div>
           <div class="control">
-            <label for="carouselUseAnchors">Use Anchors</label>
+            <label for="carouselUseAnchors">Anchors</label>
             <input type="checkbox" id="carouselUseAnchors" />
           </div>
           <div class="control">
-            <label for="carouselUseCards">Use Cards</label>
+            <label for="carouselUseCards">Cards</label>
             <input type="checkbox" id="carouselUseCards" />
           </div>
         </nav>
         
-        <custom-carousel></custom-carousel>
+        <custom-carousel nav1 nav2></custom-carousel>
         
         <style>
+          custom-carousel > * {
+            display: inline-block;
+            vertical-align: top;
+          }
+          custom-carousel:not([vertical]) > *:not(:first-child) {
+            margin-left: 3px;
+          }
+          custom-carousel[vertical] > *:not(:first-child) {
+            margin-top: 3px;
+          }
+          
           .carousel-card {
-            width: 11em;
-            min-height: 100%;
             padding: 0.25em;
             border: solid 1px #666;
             border-radius: 0.25em;
@@ -64,6 +92,14 @@
           }
           .carousel-card h3 {
             margin-top: 0;
+          }
+          custom-carousel:not([vertical]) .carousel-card {
+            width: 11em;
+            min-height: 100%;
+          }
+          custom-carousel[vertical] .carousel-card {
+            width: 100%;
+            height: 15em;
           }
           
           .carousel-link {
@@ -73,16 +109,15 @@
           
           .carousel-img,
           .carousel-link img {
-            height: 100%;
             pointer-events: none;
           }
-          
-          custom-carousel > * {
-            display: inline-block;
-            vertical-align: top;
+          custom-carousel:not([vertical]) .carousel-img,
+          custom-carousel:not([vertical]) .carousel-link img {
+            height: 100%;
           }
-          custom-carousel > *:not(:first-child) {
-            margin-left: 3px;
+          custom-carousel[vertical] .carousel-img,
+          custom-carousel[vertical] .carousel-link img {
+            width: 100%;
           }
         </style>
         
@@ -276,20 +311,63 @@
                   uniqueItems = [];
                   render();
                   break;
-                  
+                
+                case 'carouselNav1':
+                  carousel.nav1 = target.checked;
+                  break;
+                
+                case 'carouselNav2':
+                  carousel.nav2 = target.checked;
+                  break;
+                
+                case 'carouselNav2Position':
+                  carousel.nav2Position = target.value;
+                  break;
+                
+                case 'carouselVertical':
+                  carousel.height = (target.checked) ? '25em' : '';
+                  carousel.vertical = target.checked;
+                  break;
+                
                 default: {
-                  if (target.nodeName === 'A') ev.preventDefault();
+                  if (target.nodeName === 'A') {
+                    ev.preventDefault();
+                    
+                    if (!carousel.wasDragging) {
+                      const img = target.querySelector('img');
+                      const imgURL = img.src;
+                      const width = target.getAttribute('ar') === 'landscape' ? 600 : 400;
+                      const winArgs = ['CarouselPopUp', `top=100, left=100, width=${width}, height=400`];
+                      
+                      if (mockImgsInput.checked) {
+                        const win = window.open('', ...winArgs);
+                        const image = new Image();
+                        image.src = imgURL;
+                        image.style.cssText = `
+                          height: 100%;
+                          display: block;
+                        `;
+                        win.document.write(image.outerHTML);
+                        win.document.close();
+                      }
+                      else {
+                        window.open(imgURL, ...winArgs);
+                      }
+                    }
+                  }
                 }
               }
             }
             
             document.getElementById('carouselExample').addEventListener('change', handleNavUpdate);
             document.getElementById('carouselExample').addEventListener('click', handleNavUpdate);
-            carousel.addEventListener(window.CustomCarousel.events.advanced, () => {
-              console.log('Carousel advanced');
+            carousel.addEventListener(window.CustomCarousel.events.advanced, ({ detail }) => {
+              const { sectionNumber, totalSections } = detail;
+              console.log(`Carousel advanced to section ${sectionNumber} of ${totalSections}`);
             });
-            carousel.addEventListener(window.CustomCarousel.events.regressed, () => {
-              console.log('Carousel regressed');
+            carousel.addEventListener(window.CustomCarousel.events.regressed, ({ detail }) => {
+              const { sectionNumber, totalSections } = detail;
+              console.log(`Carousel regressed to section ${sectionNumber} of ${totalSections}`);
             });
             
             render();
