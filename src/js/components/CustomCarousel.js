@@ -1,5 +1,7 @@
 (() => {
+  const CSS_VAR__CAROUSEL_ANIM_DURATION = '--carousel-anim-duration';
   const CSS_VAR__CAROUSEL_HEIGHT = '--carousel-height';
+  const CSS_VAR__CAROUSEL_WIDTH = '--carousel-width';
   const CSS_VAR__COLOR__BTN__BG = '--color--btn--bg';
   const CSS_VAR__COLOR__BTN__FG = '--color--btn--fg';
   const EVENT__ADVANCED = 'carouselAdvanced';
@@ -8,7 +10,9 @@
   const MODIFIER__NAV2 = 'has--nav2';
   const ROOT_CLASS = 'carousel';
   
+  const DEFAULT__CAROUSEL_ANIM_DURATION = '400ms';
   const DEFAULT__CAROUSEL_HEIGHT = '15em';
+  const DEFAULT__CAROUSEL_WIDTH = '15em';
   const DEFAULT__COLOR__BTN__BG = '#333';
   const DEFAULT__COLOR__BTN__FG = '#eee';
   
@@ -17,8 +21,16 @@
       return this.getAttribute('height') || DEFAULT__CAROUSEL_HEIGHT;
     }
     set height(value) {
-      this.setAttribute('height', value);
-      this.style.setProperty(CSS_VAR__CAROUSEL_HEIGHT, value);
+      if (!value && value !== 0) {
+        this.removeAttribute('height');
+        this.style.removeProperty(CSS_VAR__CAROUSEL_HEIGHT);
+      }
+      else {
+        this.setAttribute('height', value);
+        this.style.setProperty(CSS_VAR__CAROUSEL_HEIGHT, value);
+      }
+      
+      this.reset();
     }
     
     get nav1() {
@@ -52,6 +64,24 @@
       (value === '' || value === 'true' || value === true)
         ? this.setAttribute('vertical', '')
         : this.removeAttribute('vertical');
+        
+      this.reset();
+    }
+    
+    get width() {
+      return this.getAttribute('width') || DEFAULT__CAROUSEL_WIDTH;
+    }
+    set width(value) {
+      if (!value && value !== 0) {
+        this.removeAttribute('width');
+        this.style.removeProperty(CSS_VAR__CAROUSEL_WIDTH);
+      }
+      else {
+        this.setAttribute('width', value);
+        this.style.setProperty(CSS_VAR__CAROUSEL_WIDTH, value);
+      }
+      
+      this.reset();
     }
     
     static get observedAttributes() {
@@ -98,7 +128,9 @@
           :host {
             ${CSS_VAR__COLOR__BTN__BG}: ${DEFAULT__COLOR__BTN__BG};
             ${CSS_VAR__COLOR__BTN__FG}: ${DEFAULT__COLOR__BTN__FG};
+            ${CSS_VAR__CAROUSEL_ANIM_DURATION}: ${DEFAULT__CAROUSEL_ANIM_DURATION};
             ${CSS_VAR__CAROUSEL_HEIGHT}: ${DEFAULT__CAROUSEL_HEIGHT};
+            ${CSS_VAR__CAROUSEL_WIDTH}: ${DEFAULT__CAROUSEL_WIDTH};
             --section-nav-spacing: 0.5em;
             --section-nav-item-diameter: 1.25em;
             
@@ -106,39 +138,69 @@
             display: block;
           }
           
-          .${ROOT_CLASS}-wrapper {
+          :host(:not([vertical])[width]) .${ROOT_CLASS}-wrapper {
+            width: var(${CSS_VAR__CAROUSEL_WIDTH});
+          }
+          :host(:not([vertical])) .${ROOT_CLASS}-wrapper {
             height: var(${CSS_VAR__CAROUSEL_HEIGHT});
           }
-          .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} {
+          :host(:not([vertical])) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} {
             height: calc(var(${CSS_VAR__CAROUSEL_HEIGHT}) + (var(--section-nav-item-diameter) + var(--section-nav-spacing)));
+          }
+          :host([vertical][height]) .${ROOT_CLASS}-wrapper {
+            height: var(${CSS_VAR__CAROUSEL_HEIGHT});
+          }
+          :host([vertical]) .${ROOT_CLASS}-wrapper {
+            width: var(${CSS_VAR__CAROUSEL_WIDTH});
+            display: flex;
+          }
+          :host([vertical]) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} {
+            width: calc(var(${CSS_VAR__CAROUSEL_WIDTH}) + (var(--section-nav-item-diameter) + var(--section-nav-spacing)));
           }
           
           .${ROOT_CLASS} {
-            height: var(${CSS_VAR__CAROUSEL_HEIGHT});
             display: flex;
+          }
+          :host(:not([vertical])) .${ROOT_CLASS} {
+            height: var(${CSS_VAR__CAROUSEL_HEIGHT});
+          }
+          :host([vertical]) .${ROOT_CLASS} {
+            width: var(${CSS_VAR__CAROUSEL_WIDTH});
+            flex-direction: column;
           }
           
           .${ROOT_CLASS}__items-container {
-            width: 100%;
             overflow: hidden;
             white-space: nowrap;
           }
           :host(:not([nav1]):not([nav2])) .${ROOT_CLASS}__items-container {
             overflow: auto;
           }
+          :host(:not([vertical])) .${ROOT_CLASS}__items-container {
+            width: 100%;
+          }
+          :host([vertical]) .${ROOT_CLASS}__items-container {
+            height: 100%;
+          }
           
           .${ROOT_CLASS}__items {
-            transition: transform 0.4s;
-            transform: translateX(0px);
+            transition: transform var(${CSS_VAR__CAROUSEL_ANIM_DURATION});
             touch-action: none;
           }
           .${ROOT_CLASS}__items.disable-transition {
             transition: none;
           }
+          :host(:not([vertical])) .${ROOT_CLASS}__items {
+            transform: translateX(0px);
+          }
+          :host([vertical]) .${ROOT_CLASS}__items {
+            transform: translateY(0px);
+            display: flex;
+            flex-direction: column;
+          }
           
           .${ROOT_CLASS}__ui-btn {
             color: var(${CSS_VAR__COLOR__BTN__FG});
-            width: 3em;
             padding: 0;
             border: none;
             background: var(${CSS_VAR__COLOR__BTN__BG});
@@ -157,15 +219,29 @@
           .${ROOT_CLASS}-wrapper.${MODIFIER__NAV1} .${ROOT_CLASS}__ui-btn:disabled {
             opacity: 0.25;
           }
+          :host(:not([vertical])) .${ROOT_CLASS}__ui-btn {
+            width: 3em;
+          }
+          :host([vertical]) .${ROOT_CLASS}__ui-btn {
+            height: 3em;
+            flex-shrink: 0;
+          }
           
           .${ROOT_CLASS}-sections-nav {
-            text-align: center;
-            margin-top: var(--section-nav-spacing);
             display: none;
           }
-          .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+          :host(:not([vertical])) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+            text-align: center;
+            margin-top: var(--section-nav-spacing);
             display: block;
           }
+          :host([vertical]) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+            margin-left: var(--section-nav-spacing);
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+          
           .${ROOT_CLASS}-sections-nav button {
             width: var(--section-nav-item-diameter);
             height: var(--section-nav-item-diameter);
@@ -174,27 +250,29 @@
             background: var(${CSS_VAR__COLOR__BTN__FG});
             opacity: 0.25;
           }
-          .${ROOT_CLASS}-sections-nav button:not(:first-of-type) {
-            margin-left: 0.25em;
-          }
           .${ROOT_CLASS}-sections-nav button:disabled {
             opacity: 1;
           }
           .${ROOT_CLASS}-sections-nav button:not(:disabled) {
             cursor: pointer;
           }
+          :host(:not([vertical])) .${ROOT_CLASS}-sections-nav button:not(:first-of-type) {
+            margin-left: 0.25em;
+          }
+          :host([vertical]) .${ROOT_CLASS}-sections-nav button:not(:first-of-type) {
+            margin-top: 0.25em;
+          }
         </style>
-        <style id="customStyles"></style>
         
         <div class="${ROOT_CLASS}-wrapper">
           <div class="${ROOT_CLASS}">
-            <button type="button" class="${ROOT_CLASS}__ui-btn is--prev">&lt;</button>
+            <button type="button" class="${ROOT_CLASS}__ui-btn is--prev" disabled>&lt;</button>
             <div class="${ROOT_CLASS}__items-container">
               <div class="${ROOT_CLASS}__items">
                 <slot name="item"></slot>
               </div>
             </div>
-            <button type="button" class="${ROOT_CLASS}__ui-btn is--next">&gt;</button>
+            <button type="button" class="${ROOT_CLASS}__ui-btn is--next" disabled>&gt;</button>
           </div>
           <nav class="${ROOT_CLASS}-sections-nav"></nav>
         </div>
@@ -223,6 +301,7 @@
       this.handlePointerUp = this.handlePointerUp.bind(this);
       this.handleSectionIndicatorClick = this.handleSectionIndicatorClick.bind(this);
       this.handleSlotChange = this.handleSlotChange.bind(this);
+      this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
       this.renderNav = this.renderNav.bind(this);
       this.reset = this.reset.bind(this);
       this.update = this.update.bind(this);
@@ -239,6 +318,17 @@
       window.removeEventListener('resize', this.reset);
     }
     
+    getSizes() {
+      return {
+        itemsViewSize: this.vertical
+          ? this.els.itemsContainer.offsetHeight
+          : this.els.items.offsetWidth,
+        itemsFullSize: this.vertical
+          ? this.els.itemsContainer.scrollHeight
+          : this.els.items.scrollWidth,
+      };
+    }
+    
     handleNextClick() {
       let nextNdx = this.sectionNdx + 1;
       
@@ -252,17 +342,19 @@
     
     handlePointerDown(ev) {
       this.els.items.classList.add('disable-transition');
-      const currPos = this.els.items.style.transform.match(/([-.\d]+)px/) || [0, 0];
-      this.startX = ev.x;
-      this.startPos = +currPos[1];
+      const [, currTransform] = this.els.items.style.transform.match(/([-.\d]+)px/) || [0, 0];
+      this.startPos = (this.vertical) ? ev.y : ev.x;
+      this.startTransform = +currTransform;
       window.addEventListener('pointermove', this.handlePointerMove);
       window.addEventListener('pointerup', this.handlePointerUp);
     }
     
     handlePointerMove(ev) {
-      const xDiff = ev.x - this.startX;
-      this.els.items.style.transform = `translateX(${ this.startPos + xDiff }px)`;
-      this.endX = ev.x;
+      const pos = this.vertical ? ev.y : ev.x;
+      const translate = this.vertical ? 'translateY' : 'translateX';
+      const diff = pos - this.startPos;
+      this.els.items.style.transform = `${translate}(${ this.startTransform + diff }px)`;
+      this.endPos = pos;
     }
     
     handlePointerUp() {
@@ -270,20 +362,32 @@
       window.removeEventListener('pointerup', this.handlePointerUp);
       this.els.items.classList.remove('disable-transition');
       
-      const [, currXPos] = this.els.items.style.transform.match(/translateX\(([\d-.]+)px\)/) || [0, 0];
-      const xPos = +currXPos;
+      const [, currTransform] = this.els.items.style.transform.match(/([-.\d]+)px/) || [0, 0];
+      const pos = +currTransform;
       
-      // based on drag direction, scroll to next or prev
-      if (this.endX < this.startX) {
-        const maxOffset = -(this.els.items.scrollWidth - this.els.items.offsetWidth);
-        if (xPos < maxOffset) this.sectionNdx = this.sectionOffsets.length - 2;
+      if (this.endPos !== undefined && this.endPos !== this.startPos) {
+        this.wasDragging = true;
         
-        this.handleNextClick();
-      }
-      else {
-        if (xPos > 0) this.sectionNdx = 1;
+        // based on drag direction, scroll to next or prev
+        if (this.endPos < this.startPos) {
+          const { itemsFullSize, itemsViewSize } = this.getSizes();
+          const maxOffset = -(itemsFullSize - itemsViewSize);
+          
+          if (pos < maxOffset) this.sectionNdx = this.sectionsCount - 2;
+          
+          this.handleNextClick();
+        }
+        else {
+          if (pos > 0) this.sectionNdx = 1;
+          
+          this.handlePrevClick();
+        }
         
-        this.handlePrevClick();
+        requestAnimationFrame(() => {
+          delete this.endPos;
+          delete this.startPos;
+          delete this.wasDragging;
+        });
       }
     }
     
@@ -313,13 +417,25 @@
       }
     }
     
+    handleTransitionEnd() {
+      const ev = (this.sectionNdx > this.prevSectionNdx)
+        ? EVENT__ADVANCED
+        : EVENT__REGRESSED;
+      this.dispatchEvent(new CustomEvent(ev, {
+        bubbles: true,
+        detail: {
+          sectionNumber: this.sectionNdx + 1,
+          totalSections: this.sectionsCount,
+        },
+      }));
+    }
+    
     renderNav() {
       clearTimeout(this.navDebounce);
       this.navDebounce = setTimeout(() => {
-        const itemsViewWidth = this.els.items.offsetWidth;
-        const itemsFullWidth = this.els.items.scrollWidth;
+        const { itemsFullSize, itemsViewSize } = this.getSizes();
         const addNav = (
-          (itemsFullWidth > itemsViewWidth)
+          (itemsFullSize > itemsViewSize)
           && (this.nav1 || this.nav2)
         );
         let domUpdateRequired = false;
@@ -327,30 +443,38 @@
         this.sectionOffsets = [0];
         
         if (
-          this.nav1
+          addNav
+          && this.nav1
           && !this.els.wrapper.classList.contains(MODIFIER__NAV1)
         ) {
           this.els.wrapper.classList.add(MODIFIER__NAV1);
           domUpdateRequired = true;
         }
         else if (
-          !this.nav1
-          && this.els.wrapper.classList.contains(MODIFIER__NAV1)
+          !addNav
+          || (
+            !this.nav1
+            && this.els.wrapper.classList.contains(MODIFIER__NAV1)
+          )
         ) {
           this.els.wrapper.classList.remove(MODIFIER__NAV1);
           domUpdateRequired = true;
         }
         
         if (
-          this.nav2
+          addNav
+          && this.nav2
           && !this.els.wrapper.classList.contains(MODIFIER__NAV2)
         ) {
           this.els.wrapper.classList.add(MODIFIER__NAV2);
           domUpdateRequired = true;
         }
         else if (
-          !this.nav2
-          && this.els.wrapper.classList.contains(MODIFIER__NAV2)
+          !addNav
+          || (
+            !this.nav2
+            && this.els.wrapper.classList.contains(MODIFIER__NAV2)
+          )
         ) {
           this.els.wrapper.classList.remove(MODIFIER__NAV2);
           domUpdateRequired = true;
@@ -365,36 +489,38 @@
         }
         
         if (addNav) {
-          let x = 0;
-          let sectionWidth = 0;
+          let offset = 0;
+          let sectionSize = 0;
           this.els.itemSlot.assignedNodes().forEach((item, ndx, items) => {
-            const { marginLeft } = getComputedStyle(item);
-            const width = item.offsetWidth + parseFloat(marginLeft);
+            const { marginLeft, marginTop } = getComputedStyle(item);
+            const currSize = this.vertical
+              ? item.offsetHeight + parseFloat(marginTop)
+              : item.offsetWidth + parseFloat(marginLeft);
             
-            sectionWidth += width;
+            sectionSize += currSize;
             
-            if (sectionWidth >= itemsViewWidth) {
+            if (sectionSize > itemsViewSize) {
               this.sectionsCount += 1;
-              this.sectionOffsets.push(x);
-              sectionWidth = width;
+              this.sectionOffsets.push(offset);
+              sectionSize = currSize;
             }
             
             // there's empty space in the last section so trim the last offset
             if (
               ndx === items.length - 1
-              && sectionWidth < itemsViewWidth
+              && sectionSize < itemsViewSize
             ) {
-              const lastNdx = this.sectionOffsets.length - 1;
-              const emptySpace = itemsViewWidth - sectionWidth;
+              const lastNdx = this.sectionsCount - 1;
+              const emptySpace = itemsViewSize - sectionSize;
               this.sectionOffsets[lastNdx] = this.sectionOffsets[lastNdx] - emptySpace;
             }
             
-            x += width;
+            offset += currSize;
           });
           
           if (this.nav1) {
             this.els.prevBtn.disabled = this.sectionNdx === 0;
-            this.els.nextBtn.disabled = this.sectionNdx === (this.sectionOffsets.length - 1);
+            this.els.nextBtn.disabled = this.sectionNdx === (this.sectionsCount - 1);
           }
           
           if (this.nav2) {
@@ -440,16 +566,11 @@
     }
     
     scrollItems() {
-      const newTransform = `translateX(${-this.sectionOffsets[this.sectionNdx]}px)`;
+      const translate = this.vertical ? 'translateY' : 'translateX';
+      const newTransform = `${translate}(${-this.sectionOffsets[this.sectionNdx]}px)`;
       
       if (newTransform !== this.els.items.style.transform) {
-        this.els.items.addEventListener('transitionend', () => {
-          const ev = (this.sectionNdx > this.prevSectionNdx)
-            ? EVENT__ADVANCED
-            : EVENT__REGRESSED;
-          this.dispatchEvent(new CustomEvent(ev, { bubbles: true }));
-        }, { once: true });
-        
+        this.els.items.addEventListener('transitionend', this.handleTransitionEnd, { once: true });
         this.els.items.style.transform = newTransform;
       }
     }
