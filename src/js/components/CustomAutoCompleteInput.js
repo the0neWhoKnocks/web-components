@@ -134,7 +134,7 @@
             padding: 0;
             border: none;
             border-radius: 100%;
-            background: #ddd;
+            background: transparent;
             cursor: pointer;
             display: none;
             position: absolute;

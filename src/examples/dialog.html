@@ -1,0 +1,80 @@
+<script src="../js/components/CustomDialog.js"></script>
+
+<nav>
+  <div class="control">
+    <button id="openDialogBtn">Open Dialog</button>
+  </div>
+  <div class="control">
+    <button id="openModalBtn">Open Modal</button>
+  </div>
+</nav>
+
+<div id="dialogExample">
+  <custom-dialog>
+    <div class="dialog-title" slot="dialogTitle">Dialog Title</div>
+    <div class="dialog-content" slot="dialogBody">
+      Click button to close Dialog.
+      <button type="button">Close Dialog</button>
+    </div>
+  </custom-dialog>
+  <custom-dialog modal>
+    <div class="dialog-title" slot="dialogTitle">Modal Title</div>
+    <div class="dialog-content" slot="dialogBody">
+      Click button to close Modal.
+      <button type="button">Close Modal</button>
+    </div>
+  </custom-dialog>
+</div>
+
+<style>
+  .dialog-content {
+    padding: 1em;
+  }
+  .dialog-content button {
+    width: 100%;
+    margin-top: 0.5em;
+    display: block;
+  }
+  .dialog-content .dynamic {
+    padding: 0.5em;
+    border-radius: 0.25em;
+    margin: 0.5em 0;
+    background: #73ff73;
+  }
+</style>
+
+<script>
+  const dE = document.getElementById('dialogExample');
+  const dialogs = [...document.querySelectorAll('custom-dialog')];
+  const [ dialog, modal ] = dialogs;
+  const openDialogBtn = document.getElementById('openDialogBtn');
+  const openModalBtn = document.getElementById('openModalBtn');
+  
+  dE.addEventListener(window.CustomDialog.events.closed, ({ detail: { modal } }) => {
+    console.log(`${modal ? 'Modal' : 'Dialog'} closed`);
+  });
+  
+  dialogs.forEach((d) => {
+    d.querySelector('[slot] button').addEventListener('click', () => {
+      d.open = false;
+    });
+  });
+  
+  let contentAdded;
+  openDialogBtn.addEventListener('click', () => {
+    dialog.open = true;
+    
+    if (!contentAdded) {
+      setTimeout(() => {
+        dialog.querySelector('[slot] button').insertAdjacentHTML('beforebegin', `
+          <div class="dynamic">dynamic content added</div>
+        `);
+        contentAdded = true;
+      }, 1000);
+    }
+  });
+  
+  openModalBtn.addEventListener('click', () => {
+    modal.open = true;
+  });
+</script>

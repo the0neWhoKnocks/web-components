@@ -1,0 +1,78 @@
+<script src="../js/components/CustomTimeline.js"></script>
+
+<nav>
+  <div class="control">
+    <label>Points</label>
+    <input type="number" id="timelinePoints" min="2" max="20" value="2" />
+  </div>
+  <div class="control">
+    <label>Point Radius</label>
+    <input type="number" id="timelinePointRadius" min="0.5" max="5" value="1.5" step="0.25" />
+  </div>
+  <div class="control">
+    <label>Scale</label>
+    <input type="number" id="timelineScale" min="0.5" max="3" value="1" step="0.25" />
+  </div>
+  <div class="control">
+    <label>Stroke Color</label>
+    <input type="color" id="timelineStrokeColor" value="#dedede" />
+  </div>
+  <div class="control">
+    <label>Stroke Width</label>
+    <input type="number" id="timelineStrokeWidth" min="0.01" max="1" value="0.25" step="0.01" />
+  </div>
+</nav>
+
+<div class="timelines-wrapper">
+  <custom-timeline vertical points="3"></custom-timeline>
+  <custom-timeline id="defaultTimeline"></custom-timeline>
+  <custom-timeline points="4"></custom-timeline>
+  <custom-timeline points="4" pointStates="1,s; 2,f; 3,r"></custom-timeline>
+</div>
+
+<style>
+  .timelines-wrapper {
+    display: grid;
+    grid-gap: 1em;
+    grid-template-areas:
+      "v ."
+      "v ."
+      "v .";
+    grid-template-columns: 1.5em auto;
+  }
+  .timelines-wrapper custom-timeline[vertical] {
+    grid-area: v;
+  }
+</style>
+
+<script>
+  const defaultTimeline = document.getElementById('defaultTimeline');
+  const timelines = [...document.querySelectorAll('custom-timeline')];
+  const timelinesWrapper = document.querySelector('.timelines-wrapper');
+  
+  document.getElementById('timelinePoints').addEventListener('input', ({ currentTarget: { value } }) => {
+    defaultTimeline.points = value;
+  });
+  document.getElementById('timelinePointRadius').addEventListener('input', ({ currentTarget: { value } }) => {
+    timelinesWrapper.style.gridTemplateColumns = `${value}em auto`;
+    timelines.forEach((timeline, ndx) => {
+      if (ndx === 0) timeline.setAttribute('pointRadius', value);
+      else timeline.pointRadius = value;
+    });
+  });
+  document.getElementById('timelineScale').addEventListener('input', ({ currentTarget: { value } }) => {
+    timelinesWrapper.style.fontSize = `${value}em`;
+  });
+  document.getElementById('timelineStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
+    timelines.forEach((timeline, ndx) => {
+      if (ndx === 0) timeline.setAttribute('strokeColor', value);
+      else timeline.strokeColor = value;
+    });
+  });
+  document.getElementById('timelineStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
+    timelines.forEach((timeline, ndx) => {
+      if (ndx === 0) timeline.setAttribute('strokeWidth', value);
+      else timeline.strokeWidth = value;
+    });
+  });
+</script>

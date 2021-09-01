@@ -1,0 +1,81 @@
+<script src="../js/components/CustomAutoCompleteInput.js"></script>
+
+<custom-auto-complete-input
+  customStyles="
+    .custom-autocomplete__list-item button {
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+    .custom-autocomplete__list-item button * {
+      pointer-events: none;
+    }
+    .custom-autocomplete .icon {
+      width: 1em;
+      height: 1em;
+      border-radius: 100%;
+      margin-right: 0.5em;
+      background: pink;
+      display: inline-block;
+    }
+  "
+  placeholder="Filter Animals"
+></custom-auto-complete-input>
+
+<style>
+  #autoCompleteExample custom-auto-complete-input {
+    --max-list-height: 30vh;
+    
+    width: 70vw;
+    max-width: 600px;
+    z-index: 1;
+  }
+</style>
+
+<script>
+  const autoCompleteInput = document.querySelector('custom-auto-complete-input');
+  
+  autoCompleteInput.addEventListener(window.CustomAutoCompleteInput.events.selected, ({
+    detail: { elements: filters, value },
+  }) => {
+    const matches = filters.map(({ dataset: { rawValue } }) => rawValue);
+    console.log(`Matches for "${value}":\n${JSON.stringify(matches, null, 2)}`);
+  });
+  autoCompleteInput.items = [
+    "Alligator Snapping Turtle",
+    "Baja California Pronghorn Buck",
+    "California Condor",
+    "Desert Bighorn Ram",
+    "Eastern Turkey Vulture",
+    "Fer-de-Lance Snake",
+    "Golden Crowned Sparrow",
+    "Hereford Bull",
+    "Java Chicken",
+    "Labrador Retriever",
+    "Mallard Duck",
+    "Neotropic Cormorant",
+    "Old Spot Pig",
+    "Pacific Loon",
+    "Rainbow Boa Snake",
+    "Sandhill Crane",
+    "Timber Rattlesnake",
+    "Virginia Opossum",
+    "Whooping Crane",
+  ].map((txt) => ({
+    attributes: { 'data-raw-value': txt },
+    label: `<span class="icon"></span>${txt}`,
+    value: txt.toLowerCase().replace(/\s/g, '-'),
+  }));
+  
+  // add a couple more items to the existing list
+  autoCompleteInput.items = [
+    ...autoCompleteInput.items,
+    ...[
+      "Wild Boar",
+      "Yellow-billed Loon",
+    ].map((txt) => ({
+      attributes: { 'data-raw-value': txt },
+      label: txt, // `value` will equal `label`, and no icon will be present
+    })),
+  ];
+</script>
