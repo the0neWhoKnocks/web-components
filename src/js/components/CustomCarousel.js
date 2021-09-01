@@ -138,6 +138,12 @@
             display: block;
           }
           
+          .svg-icon {
+            width: 1em;
+            height: 1em;
+            fill: currentColor;
+          }
+          
           :host(:not([vertical])[width]) .${ROOT_CLASS}-wrapper {
             width: var(${CSS_VAR__CAROUSEL_WIDTH});
           }
@@ -222,9 +228,18 @@
           :host(:not([vertical])) .${ROOT_CLASS}__ui-btn {
             width: 3em;
           }
+          :host(:not([vertical])) .${ROOT_CLASS}__ui-btn.is--prev .svg-icon {
+            transform: rotate(270deg);
+          }
+          :host(:not([vertical])) .${ROOT_CLASS}__ui-btn.is--next .svg-icon {
+            transform: rotate(90deg);
+          }
           :host([vertical]) .${ROOT_CLASS}__ui-btn {
             height: 3em;
             flex-shrink: 0;
+          }
+          :host([vertical]) .${ROOT_CLASS}__ui-btn.is--next .svg-icon {
+            transform: rotate(180deg);
           }
           
           .${ROOT_CLASS}-sections-nav {
@@ -264,15 +279,34 @@
           }
         </style>
         
+        
+        <svg style="display:none; position:absolute" width="0" height="0">
+          <symbol viewBox="0 0 20 10" id="arrow" xmlns="http://www.w3.org/2000/svg">
+            <polygon
+              points="10,0 20,10 0,10 10,0"
+              fill="currentColor"
+              stroke="none"
+            />
+          </symbol>
+        </svg>
+        
         <div class="${ROOT_CLASS}-wrapper">
           <div class="${ROOT_CLASS}">
-            <button type="button" class="${ROOT_CLASS}__ui-btn is--prev" disabled>&lt;</button>
+            <button type="button" class="${ROOT_CLASS}__ui-btn is--prev" disabled>
+              <svg class="svg-icon">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#arrow"></use>
+              </svg>
+            </button>
             <div class="${ROOT_CLASS}__items-container">
               <div class="${ROOT_CLASS}__items">
                 <slot name="item"></slot>
               </div>
             </div>
-            <button type="button" class="${ROOT_CLASS}__ui-btn is--next" disabled>&gt;</button>
+            <button type="button" class="${ROOT_CLASS}__ui-btn is--next" disabled>
+              <svg class="svg-icon">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#arrow"></use>
+              </svg>
+            </button>
           </div>
           <nav class="${ROOT_CLASS}-sections-nav"></nav>
         </div>
