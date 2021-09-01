@@ -1,0 +1,113 @@
+<script src="../js/components/icons/CustomIconCheck.js"></script>
+<script src="../js/components/icons/CustomIconChevron.js"></script>
+
+<nav>
+  <div class="control">
+    <button type="button" id="animateIcons">Animate</button>
+  </div>
+  <div class="control">
+    <label>Scale</label>
+    <input type="number" id="iconScale" min="1" max="5" value="1" />
+  </div>
+  <div class="control">
+    <label>Stroke Color</label>
+    <input type="color" id="iconStrokeColor" value="#333333" />
+  </div>
+  <div class="control">
+    <label>Stroke Width</label>
+    <input type="number" id="iconStrokeWidth" min="1" max="10" value="2" />
+  </div>
+</nav>
+
+<section>
+  <h3 class="title">Chevron</h3>
+    
+  <nav>
+    <div class="control">
+      <label>Length</label>
+      <input type="number" id="chevronLength" min="0.5" max="1" value="0.5" step="0.1" />
+    </div>
+  </nav>
+  
+  <div class="scale-wrapper">
+    <div class="icon-wrapper">
+      <custom-icon-chevron direction="up"></custom-icon-chevron>
+    </div>
+    <div class="icon-wrapper">
+      <custom-icon-chevron direction="down"></custom-icon-chevron>
+    </div>
+    <div class="icon-wrapper">
+      <custom-icon-chevron direction="left"></custom-icon-chevron>
+    </div>
+    <div class="icon-wrapper">
+      <custom-icon-chevron direction="right" fit></custom-icon-chevron>
+    </div>
+  </div>
+  
+</section>
+<section>
+  <h3 class="title">Check</h3>
+  <div class="scale-wrapper">
+    <div class="icon-wrapper">
+      <custom-icon-check on></custom-icon-check>
+    </div>
+    <div class="icon-wrapper">
+      <custom-icon-check animate off></custom-icon-check>
+    </div>
+    <div class="icon-wrapper">
+      <custom-icon-check animate on></custom-icon-check>
+    </div>
+  </div>
+</section>
+
+<style>
+  .icon-wrapper {
+    padding: 0.5em;
+    border: solid 1px;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>
+
+<script>
+  const checks = [...document.querySelectorAll('custom-icon-check')];
+  const chevrons = [...document.querySelectorAll('custom-icon-chevron')];
+  const scaleWrappers = [...document.querySelectorAll('.scale-wrapper')];
+  
+  document.getElementById('animateIcons').addEventListener('click', () => {
+    checks.forEach((check) => {
+      check.on = !check.on;
+    });
+    chevrons.forEach((chevron) => { chevron.toggle(); });
+  });
+  document.getElementById('chevronLength').addEventListener('input', ({ currentTarget: { value } }) => {
+    chevrons.forEach((chevron, ndx) => {
+      if (ndx === 0) chevron.setAttribute('length', value);
+      else chevron.length = value;
+    });
+  });
+  document.getElementById('iconScale').addEventListener('input', ({ currentTarget: { value } }) => {
+    scaleWrappers.forEach(el => { el.style.fontSize = `${value}em`; });
+  });
+  document.getElementById('iconStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
+    checks.forEach((check, ndx) => {
+      if (ndx === 0) check.setAttribute('strokeColor', value);
+      else check.strokeColor = value;
+    });
+    chevrons.forEach((chevron, ndx) => {
+      if (ndx === 0) chevron.setAttribute('strokeColor', value);
+      else chevron.strokeColor = value;
+    });
+  });
+  document.getElementById('iconStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
+    checks.forEach((check, ndx) => {
+      if (ndx === 0) check.setAttribute('strokeWidth', value);
+      else check.strokeWidth = value;
+    });
+    chevrons.forEach((chevron, ndx) => {
+      if (ndx === 0) chevron.setAttribute('strokeWidth', value);
+      else chevron.strokeWidth = value;
+    });
+  });
+</script>
