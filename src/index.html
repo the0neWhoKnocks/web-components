@@ -42,6 +42,13 @@
             <input type="checkbox" id="carouselNav2" checked />
           </div>
           <div class="control">
+            <label for="carouselNav2Position">Nav 2 Position</label>
+            <select id="carouselNav2Position">
+              <option value="before">Before</option>
+              <option value="after" selected>After</option>
+            </select>
+          </div>
+          <div class="control">
             <label for="carouselVertical">Vertical</label>
             <input type="checkbox" id="carouselVertical" />
           </div>
@@ -311,6 +318,10 @@
                 
                 case 'carouselNav2':
                   carousel.nav2 = target.checked;
+                  break;
+                
+                case 'carouselNav2Position':
+                  carousel.nav2Position = target.value;
                   break;
                 
                 case 'carouselVertical':

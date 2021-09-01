@@ -8,6 +8,8 @@
   const EVENT__REGRESSED = 'carouselRegressed';
   const MODIFIER__NAV1 = 'has--nav1';
   const MODIFIER__NAV2 = 'has--nav2';
+  const NAV2_POSITION__AFTER = 'after';
+  const NAV2_POSITION__BEFORE = 'before';
   const ROOT_CLASS = 'carousel';
   
   const DEFAULT__CAROUSEL_ANIM_DURATION = '400ms';
@@ -15,6 +17,7 @@
   const DEFAULT__CAROUSEL_WIDTH = '15em';
   const DEFAULT__COLOR__BTN__BG = '#333';
   const DEFAULT__COLOR__BTN__FG = '#eee';
+  const DEFAULT__NAV2_POSITION = NAV2_POSITION__AFTER;
   
   class CustomCarousel extends HTMLElement {
     get height() {
@@ -57,6 +60,24 @@
       this.setNav2Listeners();
     }
     
+    get nav2Position() {
+      return this.getAttribute('nav2Position') || DEFAULT__NAV2_POSITION;
+    }
+    set nav2Position(value) {
+      const val = ([NAV2_POSITION__AFTER, NAV2_POSITION__BEFORE].includes(value))
+        ? value
+        : DEFAULT__NAV2_POSITION;
+      
+      if (val !== this.nav2Position) {
+        this.setAttribute('nav2Position', val);
+        
+        if (this.mounted) {
+          const par = this.shadowRoot.querySelector(`.section-nav-wrapper.${val}`);
+          par.appendChild(this.els.sectionsNav);
+        }
+      }
+    }
+    
     get vertical() {
       return this.hasAttribute('vertical');
     }
@@ -89,6 +110,7 @@
         'height',
         'nav1',
         'nav2',
+        'nav2position',
         'vertical',
       ];
     }
@@ -107,6 +129,7 @@
         let _newVal = newVal;
         
         switch (attr) {
+          case 'nav2position': { this.nav2Position = _newVal; break; }
           default: { this[attr] = _newVal; }
         }
       }
@@ -242,19 +265,33 @@
             transform: rotate(180deg);
           }
           
+          .section-nav-wrapper {
+            display: contents;
+          }
+          
           .${ROOT_CLASS}-sections-nav {
             display: none;
           }
           :host(:not([vertical])) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
             text-align: center;
-            margin-top: var(--section-nav-spacing);
             display: block;
           }
+          :host(:not([vertical]):not([nav2position="before"])) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+            margin-top: var(--section-nav-spacing);
+          }
+          :host(:not([vertical])[nav2position="before"]) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+            margin-bottom: var(--section-nav-spacing);
+          }
           :host([vertical]) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
-            margin-left: var(--section-nav-spacing);
             display: inline-flex;
             flex-direction: column;
             justify-content: center;
+          }
+          :host([vertical]:not([nav2position="before"])) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+            margin-left: var(--section-nav-spacing);
+          }
+          :host([vertical][nav2position="before"]) .${ROOT_CLASS}-wrapper.${MODIFIER__NAV2} .${ROOT_CLASS}-sections-nav {
+            margin-right: var(--section-nav-spacing);
           }
           
           .${ROOT_CLASS}-sections-nav button {
@@ -279,7 +316,6 @@
           }
         </style>
         
-        
         <svg style="display:none; position:absolute" width="0" height="0">
           <symbol viewBox="0 0 20 10" id="arrow" xmlns="http://www.w3.org/2000/svg">
             <polygon
@@ -291,6 +327,7 @@
         </svg>
         
         <div class="${ROOT_CLASS}-wrapper">
+          <div class="section-nav-wrapper ${NAV2_POSITION__BEFORE}"></div>
           <div class="${ROOT_CLASS}">
             <button type="button" class="${ROOT_CLASS}__ui-btn is--prev" disabled>
               <svg class="svg-icon">
@@ -308,7 +345,9 @@
               </svg>
             </button>
           </div>
-          <nav class="${ROOT_CLASS}-sections-nav"></nav>
+          <div class="section-nav-wrapper ${NAV2_POSITION__AFTER}">
+            <nav class="${ROOT_CLASS}-sections-nav"></nav>
+          </div>
         </div>
       `;
       
