@@ -4,1284 +4,160 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1 minimum-scale=1">
     
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./css/reset.css">
+    <style>
+      body {
+        background: #eee;
+      }
     
-    <script src="js/components/icons/CustomIconCheck.js"></script>
-    <script src="js/components/icons/CustomIconChevron.js"></script>
-    <script src="js/components/indicators/CustomIndicatorLeapfrog.js"></script>
-    <script src="js/components/indicators/CustomIndicatorSpinner.js"></script>
-    <script src="js/components/CustomAccordionMenu.js"></script>
-    <script src="js/components/CustomAutoCompleteInput.js"></script>
-    <script src="js/components/CustomCarousel.js"></script>
-    <script src="js/components/CustomDialog.js"></script>
-    <script src="js/components/CustomDirectoryListing.js"></script>
-    <script src="js/components/CustomFlyout.js"></script>
-    <script src="js/components/CustomRating.js"></script>
-    <script src="js/components/CustomToggle.js"></script>
-    <script src="js/components/CustomTimeline.js"></script>
+      .wrapper,
+      .examples-nav,
+      .examples-section {
+        height: 100%
+      }
+      
+      .examples-nav,
+      .examples-section {
+        overflow: auto;
+      }
+      
+      .wrapper {
+        display: flex;
+      }
+      
+      .examples-nav {
+        padding: 1em 0;
+        flex-shrink: 0;
+      }
+      .examples-nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      .examples-nav__item {
+        width: 100%;
+        text-align: left;
+        white-space: nowrap;
+        padding: 0.5em 1em;
+        border: none;
+        background: transparent;
+        position: relative;
+      }
+      .examples-nav__item:disabled {
+        color: #000;
+        text-shadow: 1px 0 0 #000;
+      }
+      .examples-nav__item:disabled::before {
+        content: '';
+        width: 0.5em;
+        height: 100%;
+        background: currentColor;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .examples-nav__item:not(:disabled):hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      
+      .examples-section {
+        width: 100%;
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .example-title {
+        margin-top: 0;
+      }
+      
+      .examples-section iframe {
+        width: 100%;
+        height: 100%;
+        
+        background: #fff;
+      }
+      .examples-section iframe.loading {
+        opacity: 0;
+      }
+    </style>
   </head>
   <body>
-    <div id="wrapper">
-      <section id="carouselExample">
-        <h2 class="title">Carousel</h2>
+    <div id="wrapper" class="wrapper">
+      <nav id="examplesNav" class="examples-nav"></nav>
+      <section class="examples-section">
+        <h2 id="examplesTitle" class="example-title"></h2>
+        <iframe id="examplesFrame"></iframe>
+      </section>
+      
+      <script>
+        const examples = [
+          { label: 'Accordion Menu', name: 'accordion-menu' },
+          { label: 'Auto-Complete Input', name: 'auto-complete-input' },
+          { label: 'Carousel', name: 'carousel' },
+          { label: 'Dialog', name: 'dialog' },
+          { label: 'Directory Listing', name: 'directory-listing' },
+          { label: 'Flyout', name: 'flyout' },
+          { label: 'Icons', name: 'icons' },
+          { label: 'Indicators', name: 'indicators' },
+          { label: 'Rating', name: 'rating' },
+          { label: 'Timeline', name: 'timeline' },
+          { label: 'Toggle', name: 'toggle' },
+        ];
+        const navMarkup = examples.map(({ label, name }) => `<li><button class="examples-nav__item" value="${name}">${label}</button></li>`);
+        const examplesNav = document.getElementById('examplesNav');
+        const examplesTitle = document.getElementById('examplesTitle');
+        const examplesFrame = document.getElementById('examplesFrame');
         
-        <nav>
-          <div class="control">
-            <button id="carouselRandomize">Randomize</button>
-          </div>
-          <div class="control">
-            <label>Item Count</label>
-            <input type="number" id="carouselItemCount" min="3" max="20" value="10" />
-          </div>
-          <div class="control">
-            <label for="carouselNav1">Nav 1</label>
-            <input type="checkbox" id="carouselNav1" checked />
-          </div>
-          <div class="control">
-            <label for="carouselNav2">Nav 2</label>
-            <input type="checkbox" id="carouselNav2" checked />
-          </div>
-          <div class="control">
-            <label for="carouselNav2Position">Nav 2 Position</label>
-            <select id="carouselNav2Position">
-              <option value="before">Before</option>
-              <option value="after" selected>After</option>
-            </select>
-          </div>
-          <div class="control">
-            <label for="carouselVertical">Vertical</label>
-            <input type="checkbox" id="carouselVertical" />
-          </div>
-          <div class="control">
-            <label for="carouselMockImgs">Mock Images</label>
-            <input type="checkbox" id="carouselMockImgs" checked />
-          </div>
-          <div class="control">
-            <label for="carouselUseImgs">Images</label>
-            <input type="checkbox" id="carouselUseImgs" checked />
-          </div>
-          <div class="control">
-            <label for="carouselUseAnchors">Anchors</label>
-            <input type="checkbox" id="carouselUseAnchors" />
-          </div>
-          <div class="control">
-            <label for="carouselUseCards">Cards</label>
-            <input type="checkbox" id="carouselUseCards" />
-          </div>
-        </nav>
-        
-        <custom-carousel nav1 nav2></custom-carousel>
-        
-        <style>
-          custom-carousel > * {
-            display: inline-block;
-            vertical-align: top;
-          }
-          custom-carousel:not([vertical]) > *:not(:first-child) {
-            margin-left: 3px;
-          }
-          custom-carousel[vertical] > *:not(:first-child) {
-            margin-top: 3px;
-          }
+        function loadExample(filename) {
+          const exampleSrc = `examples/${filename}.html`;
+          let exampleLabel;
           
-          .carousel-card {
-            padding: 0.25em;
-            border: solid 1px #666;
-            border-radius: 0.25em;
-            background: #fff;
-          }
-          .carousel-card h3 {
-            margin-top: 0;
-          }
-          custom-carousel:not([vertical]) .carousel-card {
-            width: 11em;
-            min-height: 100%;
-          }
-          custom-carousel[vertical] .carousel-card {
-            width: 100%;
-            height: 15em;
-          }
+          [...examplesNav.querySelectorAll('.examples-nav__item')].forEach((el) => {
+            const selected = el.value === filename;
+            el.disabled = selected;
+            if (selected) exampleLabel = el.textContent;
+          });
           
-          .carousel-link {
-            outline: solid 4px #0076ff;
-            outline-offset: -4px;
-          }
-          
-          .carousel-img,
-          .carousel-link img {
-            pointer-events: none;
-          }
-          custom-carousel:not([vertical]) .carousel-img,
-          custom-carousel:not([vertical]) .carousel-link img {
-            height: 100%;
-          }
-          custom-carousel[vertical] .carousel-img,
-          custom-carousel[vertical] .carousel-link img {
-            width: 100%;
-          }
-        </style>
-        
-        <script>
-          // Generating all the random mock images is taxing, so let everything
-          // else load first, and then do all the heavy lifting.
-          window.addEventListener('load', () => {
-            const CAROUSEL_ITEM_SLOT = 'item';
-            const randomColor = () => {
-              const token = '000000';
-              const color = Math.floor(Math.random() * 16777215).toString(16);
-              return `#${token.substring(0, token.length - `${color}`.length) + color}`;
-            };
-            const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-            const randomColors = Array(20).fill('').map(() => randomColor());
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const genMockImg = (width, height) => {
-              const grd = ctx.createLinearGradient(width, 0, width, height);
-              canvas.width = width;
-              canvas.height = height;
-              grd.addColorStop(0, randomColors[randomNumber(0, 19)]);
-              grd.addColorStop(1, randomColors[randomNumber(0, 19)]);
-              ctx.fillStyle = grd;
-              ctx.fillRect(0, 0, width, height);
-              return canvas.toDataURL();
-            };
-            const mockImgs = {
-              landscape: Array(20).fill('').map(() => genMockImg(4, 3)),
-              portrait: Array(20).fill('').map(() => genMockImg(3, 4)),
-              square: Array(20).fill('').map(() => genMockImg(4, 4)),
-            };
-            const realImgs = {
-              landscape: [
-                'https://images.unsplash.com/photo-1554773228-91f39c0e6cb4?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDF8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1530679361860-63f81c6e9268?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDN8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1494935362342-566c6d6e75b5?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629782326485-b9e296df3ce1?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1622144672176-4e8d4668455f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1615731439720-47878ecc1ac6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1616144848810-11eec385ddbd?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI4fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1617014673615-8e0e73b06d56?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDMwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1619364726002-dfd4fdaee5f2?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDMxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1619266465172-02a857c3556d?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDMyfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1627441943833-8d930796dde7?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDM0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629805775501-8cd814f233f8?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDQxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1621472124503-a760c1146f44?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDUxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1622357102666-c9f68f951fa6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDUzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1625242420602-a22dd7692b82?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDU3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1627719736178-dfadf8f370d9?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDYzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1518343265568-51eec52d40da?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY1fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1627896248725-0a4171d10d4d?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629463581929-1bb8a27e7bbb?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDcxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629464565884-123b6e6f90c1?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDczfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-              ],
-              portrait: [
-                'https://images.unsplash.com/photo-1619724509229-18c42de2bf77?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEyfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1591840813416-c1cf70cd4022?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1615631150931-d15f51273758?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDR8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1551740991-c2d498028d1c?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDV8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1551655510-0d9379924e92?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDh8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1605545255361-2e6bdc58ca55?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDl8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1620234912926-d35b5f9d0be0?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDd8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1610475562502-fe51f86be4ef?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1519707761676-d6e4bb96af7f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDExfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1622946802124-5f2bd4389468?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE0fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1511677254207-d2db235ccfe1?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEzfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629964208013-e1d5eea25b3e?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE2fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629959059803-0dc732a96d15?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE4fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1580110104531-6dbe72d63c40?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629995297911-2de2cf765ee6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE5fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629995419770-01ac34d94a2f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIxfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1630003738909-fdf1c664cdcd?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629878791291-c8fb23b25c42?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIyfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629576728726-23f557c8010f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI1fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629866035441-56f6a9fe2c51?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI2fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-              ],
-              square: [
-                'https://images.unsplash.com/photo-1576672418367-e8eeec036f43?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1525770473232-8ad750e600ee?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDU2fHJuU0tESHd3WVVrfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1629814213050-980e57db3c28?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDQwfDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1629516675579-9d3e908ebc17?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY3fDZzTVZqVExTa2VRfHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1628357146270-1baefa4ba018?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI0NHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1628155524928-35c02b8ac4d3?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDI1NHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1618947102627-959d2d008dd5?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDY5Nnw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1604580322940-fec5b19db68c?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDg2M3w2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1568563252466-c73a4e2f7e94?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDkwNHw2c01WalRMU2tlUXx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                'https://images.unsplash.com/photo-1618661057302-8b01d93bd898?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDEzOTN8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1617929912008-eaa24413b9ac?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE0MzB8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1617191519105-d07b98b10de6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1MDV8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1617128734662-66da6c1d3505?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1MDZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1550853024-fae8cd4be47f?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE2ODB8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1615057638606-a678f5f27bda?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE3NzV8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1615114814213-a245ffc79e9a?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE3NzZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1481819613568-3701cbc70156?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE4NTN8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1613775970661-f45429c408d6?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE5MTJ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1613759730654-3fa5a0146c03?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE5MTZ8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-                'https://images.unsplash.com/photo-1612256360570-2901427358af?ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDIxNjl8NnNNVmpUTFNrZVF8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60',
-              ],
-            };
-            const templates = {
-              anchor: `
-                <a slot="${CAROUSEL_ITEM_SLOT}" class="carousel-link" href="#" ar="ASPECT_RATIO" draggable="false">
-                  <img src="IMG_SRC" alt="image" draggable="false" />
-                </a>
-              `,
-              card: `
-                <div slot="${CAROUSEL_ITEM_SLOT}" class="carousel-card" ar="portrait">
-                  <h3>Card Title</h3>
-                </div>
-              `,
-              img: `<img slot="${CAROUSEL_ITEM_SLOT}" class="carousel-img" src="IMG_SRC" alt="image" ar="ASPECT_RATIO" draggable="false" />`,
-            };
-            const carousel = document.querySelector('custom-carousel');
-            const itemCountInput = document.getElementById('carouselItemCount');
-            const mockImgsInput = document.getElementById('carouselMockImgs');
-            const useImgsInput = document.getElementById('carouselUseImgs');
-            const useAnchorsInput = document.getElementById('carouselUseAnchors');
-            const useCardsInput = document.getElementById('carouselUseCards');
-            
-            let randomItems = [];
-            let uniqueItems = [];
-            
-            const getUniqueRandomItem = ({
-              imgType: type,
-              imgTypes,
-              templateName: template,
-              templateNames,
-            }) => {
-              const imgNdx = randomNumber(0, 19);
-              const imgType = type || imgTypes[randomNumber(0, imgTypes.length - 1)];
-              const templateName = template || templateNames[randomNumber(0, templateNames.length - 1)];
-              const currItem = `[${templateName}][${imgType}][${imgNdx}]`;
-              
-              if (!uniqueItems.includes(currItem)) {
-                uniqueItems.push(currItem);
-                return { imgNdx, imgType, templateName };
-              }
-              
-              return getUniqueRandomItem({ imgType, imgTypes, templateName, templateNames });
-            };
-            
-            function render() {
-              const itemCount = +itemCountInput.value;
-              const imgMap = (mockImgsInput.checked) ? mockImgs : realImgs;
-              const imgTypes = Object.keys(imgMap);
-              const templateNames = [];
-              
-              if (useImgsInput.checked) templateNames.push('img');
-              if (useAnchorsInput.checked) templateNames.push('anchor');
-              if (useCardsInput.checked) templateNames.push('card');
-              
-              carousel.innerHTML = Array(itemCount).fill('').map((_, ndx) => {
-                let markup = '';
+          examplesFrame.addEventListener('load', () => {
+            const styles = ['reset', 'examples'].map((styleFilename) => {
+              return new Promise((resolve, reject) => {
+                const styles = document.createElement('link');
+                styles.href = `../css/${styleFilename}.css`;
+                styles.rel = 'stylesheet'; 
+                styles.type = 'text/css';
                 
-                if (templateNames.length) {
-                  if (!randomItems[ndx]) {
-                    randomItems[ndx] = getUniqueRandomItem({ imgTypes, templateNames });
-                  }
-                  
-                  const { imgNdx, imgType, templateName } = randomItems[ndx];
-                  let templateMarkup = templates[templateName];
-                  
-                  if (templateName === 'anchor' || templateName === 'img') {
-                    templateMarkup = templates[templateName]
-                      .replace('ASPECT_RATIO', imgType)
-                      .replace('IMG_SRC', imgMap[imgType][imgNdx]);
-                  }
-                  
-                  markup = templateMarkup;
-                }
-                
-                return markup;
-              }).join('');
-            }
-            
-            function handleNavUpdate(ev) {
-              const { target } = ev;
-              
-              switch (target.id) {
-                case 'carouselItemCount':
-                  render();
-                  break;
-                
-                case 'carouselMockImgs':
-                case 'carouselRandomize':
-                case 'carouselUseImgs':
-                case 'carouselUseAnchors':
-                case 'carouselUseCards':
-                  randomItems = [];
-                  uniqueItems = [];
-                  render();
-                  break;
-                
-                case 'carouselNav1':
-                  carousel.nav1 = target.checked;
-                  break;
-                
-                case 'carouselNav2':
-                  carousel.nav2 = target.checked;
-                  break;
-                
-                case 'carouselNav2Position':
-                  carousel.nav2Position = target.value;
-                  break;
-                
-                case 'carouselVertical':
-                  carousel.height = (target.checked) ? '25em' : '';
-                  carousel.vertical = target.checked;
-                  break;
-                
-                default: {
-                  if (target.nodeName === 'A') {
-                    ev.preventDefault();
-                    
-                    if (!carousel.wasDragging) {
-                      const img = target.querySelector('img');
-                      const imgURL = img.src;
-                      const width = target.getAttribute('ar') === 'landscape' ? 600 : 400;
-                      const winArgs = ['CarouselPopUp', `top=100, left=100, width=${width}, height=400`];
-                      
-                      if (mockImgsInput.checked) {
-                        const win = window.open('', ...winArgs);
-                        const image = new Image();
-                        image.src = imgURL;
-                        image.style.cssText = `
-                          height: 100%;
-                          display: block;
-                        `;
-                        win.document.write(image.outerHTML);
-                        win.document.close();
-                      }
-                      else {
-                        window.open(imgURL, ...winArgs);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            
-            document.getElementById('carouselExample').addEventListener('change', handleNavUpdate);
-            document.getElementById('carouselExample').addEventListener('click', handleNavUpdate);
-            carousel.addEventListener(window.CustomCarousel.events.advanced, ({ detail }) => {
-              const { sectionNumber, totalSections } = detail;
-              console.log(`Carousel advanced to section ${sectionNumber} of ${totalSections}`);
-            });
-            carousel.addEventListener(window.CustomCarousel.events.regressed, ({ detail }) => {
-              const { sectionNumber, totalSections } = detail;
-              console.log(`Carousel regressed to section ${sectionNumber} of ${totalSections}`);
+                styles.addEventListener('load', () => { resolve(); });
+                styles.addEventListener('error', () => { reject(); });
+                examplesFrame.contentDocument.head.appendChild(styles);
+              });
             });
             
-            render();
-          });
+            Promise.all(styles)
+              .then(() => { examplesFrame.classList.remove('loading'); })
+              .catch(() => { alert('Error loading styles'); });
+          }, { once: true });
           
-        </script>
-      </section>
-      <section id="indicatorsExample">
-        <h2 class="title">Indicators</h2>
-        
-        <nav>
-          <div class="control">
-            <button type="button" id="indicatorsPlayPause">Play</button>
-          </div>
-          <div class="control">
-            <label>Color</label>
-            <input id="indicatorColorInput" type="color" />
-          </div>
-        </nav>
-        
-        <div data-indicator-type="leapfrog">
-          <div data-type="default">
-            <custom-indicator-leapfrog speed="700"></custom-indicator-leapfrog>
-            <custom-indicator-leapfrog></custom-indicator-leapfrog>
-          </div>
-        </div>
-        
-        <div data-indicator-type="spinner">
-          <div data-type="default">
-            <custom-indicator-spinner speed="1000"></custom-indicator-spinner>
-            <custom-indicator-spinner></custom-indicator-spinner>
-            <custom-indicator-spinner speed="300"></custom-indicator-spinner>
-          </div>
-          <div data-type="rounded">
-            <custom-indicator-spinner type="rounded" speed="1000"></custom-indicator-spinner>
-            <custom-indicator-spinner type="rounded"></custom-indicator-spinner>
-            <custom-indicator-spinner type="rounded" speed="300"></custom-indicator-spinner>
-          </div>
-          <div data-type="trail">
-            <custom-indicator-spinner type="trail" speed="1000"></custom-indicator-spinner>
-            <custom-indicator-spinner type="trail"></custom-indicator-spinner>
-            <custom-indicator-spinner type="trail" speed="300"></custom-indicator-spinner>
-          </div>
-        </div>
-        
-        <style>
-          #indicatorsExample [data-indicator-type]::before {
-            content: 'Indicator Type: "'attr(data-indicator-type)'"';
-            border-bottom: solid 1px;
-            margin-bottom: 0.5em;
-            display: inline-block;
-          }
-          #indicatorsExample [data-indicator-type]:not(:first-of-type) {
-            margin-top: 1em;
-          }
+          examplesFrame.classList.add('loading');
+          examplesFrame.src = exampleSrc;
+          examplesFrame.title = `Example for ${exampleLabel}`;
+          examplesTitle.textContent = exampleLabel;
           
-          #indicatorsExample [data-type] {
-            display: flex;
-            align-items: center;
-          }
-          #indicatorsExample [data-type]::before {
-            content: 'Type: "'attr(data-type)'"';
-            min-width: 7.5em;
-            margin-right: 0.5em;
-          }
-          #indicatorsExample [data-type]:not(:first-of-type) {
-            margin-top: 0.5em;
-          }
-          
-          #indicatorsPlayPause {
-            width: 4em;
-          }
+          const url = new URL(window.location);
+          url.searchParams.set('e', filename);
+          window.history.replaceState({}, '', url.href);
+        }
         
-          custom-indicator-spinner {
-            font-size: 2em;
-            margin: 0 0.25em;
-          }
-        </style>
+        examplesNav.innerHTML = `<ul>${navMarkup.join('')}</ul>`;
+        examplesNav.addEventListener('click', ({ target }) => {
+          if (target.nodeName === 'BUTTON') loadExample(target.value);
+        });
         
-        <script>
-          const indicators = document.querySelectorAll(`
-            custom-indicator-leapfrog,
-            custom-indicator-spinner
-          `);
-          
-          document.getElementById('indicatorsPlayPause').addEventListener('click', ({ currentTarget: btn }) => {
-            let btnText, play;
-            if (btn.textContent === 'Play') {
-              btnText = 'Pause';
-              play = true;
-            }
-            else {
-              btnText = 'Play';
-              play = false;
-            }
-            
-            btn.textContent = btnText;
-            indicators.forEach(el => { el.play = play; });
-          });
-          document.getElementById('indicatorColorInput').addEventListener('input', ({ currentTarget: { value } }) => {
-            indicators.forEach(el => { el.color = value; });
-          });
-        </script>
-      </section>
-      <section id="dirListingExample">
-        <h2 class="title">Directory Listing</h2>
-        
-        <div class="dir-listings">
-          <custom-directory-listing>
-            /
-              /bin
-            /root1
-              /sub1
-                - [file.js](#)
-                - file.txt
-              /sub2
-                - file.css
-              /sub3
-              /sub4
-                /sub4_1
-              - index.html
-            /root2
-            - .bashrc
-          </custom-directory-listing>
-          <custom-directory-listing
-            listData="[[&quot;&quot;,[[&quot;bin&quot;,[]]]],[&quot;root1&quot;,[[&quot;sub1&quot;,[{&quot;link&quot;:&quot;#&quot;,&quot;name&quot;:&quot;file.js&quot;},{&quot;name&quot;:&quot;file.txt&quot;}]],[&quot;sub2&quot;,[{&quot;name&quot;:&quot;file.css&quot;}]],[&quot;sub3&quot;,[]],[&quot;sub4&quot;,[[&quot;sub4_1&quot;,[]]]],{&quot;name&quot;:&quot;index.html&quot;}]],[&quot;root2&quot;,[]],{&quot;name&quot;:&quot;.bashrc&quot;}]"
-            expanded
-          ></custom-directory-listing>
-          <custom-directory-listing
-            customStyles="
-              .file[data-ext='css'] {
-                --file--color--fill: cyan;
-                --file--color--stroke: blue;
-              }
-              .file[data-ext='html'] {
-                --file--color--fill: #ffff6c;
-                --file--color--stroke: #8a6c00;
-              }
-              .file[data-ext='js'] {
-                --file--color--fill: orange;
-                --file--color--stroke: red;
-              }
-              
-              .folder[open]:not([empty]):hover > .folder__name .icon {
-                --folder--color--fill: #666;
-                --folder--color--stroke: #fff;
-              }
-            "
-            listData="[[&quot;&quot;,[[&quot;bin&quot;,[]]]],[&quot;root1&quot;,[[&quot;sub1&quot;,[{&quot;link&quot;:&quot;#&quot;,&quot;name&quot;:&quot;file.js&quot;},{&quot;name&quot;:&quot;file.txt&quot;}]],[&quot;sub2&quot;,[{&quot;name&quot;:&quot;file.css&quot;}]],[&quot;sub3&quot;,[]],[&quot;sub4&quot;,[[&quot;sub4_1&quot;,[]]]],{&quot;name&quot;:&quot;index.html&quot;}]],[&quot;root2&quot;,[]],{&quot;name&quot;:&quot;.bashrc&quot;}]"
-            expanded
-          ></custom-directory-listing>
-        </div>
-        
-        <style>
-          .dir-listings {
-            display: flex;
-          }
-          
-          custom-directory-listing {
-            border: solid 1px #ccc;
-          }
-          custom-directory-listing:not(:first-of-type) {
-            margin-left: 1em;
-          }
-          custom-directory-listing:nth-of-type(3) {
-            --color--hover: #fff;
-            --color--text: #ddd;
-            --folder--color--fill: #333;
-            --folder--color--stroke: #eee;
-            
-            background: #333;
-          }
-        </style>
-        
-        <script>
-          document.getElementById('dirListingExample').addEventListener(window.CustomDirectoryListing.events.fileClick, (ev) => {
-            ev.preventDefault();
-            console.log(ev.detail);
-          });
-        </script>
-      </section>
-      <section id="ratingsExample">
-        <h2 class="title">Rating</h2>
-        
-        <nav>
-          <div class="control vert">
-            <label>BG Color</label>
-            <input id="starBGColorInput" type="color" />
-          </div>
-          <div class="control vert">
-            <label>FG Colors</label>
-            <div class="fg-colors">
-              <input id="starFGColorInput1" type="color" />
-              <input id="starFGColorInput2" type="color" />
-            </div>
-          </div>
-          <div class="control vert">
-            <label>Stroke Color</label>
-            <input id="starStrokeColorInput" type="color" />
-          </div>
-          <div class="control vert">
-            <label>
-              Star Count
-              <span class="vals">
-                (<span id="starCount"></span>)
-              </span>
-            </label>
-            <input id="starCountRange" type="range" min="1" max="10">
-          </div>
-          <div class="control vert">
-            <label>
-              Star Inner Radius
-              <span class="vals">
-                (<span id="starInnerRadius"></span>)
-              </span>
-            </label>
-            <input id="starInnerRadiusRange" type="range" step="0.1">
-          </div>
-          <div class="control vert">
-            <label>
-              Star Points
-              <span class="vals">
-                (<span id="starPoints"></span>)
-              </span>
-            </label>
-            <input id="starPointsRange" type="range" min="2" max="30">
-          </div>
-          <div class="control vert">
-            <label>
-              Rating
-              <span class="vals">
-                (<span id="ratingCurrent"></span> / <span id="ratingMax"></span>)
-              </span>
-            </label>
-            <input id="ratingRange" type="range" min="0" max="100" step="5">
-          </div>
-        </nav>
-        
-        <custom-rating rating="2.5"></custom-rating>
-        <custom-rating bgColor="#000" gradientAngle="270" rating="4.5" strokeColor="#000000" strokeWidth="3"></custom-rating>
-        
-        <style>
-          custom-rating {
-            font-size: 2em;
-            padding: 0.25em 0.5em;
-            border: solid 1px #bbb;
-            border-radius: 0.25em;
-            margin-top: 0.25em;
-            display: inline-block;
-          }
-          custom-rating:not(:first-of-type) {
-            margin-left: 0.25em;
-          }
-        
-          .fg-colors {
-            width: 100%;
-            display: flex;
-          }
-        </style>
-        
-        <script>
-          const bgColor = document.getElementById('starBGColorInput');
-          const fgColor1 = document.getElementById('starFGColorInput1');
-          const fgColor2 = document.getElementById('starFGColorInput2');
-          const ratingCurrent = document.getElementById('ratingCurrent');
-          const ratingMax = document.getElementById('ratingMax');
-          const ratingRange = document.getElementById('ratingRange');
-          const starCountTxt = document.getElementById('starCount');
-          const starCountRange = document.getElementById('starCountRange');
-          const starInnerRadiusRange = document.getElementById('starInnerRadiusRange');
-          const starInnerRadiusTxt = document.getElementById('starInnerRadius');
-          const starPointsRange = document.getElementById('starPointsRange');
-          const starPointsTxt = document.getElementById('starPoints');
-          const starStrokeColor = document.getElementById('starStrokeColorInput');
-          const dynamicRatings = document.querySelector('custom-rating:nth-of-type(2)');
-          
-          fgColor1.value = window.CustomRating.defaultFGColor;
-          fgColor2.value = '#FF0000';
-          ratingRange.value = (dynamicRatings.rating / dynamicRatings.starCount) * 100;
-          starCountRange.value = window.CustomRating.defaultStarCount;
-          starInnerRadiusRange.min = 0.1;
-          starInnerRadiusRange.max = 1;
-          starInnerRadiusRange.value = 0.5;
-          starPointsRange.value = window.CustomRating.defaultStarPoints;
-          starStrokeColor.value = dynamicRatings.strokeColor;
-          
-          bgColor.addEventListener('input', ({ currentTarget: { value } }) => {
-            dynamicRatings.bgColor = value;
-          });
-          document.querySelector('.fg-colors').addEventListener('input', () => {
-            const fg1 = fgColor1.value;
-            const fg2 = fgColor2.value;
-            dynamicRatings.fgColor = (fg1 === fg2) ? fg1 : `${fg1}|${fg2}`;
-          });
-          ratingRange.addEventListener('input', ({ currentTarget: { value } }) => {
-            const ratingsPerc = +value;
-            const rating = +(dynamicRatings.starCount * (ratingsPerc * 0.01)).toFixed(2);
-            
-            dynamicRatings.rating = rating;
-            ratingCurrent.innerText = rating;
-          });
-          starCountRange.addEventListener('input', ({ currentTarget: { value } }) => {
-            const count = +value;
-            
-            if (count) {
-              dynamicRatings.starCount = count;
-              ratingCurrent.innerText = ((ratingRange.value * 0.01) * count).toFixed(2);
-              ratingMax.innerText = count;
-              starCountTxt.innerText = count;
-            }
-          });
-          starInnerRadiusRange.addEventListener('input', ({ currentTarget: { value } }) => {
-            dynamicRatings.starInnerRadius = value;
-            starInnerRadiusTxt.innerText = value;
-          });
-          starPointsRange.addEventListener('input', ({ currentTarget: { value } }) => {
-            dynamicRatings.starPoints = value;
-            starPointsTxt.innerText = value;
-          });
-          starStrokeColor.addEventListener('input', ({ currentTarget: { value } }) => {
-            dynamicRatings.strokeColor = value;
-          });
-          
-          [...document.querySelectorAll('#ratingsExample nav input')].forEach((el) => {
-            el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
-          });
-        </script>
-      </section>
-      <section id="accordionExample">
-        <h2 class="title">Accordion Menu</h2>
-        
-        <div class="accordions">
-          <custom-accordion-menu>
-            <custom-accordion-menu-group>
-              <label slot="label">Default group</label>
-              <a slot="item" href="#">Link 1</a>
-              <a slot="item" href="#">Link 2</a>
-            </custom-accordion-menu-group>
-            <custom-accordion-menu-group open>
-              <div slot="label">Custom group</div>
-              <button slot="item">Button 1</button>
-              <button slot="item">Button 2</button>
-              <button slot="item">Button 3</button>
-            </custom-accordion-menu-group>
-          </custom-accordion-menu>
-          <custom-accordion-menu single>
-            <custom-accordion-menu-group>
-              <label slot="label">Group 1</label>
-              <a slot="item" href="#">Link 1</a>
-              <a slot="item" href="#">Link 2</a>
-            </custom-accordion-menu-group>
-            <custom-accordion-menu-group open>
-              <div slot="label">Group 2</div>
-              <button slot="item">Button 1</button>
-              <button slot="item">Button 2</button>
-              <button slot="item">Button 3</button>
-            </custom-accordion-menu-group>
-          </custom-accordion-menu>
-        </div>
-        
-        <style>
-          .accordions {
-            display: grid;
-            grid-gap: 1em;
-            grid-template-areas: ". .";
-            grid-template-columns: auto auto;
-          }
-        
-          custom-accordion-menu:nth-of-type(1) custom-accordion-menu-group:nth-of-type(2) [slot="label"] {
-            font-weight: bold;
-            text-shadow: 0 2px 1px white;
-            background: linear-gradient(0deg, #dcdcdc, transparent);
-          }
-        </style>
-        
-        <script>
-          document.getElementById('accordionExample').addEventListener('click', (ev) => {
-            const type = ev.target.nodeName.toLowerCase();
-            if (type === 'button' || type === 'a') {
-              ev.preventDefault();
-              console.log(`${type === 'a' ? 'Link' : 'Button'} clicked`);
-            }
-          });
-        </script>
-      </section>
-      <section id="timelineExample">
-        <h2 class="title">Timeline</h2>
-        
-        <nav>
-          <div class="control">
-            <label>Points</label>
-            <input type="number" id="timelinePoints" min="2" max="20" value="2" />
-          </div>
-          <div class="control">
-            <label>Point Radius</label>
-            <input type="number" id="timelinePointRadius" min="0.5" max="5" value="1.5" step="0.25" />
-          </div>
-          <div class="control">
-            <label>Scale</label>
-            <input type="number" id="timelineScale" min="0.5" max="3" value="1" step="0.25" />
-          </div>
-          <div class="control">
-            <label>Stroke Color</label>
-            <input type="color" id="timelineStrokeColor" value="#dedede" />
-          </div>
-          <div class="control">
-            <label>Stroke Width</label>
-            <input type="number" id="timelineStrokeWidth" min="0.01" max="1" value="0.25" step="0.01" />
-          </div>
-        </nav>
-        
-        <div class="timelines-wrapper">
-          <custom-timeline vertical points="3"></custom-timeline>
-          <custom-timeline id="defaultTimeline"></custom-timeline>
-          <custom-timeline points="4"></custom-timeline>
-          <custom-timeline points="4" pointStates="1,s; 2,f; 3,r"></custom-timeline>
-        </div>
-        
-        <style>
-          .timelines-wrapper {
-            display: grid;
-            grid-gap: 1em;
-            grid-template-areas:
-              "v ."
-              "v ."
-              "v .";
-            grid-template-columns: 1.5em auto;
-          }
-          .timelines-wrapper custom-timeline[vertical] {
-            grid-area: v;
-          }
-        </style>
-        
-        <script>
-          const defaultTimeline = document.getElementById('defaultTimeline');
-          const timelines = [...document.querySelectorAll('custom-timeline')];
-          const timelinesWrapper = document.querySelector('.timelines-wrapper');
-          
-          document.getElementById('timelinePoints').addEventListener('input', ({ currentTarget: { value } }) => {
-            defaultTimeline.points = value;
-          });
-          document.getElementById('timelinePointRadius').addEventListener('input', ({ currentTarget: { value } }) => {
-            timelinesWrapper.style.gridTemplateColumns = `${value}em auto`;
-            timelines.forEach((timeline, ndx) => {
-              if (ndx === 0) timeline.setAttribute('pointRadius', value);
-              else timeline.pointRadius = value;
-            });
-          });
-          document.getElementById('timelineScale').addEventListener('input', ({ currentTarget: { value } }) => {
-            timelinesWrapper.style.fontSize = `${value}em`;
-          });
-          document.getElementById('timelineStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
-            timelines.forEach((timeline, ndx) => {
-              if (ndx === 0) timeline.setAttribute('strokeColor', value);
-              else timeline.strokeColor = value;
-            });
-          });
-          document.getElementById('timelineStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
-            timelines.forEach((timeline, ndx) => {
-              if (ndx === 0) timeline.setAttribute('strokeWidth', value);
-              else timeline.strokeWidth = value;
-            });
-          });
-        </script>
-      </section>
-      <section id="iconsExample">
-        <h2 class="title">Icons</h2>
-        
-        <nav>
-          <div class="control">
-            <button type="button" id="animateIcons">Animate</button>
-          </div>
-          <div class="control">
-            <label>Scale</label>
-            <input type="number" id="iconScale" min="1" max="5" value="1" />
-          </div>
-          <div class="control">
-            <label>Stroke Color</label>
-            <input type="color" id="iconStrokeColor" value="#333333" />
-          </div>
-          <div class="control">
-            <label>Stroke Width</label>
-            <input type="number" id="iconStrokeWidth" min="1" max="10" value="2" />
-          </div>
-        </nav>
-        
-        <section>
-          <h3 class="title">Chevron</h2>
-            
-          <nav>
-            <div class="control">
-              <label>Length</label>
-              <input type="number" id="chevronLength" min="0.5" max="1" value="0.5" step="0.1" />
-            </div>
-          </nav>
-          
-          <div class="scale-wrapper">
-            <div class="icon-wrapper">
-              <custom-icon-chevron direction="up"></custom-icon-chevron>
-            </div>
-            <div class="icon-wrapper">
-              <custom-icon-chevron direction="down"></custom-icon-chevron>
-            </div>
-            <div class="icon-wrapper">
-              <custom-icon-chevron direction="left"></custom-icon-chevron>
-            </div>
-            <div class="icon-wrapper">
-              <custom-icon-chevron direction="right" fit></custom-icon-chevron>
-            </div>
-          </div>
-          
-        </section>
-        <section>
-          <h3 class="title">Check</h2>
-          <div class="scale-wrapper">
-            <div class="icon-wrapper">
-              <custom-icon-check on></custom-icon-check>
-            </div>
-            <div class="icon-wrapper">
-              <custom-icon-check animate off></custom-icon-check>
-            </div>
-            <div class="icon-wrapper">
-              <custom-icon-check animate on></custom-icon-check>
-            </div>
-          </div>
-        </section>
-        
-        <style>
-          .icon-wrapper {
-            padding: 0.5em;
-            border: solid 1px;
-            vertical-align: middle;
-            display: inline-flex;
-            align-items: center;
-          }
-        </style>
-        
-        <script>
-          const checks = [...document.querySelectorAll('custom-icon-check')];
-          const chevrons = [...document.querySelectorAll('custom-icon-chevron')];
-          const scaleWrappers = [...document.querySelectorAll('.scale-wrapper')];
-          
-          document.getElementById('animateIcons').addEventListener('click', () => {
-            checks.forEach((check) => {
-              check.on = !check.on;
-            });
-            chevrons.forEach((chevron) => { chevron.toggle(); });
-          });
-          document.getElementById('chevronLength').addEventListener('input', ({ currentTarget: { value } }) => {
-            chevrons.forEach((chevron, ndx) => {
-              if (ndx === 0) chevron.setAttribute('length', value);
-              else chevron.length = value;
-            });
-          });
-          document.getElementById('iconScale').addEventListener('input', ({ currentTarget: { value } }) => {
-            scaleWrappers.forEach(el => { el.style.fontSize = `${value}em`; });
-          });
-          document.getElementById('iconStrokeColor').addEventListener('input', ({ currentTarget: { value } }) => {
-            checks.forEach((check, ndx) => {
-              if (ndx === 0) check.setAttribute('strokeColor', value);
-              else check.strokeColor = value;
-            });
-            chevrons.forEach((chevron, ndx) => {
-              if (ndx === 0) chevron.setAttribute('strokeColor', value);
-              else chevron.strokeColor = value;
-            });
-          });
-          document.getElementById('iconStrokeWidth').addEventListener('input', ({ currentTarget: { value } }) => {
-            checks.forEach((check, ndx) => {
-              if (ndx === 0) check.setAttribute('strokeWidth', value);
-              else check.strokeWidth = value;
-            });
-            chevrons.forEach((chevron, ndx) => {
-              if (ndx === 0) chevron.setAttribute('strokeWidth', value);
-              else chevron.strokeWidth = value;
-            });
-          });
-        </script>
-      </section>
-      <section id="autoCompleteExample">
-        <h2 class="title">Auto-Complete Input</h2>
-        
-        <custom-auto-complete-input
-          customStyles="
-            .custom-autocomplete__list-item button {
-              margin: 0;
-              display: flex;
-              align-items: center;
-            }
-            .custom-autocomplete__list-item button * {
-              pointer-events: none;
-            }
-            .custom-autocomplete .icon {
-              width: 1em;
-              height: 1em;
-              border-radius: 100%;
-              margin-right: 0.5em;
-              background: pink;
-              display: inline-block;
-            }
-          "
-          placeholder="Filter Animals"
-        ></custom-auto-complete-input>
-        
-        <style>
-          #autoCompleteExample custom-auto-complete-input {
-            --max-list-height: 30vh;
-            
-            width: 70vw;
-            max-width: 600px;
-            z-index: 1;
-          }
-        </style>
-        
-        <script>
-          const autoCompleteInput = document.querySelector('custom-auto-complete-input');
-          
-          autoCompleteInput.addEventListener(window.CustomAutoCompleteInput.events.selected, ({
-            detail: { elements: filters, value },
-          }) => {
-            const matches = filters.map(({ dataset: { rawValue } }) => rawValue);
-            console.log(`Matches for "${value}":\n${JSON.stringify(matches, null, 2)}`);
-          });
-          autoCompleteInput.items = [
-            "Alligator Snapping Turtle",
-            "Baja California Pronghorn Buck",
-            "California Condor",
-            "Desert Bighorn Ram",
-            "Eastern Turkey Vulture",
-            "Fer-de-Lance Snake",
-            "Golden Crowned Sparrow",
-            "Hereford Bull",
-            "Java Chicken",
-            "Labrador Retriever",
-            "Mallard Duck",
-            "Neotropic Cormorant",
-            "Old Spot Pig",
-            "Pacific Loon",
-            "Rainbow Boa Snake",
-            "Sandhill Crane",
-            "Timber Rattlesnake",
-            "Virginia Opossum",
-            "Whooping Crane",
-          ].map((txt) => ({
-            attributes: { 'data-raw-value': txt },
-            label: `<span class="icon"></span>${txt}`,
-            value: txt.toLowerCase().replace(/\s/g, '-'),
-          }));
-          
-          // add a couple more items to the existing list
-          autoCompleteInput.items = [
-            ...autoCompleteInput.items,
-            ...[
-              "Wild Boar",
-              "Yellow-billed Loon",
-            ].map((txt) => ({
-              attributes: { 'data-raw-value': txt },
-              label: txt, // `value` will equal `label`, and no icon will be present
-            })),
-          ];
-        </script>
-      </section>
-      <section id="toggleExample">
-        <h2 class="title">Toggle</h2>
-        
-        <div class="toggles">
-          <form id="toggleForm">
-            <custom-toggle enabled></custom-toggle>
-            <custom-toggle id="custom" name="someName"></custom-toggle>
-            <custom-toggle circle solid></custom-toggle>
-          </form>
-          <pre></pre>
-        </div>
-        
-        <style>
-          .toggles {
-            display: flex;
-            align-items: center;
-          }
-          .toggles form {
-            margin: 0;
-          }
-          .toggles pre {
-            width: 100%;
-            color: #eee;
-            font-size: 1.25em;
-            line-height: 1.4em;
-            padding: 0.5em 0.75em;
-            border-radius: 0.5em;
-            margin: 0;
-            margin-left: 1em;
-            background: #333;
-          }
-          .toggles custom-toggle {
-            display: block;
-          }
-          .toggles custom-toggle:not(:first-of-type) {
-            margin-top: 0.5em;
-          }
-          .toggles custom-toggle:nth-of-type(3) {
-            --color--disabled: #ffa4c8;
-            --color--enabled: #46ccff;
-            --color--focused: #009827;
-            --color--toggle: #daf6da;
-          }
-        </style>
-        
-        <script>
-          const toggleForm = document.getElementById('toggleForm');
-          const togglesOutput = document.querySelector('#toggleForm + pre');
-          
-          function handleToggle() {
-            const formData = new FormData(toggleForm);
-            const output = [...formData.entries()]
-              .map(([name, value]) => `${name}: ${value}`)
-              .join('\n');
-            
-            togglesOutput.textContent = output;
-          }
-          
-          // Append any Custom Element data to Form data when it's requested.
-          // Only neccessary for Custom Elements using the Shadow DOM.
-          toggleForm.addEventListener('formdata', ({ formData }) => {
-            [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
-              formData.append(toggle.name, toggle.enabled);
-            });
-          });
-          
-          toggleForm.addEventListener(window.CustomToggle.events.toggled, handleToggle);
-          
-          handleToggle();
-        </script>
-      </section>
-      <section id="dialogExample">
-        <h2 class="title">Dialog</h2>
-        <button id="openDialogBtn">Open Dialog</button>
-        <button id="openModalBtn">Open Modal</button>
-        
-        <custom-dialog>
-          <div class="dialog-title" slot="dialogTitle">Dialog Title</div>
-          <div class="dialog-content" slot="dialogBody">
-            Click button to close Dialog.
-            <button type="button">Close Dialog</button>
-          </div>
-        </custom-dialog>
-        <custom-dialog modal>
-          <div class="dialog-title" slot="dialogTitle">Modal Title</div>
-          <div class="dialog-content" slot="dialogBody">
-            Click button to close Modal.
-            <button type="button">Close Modal</button>
-          </div>
-        </custom-dialog>
-        
-        <style>
-          .dialog-content {
-            padding: 1em;
-          }
-          .dialog-content button {
-            width: 100%;
-            margin-top: 0.5em;
-            display: block;
-          }
-          .dialog-content .dynamic {
-            padding: 0.5em;
-            border-radius: 0.25em;
-            margin: 0.5em 0;
-            background: #73ff73;
-          }
-        </style>
-        
-        <script>
-          const dE = document.getElementById('dialogExample');
-          const dialogs = [...document.querySelectorAll('custom-dialog')];
-          const [ dialog, modal ] = dialogs;
-          const openDialogBtn = document.getElementById('openDialogBtn');
-          const openModalBtn = document.getElementById('openModalBtn');
-          
-          dE.addEventListener(window.CustomDialog.events.closed, ({ detail: { modal } }) => {
-            console.log(`${modal ? 'Modal' : 'Dialog'} closed`);
-          });
-          
-          dialogs.forEach((d) => {
-            d.querySelector('[slot] button').addEventListener('click', () => {
-              d.open = false;
-            });
-          });
-          
-          let contentAdded;
-          openDialogBtn.addEventListener('click', () => {
-            dialog.open = true;
-            
-            if (!contentAdded) {
-              setTimeout(() => {
-                dialog.querySelector('[slot] button').insertAdjacentHTML('beforebegin', `
-                  <div class="dynamic">dynamic content added</div>
-                `);
-                contentAdded = true;
-              }, 1000);
-            }
-          });
-          
-          openModalBtn.addEventListener('click', () => {
-            modal.open = true;
-          });
-        </script>
-      </section>
-      <section id="flyoutExample">
-        <h2 class="title">Flyout</h2>
-        
-        <div id="flyouts">
-          <button type="button" data-open-from="top">Open From <b>top</b></button>
-          <custom-flyout from="top">
-            <div class="title" slot="flyoutTitle">Top Flyout</div>
-            <div class="content" slot="flyoutBody">Flyout content.</div>
-          </custom-flyout>
-          
-          <button type="button" data-open-from="right">Open From <b>right</b></button>
-          <custom-flyout from="right">
-            <div class="title" slot="flyoutTitle">Right Flyout</div>
-            <div class="content" slot="flyoutBody">Flyout content.</div>
-          </custom-flyout>
-          
-          <button type="button" data-open-from="bottom">Open From <b>bottom</b></button>
-          <custom-flyout from="bottom">
-            <div class="title" slot="flyoutTitle">Bottom Flyout</div>
-            <div class="content" slot="flyoutBody">Flyout content.</div>
-          </custom-flyout>
-          
-          <button type="button" data-open-from="left">Open From <b>left</b></button>
-          <custom-flyout from="left">
-            <div class="title" slot="flyoutTitle">Left Flyout</div>
-            <div class="content" slot="flyoutBody">Flyout content.</div>
-          </custom-flyout>
-        </div>
-        
-        <style>
-          #flyouts {
-            width: 100%;
-            height: 10em;
-            background: #ddd;
-            background-image:
-              radial-gradient(#aaa 20%, transparent 0),
-              radial-gradient(#aaa 20%, transparent 0);
-            background-size: 8px 8px;
-            background-position: 0 0, 8px 8px;
-            position: relative;
-            box-shadow: inset 0 5px 7px 0px #00000050;
-            overflow: hidden;
-          }
-          #flyouts button * {
-            pointer-events: none;
-          }
-          #flyouts button {
-            border: solid 1px #777;
-            padding: 1em;
-            background: #fff;
-            margin: 0;
-            box-shadow: 0 5px 7px 0px #00000050;
-            position: absolute;
-          }
-          #flyouts [data-open-from="top"],
-          #flyouts [data-open-from="bottom"] {
-            left: 50%;
-            transform: translateX(-50%);
-          }
-          #flyouts [data-open-from="top"] {
-            border-radius: 0 0 0.5em 0.5em;
-            border-top: none;
-            top: 0;
-          }
-          #flyouts [data-open-from="bottom"] {
-            border-radius: 0.5em 0.5em 0 0;
-            border-bottom: none;
-            bottom: 0;
-          }
-          #flyouts [data-open-from="left"],
-          #flyouts [data-open-from="right"] {
-            top: 50%;
-            transform: translateY(-50%);
-          }
-          #flyouts [data-open-from="left"] {
-            border-radius: 0 0.5em 0.5em 0;
-            border-left: none;
-            left: 0;
-          }
-          #flyouts [data-open-from="right"] {
-            border-radius: 0.5em 0 0 0.5em;
-            border-right: none;
-            right: 0;
-          }
-        
-          #flyouts .content {
-            min-width: 80vw;
-            min-height: 80vh;
-            padding: 1em;
-          }
-        </style>
-        
-        <script>
-          const flyouts = document.getElementById('flyouts');
-          
-          flyouts.addEventListener(window.CustomFlyout.events.closed, ({ detail: { from } }) => {
-            console.log(`Closed "${from}" Flyout`);
-          });
-          flyouts.addEventListener('click', ({ target: { dataset } }) => {
-            const { openFrom } = dataset;
-          
-            if (openFrom) {
-              const flyout = document.querySelector(`custom-flyout[from="${openFrom}"]`);
-              flyout.open = true;
-            }
-          });
-        </script>
-      </section>
+        const params = new URLSearchParams(window.location.search);
+        const firstExample = examplesNav.querySelector('.examples-nav__item').value;
+        loadExample(params.get('e') || firstExample);
+      </script>
     </div>
   </body>
 </html>
