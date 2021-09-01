@@ -1,0 +1,69 @@
+<script src="../js/components/CustomToggle.js"></script>
+
+<div class="toggles">
+  <form id="toggleForm">
+    <custom-toggle enabled></custom-toggle>
+    <custom-toggle id="custom" name="someName"></custom-toggle>
+    <custom-toggle circle solid></custom-toggle>
+  </form>
+  <pre></pre>
+</div>
+
+<style>
+  .toggles {
+    display: flex;
+    align-items: center;
+  }
+  .toggles form {
+    margin: 0;
+  }
+  .toggles pre {
+    width: 100%;
+    color: #eee;
+    font-size: 1.25em;
+    line-height: 1.4em;
+    padding: 0.5em 0.75em;
+    border-radius: 0.5em;
+    margin: 0;
+    margin-left: 1em;
+    background: #333;
+  }
+  .toggles custom-toggle {
+    display: block;
+  }
+  .toggles custom-toggle:not(:first-of-type) {
+    margin-top: 0.5em;
+  }
+  .toggles custom-toggle:nth-of-type(3) {
+    --color--disabled: #ffa4c8;
+    --color--enabled: #46ccff;
+    --color--focused: #009827;
+    --color--toggle: #daf6da;
+  }
+</style>
+
+<script>
+  const toggleForm = document.getElementById('toggleForm');
+  const togglesOutput = document.querySelector('#toggleForm + pre');
+  
+  function handleToggle() {
+    const formData = new FormData(toggleForm);
+    const output = [...formData.entries()]
+      .map(([name, value]) => `${name}: ${value}`)
+      .join('\n');
+    
+    togglesOutput.textContent = output;
+  }
+  
+  // Append any Custom Element data to Form data when it's requested.
+  // Only neccessary for Custom Elements using the Shadow DOM.
+  toggleForm.addEventListener('formdata', ({ formData }) => {
+    [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
+      formData.append(toggle.name, toggle.enabled);
+    });
+  });
+  
+  toggleForm.addEventListener(window.CustomToggle.events.toggled, handleToggle);
+  
+  handleToggle();
+</script>
