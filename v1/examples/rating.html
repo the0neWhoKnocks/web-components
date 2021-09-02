@@ -1,58 +1,31 @@
-<script src="../js/components/CustomRating.js"></script>
+<script src="./js/components/CustomRating.js"></script>
 
-<nav>
-  <div class="control vert">
-    <label>BG Color</label>
-    <input id="starBGColorInput" type="color" />
+<custom-controls>
+  <custom-control-color id="starBGColorInput" vertical>BG Color</custom-control-color>
+  <div class="fg-colors">
+    <custom-control-color id="starFGColorInput1" vertical>FG Color 1</custom-control-color>
+    <custom-control-color id="starFGColorInput2" vertical>FG Color 2</custom-control-color>
   </div>
-  <div class="control vert">
-    <label>FG Colors</label>
-    <div class="fg-colors">
-      <input id="starFGColorInput1" type="color" />
-      <input id="starFGColorInput2" type="color" />
-    </div>
-  </div>
-  <div class="control vert">
-    <label>Stroke Color</label>
-    <input id="starStrokeColorInput" type="color" />
-  </div>
-  <div class="control vert">
-    <label>
-      Count
-      <span class="vals">
-        (<span id="starCount"></span>)
-      </span>
-    </label>
-    <input id="starCountRange" type="range" min="1" max="10">
-  </div>
-  <div class="control vert">
-    <label>
-      Inner Radius
-      <span class="vals">
-        (<span id="starInnerRadius"></span>)
-      </span>
-    </label>
-    <input id="starInnerRadiusRange" type="range" step="0.1">
-  </div>
-  <div class="control vert">
-    <label>
-      Points
-      <span class="vals">
-        (<span id="starPoints"></span>)
-      </span>
-    </label>
-    <input id="starPointsRange" type="range" min="2" max="30">
-  </div>
-  <div class="control vert">
-    <label>
-      Rating
-      <span class="vals">
-        (<span id="ratingCurrent"></span> / <span id="ratingMax"></span>)
-      </span>
-    </label>
-    <input id="ratingRange" type="range" min="0" max="100" step="5">
-  </div>
-</nav>
+  <custom-control-color id="starStrokeColorInput" vertical>Stroke Color</custom-control-color>
+  <custom-control-range id="starCountRange" min="1" max="10" vertical>
+    Count
+    <span id="starCount" slot="val"></span>
+  </custom-control-range>
+  <custom-control-range id="starInnerRadiusRange" step="0.1" vertical>
+    Inner Radius
+    <span id="starInnerRadius" slot="val"></span>
+  </custom-control-range>
+  <custom-control-range id="starPointsRange" min="2" max="30" vertical>
+    Points
+    <span id="starPoints" slot="val"></span>
+  </custom-control-range>
+  <custom-control-range id="ratingRange" min="0" max="100" step="5" vertical>
+    Rating
+    <span slot="val">
+      <span id="ratingCurrent"></span> / <span id="ratingMax"></span>
+    </span>
+  </custom-control-range>
+</custom-controls>
 
 <custom-rating rating="2.5"></custom-rating>
 <custom-rating bgColor="#000" gradientAngle="270" rating="4.5" strokeColor="#000000" strokeWidth="3"></custom-rating>
@@ -71,8 +44,18 @@
   }
 
   .fg-colors {
-    width: 100%;
     display: flex;
+  }
+  
+  [slot="val"] {
+    display: inline-block;
+    text-align: center;
+  }
+  #starInnerRadiusRange [slot="val"] {
+    width: 1.5em;
+  }
+  #ratingRange [slot="val"] {
+    width: 4em;
   }
 </style>
 
@@ -139,7 +122,7 @@
     dynamicRatings.strokeColor = value;
   });
   
-  [...document.querySelectorAll('nav input')].forEach((el) => {
+  [...document.querySelectorAll('custom-control-color, custom-control-range')].forEach((el) => {
     el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
   });
 </script>
