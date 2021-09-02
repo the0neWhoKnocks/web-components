@@ -144,12 +144,19 @@
           writeToIframe(examplesFrame, '');
           
           fetchCache(exampleSrc).then((ex) => {
-            const styles = ['reset', 'examples'].map((styleFilename) => {
-              return `<link href="../css/${styleFilename}.css" rel="stylesheet" type="text/css" />`;
+            const styles = [
+              'reset',
+              'examples',
+            ].map((styleFilename) => `<link href="./css/${styleFilename}.css" rel="stylesheet" type="text/css" />`);
+            const scripts = [
+              'CustomControls',
+            ].map((scriptFilename) => {
+              return `<script src="./examples/controls/${scriptFilename}.js"><\/script>`; // eslint-disable-line no-useless-escape
             });
             
             writeToIframe(examplesFrame, `
               ${styles.join('\n')}
+              ${scripts.join('\n')}
               ${ex}
             `);
             
