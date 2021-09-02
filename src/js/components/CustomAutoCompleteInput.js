@@ -11,27 +11,12 @@
   const CSS_CLASS__INPUT_OVERLAY = `${ROOT_CLASS}__input-overlay`;
   const CSS_CLASS__INPUT_WRAPPER = `${ROOT_CLASS}__input-wrapper`;
   const CSS_CLASS__LIST = `${ROOT_CLASS}__list`;
-  const CSS_CLASS__LIST_ITEM = `${ROOT_CLASS}__list-item`;
-  const CSS_CLASS__LIST_ITEM_BTN = `${ROOT_CLASS}__list-item-btn`;
   
   const DEFAULT__MAX_LIST_HEIGHT = '75vh';
   
+  const formatItemData = (str) => str.toLowerCase().replace(/(\s|_)/g, '-');
+  
   class CustomAutoCompleteInput extends HTMLElement {
-    get customStyles() {
-      return this.els.customStyles.textContent;
-    }
-    set customStyles(styles) {
-      this.els.customStyles.textContent = styles;
-    }
-    
-    get items() {
-      return this.data.items;
-    }
-    set items(items) {
-      this.data.items = Array.isArray(items) ? items : [];
-      if (this.initialized) this.renderListItems();
-    }
-    
     get placeholder() {
       return this.els.input.placeholder;
     }
@@ -41,7 +26,9 @@
     }
     
     static get observedAttributes() {
-      return ['customstyles', 'items', 'placeholder'];
+      return [
+        'placeholder',
+      ];
     }
     
     static get events() {
@@ -57,15 +44,6 @@
         let _newVal = newVal;
         
         switch (attr) {
-          case 'customstyles': { this.customStyles = _newVal; break; }
-          case 'items': {
-            if (typeof _newVal === 'string' && _newVal.startsWith('[')) {
-              _newVal = JSON.parse(_newVal);
-            }
-            
-            this[attr] = _newVal;
-            break;
-          }
           default: { this[attr] = _newVal; }
         }
       }
@@ -76,7 +54,6 @@
       this.attachShadow({ mode: 'open' });
       
       const { shadowRoot } = this;
-      this.data = {};
       this.visibleListItems = [];
       
       shadowRoot.innerHTML = `
@@ -105,9 +82,10 @@
           
           .${CSS_CLASS__INPUT},
           .${CSS_CLASS__INPUT_OVERLAY} {
-            font: 400 1em system-ui;
             width: 100%;
+            font: 400 1em system-ui;
             padding: 0.5em 1em;
+            user-select: none;
           }
           
           .${CSS_CLASS__INPUT} {
@@ -151,48 +129,18 @@
             min-width: 100%;
             max-height: var(${CSS_VAR__MAX_LIST_HEIGHT});
             overflow-y: auto;
-            list-style: none;
-            padding: 0;
             border: solid 1px #ddd;
-            margin: 0;
             background-color: #fff;
             display: none;
             position: absolute;
             top: 100%;
             left: 0;
           }
-          .${CSS_CLASS__LIST} [data-autocomplete-item] {
+          
+          ::slotted([itemkey]) {
             display: none;
           }
-          .${CSS_CLASS__LIST_ITEM} {
-            color: #000;
-            font-size: inherit;
-            width: 100%;
-            text-decoration: none;
-            text-align: left;
-            border: none;
-            padding: 0;
-            background: transparent;
-            cursor: pointer;
-          }
-          .${CSS_CLASS__LIST_ITEM_BTN} {
-            width: 100%;
-            font-size: 1rem;
-            text-align: left;
-            padding: 1em;
-            border: none;
-            background: #fff;
-            display: block;
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-          }
-          .${CSS_CLASS__LIST_ITEM_BTN}:focus,
-          .${CSS_CLASS__LIST_ITEM_BTN}:hover {
-            background: #eee;
-          }
         </style>
-        <style id="customStyles"></style>
         <style id="autocompleteStyles"></style>
         
         <div class="${ROOT_CLASS}">
@@ -201,16 +149,18 @@
             <div class="${CSS_CLASS__INPUT_OVERLAY}"></div>
             <button class="${CSS_CLASS__CLEAR_BTN}" type="button">&#10005;</button>
           </div>
-          <ul class="${CSS_CLASS__LIST}"></ul>
+          <div class="${CSS_CLASS__LIST}">
+            <slot></slot>
+          </div>
         </div>
       `;
       
       this.els = {
-        customStyles: shadowRoot.querySelector('#customStyles'),
         input: shadowRoot.querySelector(`.${CSS_CLASS__INPUT}`),
         inputOverlay: shadowRoot.querySelector(`.${CSS_CLASS__INPUT_OVERLAY}`),
         list: shadowRoot.querySelector(`.${CSS_CLASS__LIST}`),
         listStyles: shadowRoot.querySelector('#autocompleteStyles'),
+        slot: shadowRoot.querySelector('slot'),
         wrapper: shadowRoot.querySelector(`.${ROOT_CLASS}`),
       };
       
@@ -225,41 +175,8 @@
     }
     
     connectedCallback() {
-      this.renderListItems();
       this.addListeners();
       this.initialized = true;
-    }
-    
-    formatItemData(str) {
-      return str.toLowerCase().replace(/(\s|_)/g, '-');
-    }
-    
-    renderListItems() {
-      if (this.data.items && Array.isArray(this.data.items)) {
-        this.els.list.innerHTML = this.data.items.map(({ attributes = {}, label = '', value = '' }) => {
-          const atts = Object.keys(attributes).map(att => `${att}="${attributes[att]}"`).join(' ');
-          let _label = label;
-          let _value = value;
-          
-          if (!_label && _value) _label = _value;
-          if (!_value && _label) _value = _label;
-          
-          return `
-            <li
-              class="${CSS_CLASS__LIST_ITEM}"
-              data-autocomplete-item="${this.formatItemData(_value)}"
-            >
-              <button 
-                class="${CSS_CLASS__LIST_ITEM_BTN}"
-                type="button"
-                value="${_value}"
-                tabindex="-1"
-                ${atts}
-              >${_label}</button>
-            </li>
-          `;
-        }).join('');
-      }
     }
     
     updateListStyles(rules = '') {
@@ -279,12 +196,12 @@
         const query = ev.currentTarget.value;
         const rule = (query !== '')
           ? `
-            .${CSS_CLASS__LIST} [data-autocomplete-item*="${this.formatItemData(query)}"] {
+            ::slotted([itemkey*="${formatItemData(query)}"]) {
               display: block;
             }
           `
           : `
-            .${CSS_CLASS__LIST} [data-autocomplete-item] {
+            ::slotted([itemkey]) {
               display: block;
             }
           `;
@@ -301,9 +218,8 @@
       
       if (this.els.list.offsetHeight !== 0) {
         // find the first visible item in the drop down to select
-        const items = [...this.els.list.querySelectorAll(`.${CSS_CLASS__LIST_ITEM_BTN}`)];
-        this.visibleListItems = items.reduce((arr, item) => {
-          if (item.offsetHeight !== 0) arr.push(item);
+        this.visibleListItems = this.els.slot.assignedNodes().reduce((arr, item) => {
+          if (item.offsetHeight && item.offsetHeight !== 0) arr.push(item);
           return arr;
         }, []);
       }
@@ -323,7 +239,7 @@
         case KEY_CODE__DOWN:
           if (this.visibleListItems.length) {
             this.itemIndex = 0;
-            this.visibleListItems[0].focus();
+            this.visibleListItems[0].els.btn.focus();
           }
           break;
         
@@ -335,7 +251,12 @@
     
     handleBlur() {
       window.requestAnimationFrame(() => {
-        if (!this.shadowRoot.activeElement) {
+        const internalItemSelected = (
+          this.shadowRoot.activeElement
+          || document.activeElement.nodeName === 'CUSTOM-AUTO-COMPLETE-INPUT-ITEM'
+        );
+        
+        if (!internalItemSelected) {
           this.els.input.removeEventListener('blur', this.handleBlur);
           window.removeEventListener('click', this.handleBlur);
           this.updateListStyles('');
@@ -369,7 +290,7 @@
           break;
       }
       
-      const currItem = this.visibleListItems[this.itemIndex];
+      const currItem = this.visibleListItems[this.itemIndex].els.btn;
       
       this.updateInputOverlayText(currItem);
       currItem.focus();
@@ -382,15 +303,16 @@
     
     handleItemSelection(ev) {
       const target = ev.target;
-      const value = target.value;
-      let elements, item;
+      let query = target.value;
+      let results, item;
       
       if (target.nodeName === 'INPUT') {
-        elements = [...this.visibleListItems];
+        results = [...this.visibleListItems];
       }
       else {
         item = target;
-        elements = [item];
+        query = item.label;
+        results = [item];
         this.els.input.value = item.innerText;
         
         if (this.shadowRoot.activeElement !== this.els.input) {
@@ -406,7 +328,7 @@
       setTimeout(() => {
         this.dispatchEvent(new CustomEvent(EVENT__SELECTED, {
           bubbles: true,
-          detail: { elements, value },
+          detail: { query, results },
         }));
       }, 10);
     }
@@ -424,7 +346,7 @@
     handleClick(ev) {
       const el = ev.target;
       
-      if (el.classList.contains(CSS_CLASS__LIST_ITEM_BTN)) this.handleItemSelection(ev);
+      if (el.nodeName === 'CUSTOM-AUTO-COMPLETE-INPUT-ITEM') this.handleItemSelection(ev);
       else if (el.classList.contains(CSS_CLASS__CLEAR_BTN)) this.handleClear(ev);
     }
     
@@ -452,12 +374,121 @@
     }
   }
   
-  const EL_NAME = 'custom-auto-complete-input';
-  if (window.customElements.get(EL_NAME)) {
-    console.warn(`${EL_NAME} already defined`);
+  class CustomAutoCompleteInputItem extends HTMLElement {
+    get itemKey() {
+      return this.getAttribute('itemKey');
+    }
+    set itemKey(value) {
+      this.setAttribute('itemKey', formatItemData(value));
+    }
+    
+    get label() {
+      return this.els.slot.assignedNodes().reduce((str, el) => {
+        return `${str}${el.textContent.trim()}`;
+      }, '');
+    }
+    
+    get value() {
+      return this.getAttribute('value');
+    }
+    set value(value) {
+      this.setAttribute('value', value);
+      
+      this.itemKey = value;
+      this.els.btn.value = value;
+    }
+    
+    static get observedAttributes() {
+      return [
+        'itemkey',
+        'value',
+      ];
+    }
+    
+    attributeChangedCallback(attr, oldVal, newVal) {
+      const empty = oldVal === '' && (newVal === null || newVal === undefined);
+      
+      if (!empty && oldVal !== newVal) {
+        let _newVal = newVal;
+        
+        switch (attr) {
+          case 'itemkey': { this.itemKey = _newVal; break; }
+          default: { this[attr] = _newVal; }
+        }
+      }
+    }
+    
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      
+      const { shadowRoot } = this;
+      
+      shadowRoot.innerHTML = `
+        <style>
+          :host {
+            color: #000;
+            font-size: inherit;
+            width: 100%;
+            text-decoration: none;
+            text-align: left;
+            border: none;
+            padding: 0;
+            background: transparent;
+            display: block;
+          }
+          
+          button {
+            width: 100%;
+            font-size: 1rem;
+            text-align: left;
+            padding: 1em;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            appearance: none;
+            display: flex;
+            align-items: center;
+          }
+          button:focus,
+          button:hover {
+            background: #eee;
+          }
+          
+          ::slotted(*) {
+            pointer-events: none;
+          }
+        </style>
+        
+        <button type="button">
+          <slot></slot>
+        </button>
+      `;
+      
+      this.els = {
+        btn: shadowRoot.querySelector('button'),
+        slot: shadowRoot.querySelector('slot'),
+      };
+    }
+    
+    connectedCallback() {
+      if (!this.value) {
+        const label = this.label;
+        if (label) this.value = label;
+      }
+    }
   }
-  else {
-    window.customElements.define(EL_NAME, CustomAutoCompleteInput);
-    window.CustomAutoCompleteInput = CustomAutoCompleteInput;
-  }
+  
+  [
+    ['custom-auto-complete-input', CustomAutoCompleteInput],
+    ['custom-auto-complete-input-item', CustomAutoCompleteInputItem],
+  ].forEach(([name, _class]) => {
+    if (window.customElements.get(name)) {
+      console.warn(`${name} already defined`);
+    }
+    else {
+      window.customElements.define(name, _class);
+      window[_class.name] = _class;
+    }
+  });
 })();
