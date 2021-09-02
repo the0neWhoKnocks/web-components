@@ -1,33 +1,19 @@
-<script src="../js/components/icons/CustomIconCheck.js"></script>
-<script src="../js/components/icons/CustomIconChevron.js"></script>
+<script src="./js/components/icons/CustomIconCheck.js"></script>
+<script src="./js/components/icons/CustomIconChevron.js"></script>
 
-<nav>
-  <div class="control">
-    <button type="button" id="animateIcons">Animate</button>
-  </div>
-  <div class="control">
-    <label>Scale</label>
-    <input type="number" id="iconScale" min="1" max="5" value="1" />
-  </div>
-  <div class="control">
-    <label>Stroke Color</label>
-    <input type="color" id="iconStrokeColor" value="#333333" />
-  </div>
-  <div class="control">
-    <label>Stroke Width</label>
-    <input type="number" id="iconStrokeWidth" min="1" max="10" value="2" />
-  </div>
-</nav>
+<custom-controls>
+  <custom-control-btn id="animateIcons">Animate</custom-control-btn>
+  <custom-control-number id="iconScale" min="1" max="5" value="1">Scale</custom-control-number>
+  <custom-control-color id="iconStrokeColor" value="#333333">Stroke Color</custom-control-color>
+  <custom-control-number id="iconStrokeWidth" min="1" max="10" value="2">Stroke Width</custom-control-number>
+</custom-controls>
 
 <section>
   <h3 class="title">Chevron</h3>
-    
-  <nav>
-    <div class="control">
-      <label>Length</label>
-      <input type="number" id="chevronLength" min="0.5" max="1" value="0.5" step="0.1" />
-    </div>
-  </nav>
+  
+  <custom-controls>
+    <custom-control-number id="chevronLength" min="0.5" max="1" value="0.5" step="0.1">Length</custom-control-number>
+  </custom-controls>
   
   <div class="scale-wrapper">
     <div class="icon-wrapper">

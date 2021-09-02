@@ -1,15 +1,10 @@
-<script src="../js/components/indicators/CustomIndicatorLeapfrog.js"></script>
-<script src="../js/components/indicators/CustomIndicatorSpinner.js"></script>
+<script src="./js/components/indicators/CustomIndicatorLeapfrog.js"></script>
+<script src="./js/components/indicators/CustomIndicatorSpinner.js"></script>
 
-<nav>
-  <div class="control">
-    <button type="button" id="indicatorsPlayPause">Play</button>
-  </div>
-  <div class="control">
-    <label>Color</label>
-    <input id="indicatorColorInput" type="color" />
-  </div>
-</nav>
+<custom-controls>
+  <custom-control-btn id="indicatorsPlayPause">Play</custom-control-btn>
+  <custom-control-color id="indicatorColorInput">Color</custom-control-color>
+</custom-controls>
 
 <div data-indicator-type="leapfrog">
   <div data-type="default">
@@ -61,7 +56,7 @@
   }
   
   #indicatorsPlayPause {
-    width: 4em;
+    width: 6em;
   }
 
   custom-indicator-spinner {
