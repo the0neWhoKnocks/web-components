@@ -22,25 +22,6 @@
     expanded
   ></custom-directory-listing>
   <custom-directory-listing
-    customStyles="
-      .file[data-ext='css'] {
-        --file--color--fill: cyan;
-        --file--color--stroke: blue;
-      }
-      .file[data-ext='html'] {
-        --file--color--fill: #ffff6c;
-        --file--color--stroke: #8a6c00;
-      }
-      .file[data-ext='js'] {
-        --file--color--fill: orange;
-        --file--color--stroke: red;
-      }
-      
-      .folder[open]:not([empty]):hover > .folder__name .icon {
-        --folder--color--fill: #666;
-        --folder--color--stroke: #fff;
-      }
-    "
     listData="[[&quot;&quot;,[[&quot;bin&quot;,[]]]],[&quot;root1&quot;,[[&quot;sub1&quot;,[{&quot;link&quot;:&quot;#&quot;,&quot;name&quot;:&quot;file.js&quot;},{&quot;name&quot;:&quot;file.txt&quot;}]],[&quot;sub2&quot;,[{&quot;name&quot;:&quot;file.css&quot;}]],[&quot;sub3&quot;,[]],[&quot;sub4&quot;,[[&quot;sub4_1&quot;,[]]]],{&quot;name&quot;:&quot;index.html&quot;}]],[&quot;root2&quot;,[]],{&quot;name&quot;:&quot;.bashrc&quot;}]"
     expanded
   ></custom-directory-listing>
@@ -60,10 +41,21 @@
     margin-left: 1em;
   }
   custom-directory-listing:nth-of-type(3) {
-    --color--hover: #fff;
+    --color--file--fill: transparent;
+    --color--file--stroke: #eee;
+    --color--file--css--fill: cyan;
+    --color--file--css--stroke: blue;
+    --color--file--html--fill: #ffff6c;
+    --color--file--html--stroke: #8a6c00;
+    --color--file--js--fill: orange;
+    --color--file--js--stroke: red;
+    
+    --color--folder--fill: #333;
+    --color--folder--fill--hover: #666;
+    --color--folder--stroke: #eee;
+    --color--folder--stroke--hover: #fff;
     --color--text: #ddd;
-    --folder--color--fill: #333;
-    --folder--color--stroke: #eee;
+    --color--text--hover: #fff;
     
     background: #333;
   }

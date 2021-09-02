@@ -1,16 +1,20 @@
 (() => {
-  const CSS_VAR__COLOR__HOVER = '--color--hover';
+  const CSS_VAR__COLOR__FILE__FILL = '--color--file--fill';
+  const CSS_VAR__COLOR__FILE__STROKE = '--color--file--stroke';
+  const CSS_VAR__COLOR__FOLDER__FILL = '--color--folder--fill';
+  const CSS_VAR__COLOR__FOLDER__FILL__HOVER = '--color--folder--fill--hover';
+  const CSS_VAR__COLOR__FOLDER__STROKE = '--color--folder--stroke';
+  const CSS_VAR__COLOR__FOLDER__STROKE__HOVER = '--color--folder--stroke--hover';
   const CSS_VAR__COLOR__TEXT = '--color--text';
-  const CSS_VAR__FILE__COLOR__FILL = '--file--color--fill';
-  const CSS_VAR__FILE__COLOR__STROKE = '--file--color--stroke';
-  const CSS_VAR__FOLDER__COLOR__FILL = '--folder--color--fill';
-  const CSS_VAR__FOLDER__COLOR__STROKE = '--folder--color--stroke';
-  const DEFAULT__COLOR__HOVER = 'green';
+  const CSS_VAR__COLOR__TEXT__HOVER = '--color--text--hover';
+  const DEFAULT__COLOR__FILE__FILL = '#fff';
+  const DEFAULT__COLOR__FILE__STROKE = '#000';
+  const DEFAULT__COLOR__FOLDER__FILL = 'yellow';
+  const DEFAULT__COLOR__FOLDER__FILL__HOVER = 'orange';
+  const DEFAULT__COLOR__FOLDER__STROKE = '#000';
+  const DEFAULT__COLOR__FOLDER__STROKE__HOVER = '#000';
   const DEFAULT__COLOR__TEXT = '#000';
-  const DEFAULT__FILE__COLOR__FILL = '#fff';
-  const DEFAULT__FILE__COLOR__STROKE = '#000';
-  const DEFAULT__FOLDER__COLOR__FILL = 'yellow';
-  const DEFAULT__FOLDER__COLOR__STROKE = '#000';
+  const DEFAULT__COLOR__TEXT__HOVER = 'green';
   const EVENT__FILE_CLICK = 'fileClick';
   const ICON_DIAMETER = 20;
   const ICON_STROKE_WIDTH = 1;
@@ -38,10 +42,6 @@
   const POINTS__FOLDER = plotPoints('0,5 1,5 2,2 10,2 12,5 20,5 20,18 0,18 0,5');
   
   class CustomDirectoryListing extends HTMLElement {
-    set customStyles(styles) {
-      this.els.customStyles.textContent = styles;
-    }
-    
     get expanded() {
       return this.hasAttribute('expanded');
     }
@@ -64,7 +64,6 @@
     
     static get observedAttributes() {
       return [
-        'customstyles',
         'expanded',
         'listdata',
       ];
@@ -83,7 +82,6 @@
         let _newVal = newVal;
         
         switch (attr) {
-          case 'customstyles': { this.customStyles = _newVal; break; }
           case 'listdata': { this.listData = _newVal; break; }
           default: { this[attr] = _newVal; }
         }
@@ -104,12 +102,14 @@
           }
           
           :host {
-            ${CSS_VAR__COLOR__HOVER}: ${DEFAULT__COLOR__HOVER};
+            ${CSS_VAR__COLOR__FILE__FILL}: ${DEFAULT__COLOR__FILE__FILL};
+            ${CSS_VAR__COLOR__FILE__STROKE}: ${DEFAULT__COLOR__FILE__STROKE};
+            ${CSS_VAR__COLOR__FOLDER__FILL}: ${DEFAULT__COLOR__FOLDER__FILL};
+            ${CSS_VAR__COLOR__FOLDER__FILL__HOVER}: ${DEFAULT__COLOR__FOLDER__FILL__HOVER};
+            ${CSS_VAR__COLOR__FOLDER__STROKE}: ${DEFAULT__COLOR__FOLDER__STROKE};
+            ${CSS_VAR__COLOR__FOLDER__STROKE__HOVER}: ${DEFAULT__COLOR__FOLDER__STROKE__HOVER};
             ${CSS_VAR__COLOR__TEXT}: ${DEFAULT__COLOR__TEXT};
-            ${CSS_VAR__FILE__COLOR__FILL}: ${DEFAULT__FILE__COLOR__FILL};
-            ${CSS_VAR__FILE__COLOR__STROKE}: ${DEFAULT__FILE__COLOR__STROKE};
-            ${CSS_VAR__FOLDER__COLOR__FILL}: ${DEFAULT__FOLDER__COLOR__FILL};
-            ${CSS_VAR__FOLDER__COLOR__STROKE}: ${DEFAULT__FOLDER__COLOR__STROKE};
+            ${CSS_VAR__COLOR__TEXT__HOVER}: ${DEFAULT__COLOR__TEXT__HOVER};
             
             font-family: Helvetica, Arial, sans-serif;
           }
@@ -194,6 +194,8 @@
           }
           
           .folder__name .icon {
+            fill: var(${CSS_VAR__COLOR__FOLDER__FILL});
+            stroke: var(${CSS_VAR__COLOR__FOLDER__STROKE});
             margin-right: 0.25em;
           }
           
@@ -219,6 +221,8 @@
           }
           
           .file .icon {
+            fill: var(${CSS_VAR__COLOR__FILE__FILL});
+            stroke: var(${CSS_VAR__COLOR__FILE__STROKE});
             margin-right: 0.25em;
             display: inline-block;
           }
@@ -226,11 +230,16 @@
           .folder[open]:not([empty]):hover::after,
           .folder[open]:not([empty]):hover > .folder__name,
           a.file:hover {
-            color: var(${CSS_VAR__COLOR__HOVER});
-            text-shadow: 1px 0px 0px var(${CSS_VAR__COLOR__HOVER});
+            color: var(${CSS_VAR__COLOR__TEXT__HOVER});
+            text-shadow: 1px 0px 0px var(${CSS_VAR__COLOR__TEXT__HOVER});
+          }
+          
+          .folder[open]:not([empty]):hover > .folder__name .icon {
+            fill: var(${CSS_VAR__COLOR__FOLDER__FILL__HOVER});
+            stroke: var(${CSS_VAR__COLOR__FOLDER__STROKE__HOVER});
           }
         </style>
-        <style id="customStyles"></style>
+        <style id="fileStyles"></style>
         
         <slot></slot>
         <svg style="display:none; position:absolute" width="0" height="0">
@@ -240,10 +249,6 @@
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="${ICON_STROKE_WIDTH}"
-              style="
-                fill: var(${CSS_VAR__FOLDER__COLOR__FILL});
-                stroke: var(${CSS_VAR__FOLDER__COLOR__STROKE});
-              "
             />
           </symbol>
           <symbol viewBox="0 0 ${ICON_DIAMETER} ${ICON_DIAMETER}" id="file" xmlns="http://www.w3.org/2000/svg">
@@ -252,20 +257,13 @@
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="${ICON_STROKE_WIDTH}"
-              style="
-                fill: var(${CSS_VAR__FILE__COLOR__FILL});
-                stroke: var(${CSS_VAR__FILE__COLOR__STROKE});
-              "
             />
             <polyline
               points="${POINTS__FILE_BEND}"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="${ICON_STROKE_WIDTH}"
-              style="
-                fill: #fff;
-                stroke: var(${CSS_VAR__FILE__COLOR__STROKE});
-              "
+              style="fill: transparent;"
             />
           </symbol>
         </svg>
@@ -273,7 +271,7 @@
       `;
       
       this.els = {
-        customStyles: shadowRoot.getElementById('customStyles'),
+        fileStyles: shadowRoot.getElementById('fileStyles'),
         root: shadowRoot.querySelector(`.${ROOT_CLASS}`),
       };
     }
@@ -436,6 +434,16 @@
             `;
           }
           
+          if (!this.fileStyles) this.fileStyles = {};
+          if (!this.fileStyles[ext]) {
+            this.fileStyles[ext] = `
+              .file[data-ext="${ext}"] .icon {
+                fill: var(--color--file--${ext}--fill, var(${CSS_VAR__COLOR__FILE__FILL}));
+                stroke: var(--color--file--${ext}--stroke, var(${CSS_VAR__COLOR__FILE__STROKE}));
+              }
+            `;
+          }
+          
           return fileMarkup;
         }
       }).join('');
@@ -444,6 +452,10 @@
     render() {
       const data = this.listData;
       this.els.root.innerHTML = this.iterateGroup(data);
+      
+      if (this.fileStyles && Object.keys(this.fileStyles).length) {
+        this.els.fileStyles.textContent = Object.values(this.fileStyles).join('\n');
+      }
     }
   }
 
