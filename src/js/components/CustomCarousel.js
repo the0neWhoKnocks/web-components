@@ -353,7 +353,6 @@
       
       this.els = {
         carousel: shadowRoot.querySelector(`.${ROOT_CLASS}`),
-        customStyles: shadowRoot.getElementById('customStyles'),
         items: shadowRoot.querySelector(`.${ROOT_CLASS}__items`),
         itemsContainer: shadowRoot.querySelector(`.${ROOT_CLASS}__items-container`),
         itemSlot: shadowRoot.querySelector('slot[name="item"]'),
