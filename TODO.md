@@ -2,7 +2,6 @@
 
 ---
 
-- [ ] carousel https://codepen.io/theOneWhoKnocks/pen/gjvdev
 - [ ] file uploader https://codepen.io/theOneWhoKnocks/pen/KXZZLy
 - [ ] navs https://codepen.io/theOneWhoKnocks/pen/NGyjKR
   - https://codepen.io/theOneWhoKnocks/pen/ZYKebb
@@ -11,7 +10,8 @@
 - [ ] countdown clock https://codepen.io/theOneWhoKnocks/pen/fedCk
 - [ ] split flap clock https://codepen.io/theOneWhoKnocks/pen/Ivneu
 - [ ] toaster/notification
-
+- [ ] custom scroll bars
+- [ ] pagination bar
 
 ## CustomAutoCompleteInput
 
