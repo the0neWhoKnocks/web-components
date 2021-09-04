@@ -1,0 +1,87 @@
+<script src="./js/components/CustomSelect.js"></script>
+
+<custom-controls>
+  <custom-control-checkbox id="useMaxHeight">Use Max Height</custom-control-checkbox>
+  <custom-control-number id="maxHeight" min="3" max="8" value="6">Max Height</custom-control-number>
+  <custom-control-color id="bgColor" value="#ffffff">BG Color</custom-control-color>
+  <custom-control-color id="fgColor" value="#000000">FG Color</custom-control-color>
+  <custom-control-color id="optHoverColor" value="#000000">Opt Hover Color</custom-control-color>
+</custom-controls>
+
+<style>
+  div {
+    display: flex;
+  }
+  
+  pre {
+    width: 15em;
+    color: #eee;
+    padding: 1em;
+    border-radius: 0.5em;
+    margin: 0;
+    margin-left: 1em;
+    background: #333;
+  }
+  code {
+    color: pink;
+  }
+</style>
+
+<div>
+  <form>
+    <custom-select>
+      <select name="opts">
+        <option value="opt1">Option 1</option>
+        <option value="opt2">Option 2</option>
+        <option value="opt3">Option 3</option>
+        <option value="opt4">Option 4</option>
+        <option value="opt5">Option 5 <b>not bold</b></option>
+        <option value="realLongOpt">Really Long Option</option>
+      </select>
+    </custom-select>
+  </form>
+  <pre></pre>
+</div>
+
+<script>
+  const useMaxHeight = document.getElementById('useMaxHeight');
+  const maxHeight = document.getElementById('maxHeight');
+  const bgColor = document.getElementById('bgColor');
+  const fgColor = document.getElementById('fgColor');
+  const optHoverColor = document.getElementById('optHoverColor');
+  const form = document.querySelector('form');
+  const outputEl = document.querySelector('pre');
+  const select = document.querySelector('select');
+  const customSelect = document.querySelector('custom-select');
+  
+  function renderFormData() {
+    const formData = new FormData(form);
+    const output = [...formData.entries()]
+      .map(([name, value]) => `${name}: <code>${value}</code>`)
+      .join('\n');
+    
+    outputEl.innerHTML = output;
+  }
+  
+  useMaxHeight.addEventListener('change', ({ currentTarget: { checked } }) => {
+    customSelect.maxHeight = checked ? `${maxHeight.value}em` : '';
+  });
+  maxHeight.addEventListener('change', ({ currentTarget: { value } }) => {
+    if (useMaxHeight.checked) customSelect.maxHeight = `${value}em`;
+  });
+  bgColor.addEventListener('input', ({ currentTarget: { value } }) => {
+    customSelect.bgColor = value;
+  });
+  fgColor.addEventListener('input', ({ currentTarget: { value } }) => {
+    customSelect.fgColor = value;
+  });
+  optHoverColor.addEventListener('input', ({ currentTarget: { value } }) => {
+    customSelect.optHoverColor = value;
+  });
+  
+  select.addEventListener('change', () => {
+    renderFormData();
+  });
+  
+  renderFormData();
+</script>
