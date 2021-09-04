@@ -598,15 +598,15 @@
           if (this.nav2) {
             // only render indicators when number of sections have changed
             if (
-              !this.els.sectionsNav.childNodes.length
-              || (this.els.sectionsNav.childNodes.length !== this.sectionsCount)
+              !this.els.sectionsNav.childElementCount
+              || (this.els.sectionsNav.childElementCount !== this.sectionsCount)
             ) {
               this.els.sectionsNav.innerHTML = Array(this.sectionsCount).fill('').map((_, ndx) => {
                 return `<button title="Section ${ndx + 1}" data-ndx="${ndx}"></button>`;
               }).join('');
             }
             
-            this.els.sectionsNav.childNodes.forEach((indicator, ndx) => {
+            [...this.els.sectionsNav.children].forEach((indicator, ndx) => {
               indicator.disabled = ndx === this.sectionNdx;
             });
           }
