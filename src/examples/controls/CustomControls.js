@@ -678,7 +678,6 @@
           this.dispatchEvent(clonedEv);
         };
         this.els.input.addEventListener('change', handleUpdate);
-        this.els.input.addEventListener('input', handleUpdate);
       }
     }
 

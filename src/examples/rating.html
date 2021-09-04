@@ -93,14 +93,14 @@
     const fg2 = fgColor2.value;
     dynamicRatings.fgColor = (fg1 === fg2) ? fg1 : `${fg1}|${fg2}`;
   });
-  ratingRange.addEventListener('input', ({ currentTarget: { value } }) => {
+  ratingRange.addEventListener('change', ({ currentTarget: { value } }) => {
     const ratingsPerc = +value;
     const rating = +(dynamicRatings.starCount * (ratingsPerc * 0.01)).toFixed(2);
     
     dynamicRatings.rating = rating;
     ratingCurrent.innerText = rating;
   });
-  starCountRange.addEventListener('input', ({ currentTarget: { value } }) => {
+  starCountRange.addEventListener('change', ({ currentTarget: { value } }) => {
     const count = +value;
     
     if (count) {
@@ -110,19 +110,19 @@
       starCountTxt.innerText = count;
     }
   });
-  starInnerRadiusRange.addEventListener('input', ({ currentTarget: { value } }) => {
+  starInnerRadiusRange.addEventListener('change', ({ currentTarget: { value } }) => {
     dynamicRatings.starInnerRadius = value;
     starInnerRadiusTxt.innerText = value;
   });
-  starPointsRange.addEventListener('input', ({ currentTarget: { value } }) => {
+  starPointsRange.addEventListener('change', ({ currentTarget: { value } }) => {
     dynamicRatings.starPoints = value;
     starPointsTxt.innerText = value;
   });
-  starStrokeColor.addEventListener('input', ({ currentTarget: { value } }) => {
+  starStrokeColor.addEventListener('change', ({ currentTarget: { value } }) => {
     dynamicRatings.strokeColor = value;
   });
   
   [...document.querySelectorAll('custom-control-color, custom-control-range')].forEach((el) => {
-    el.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
   });
 </script>
