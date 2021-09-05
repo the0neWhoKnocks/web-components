@@ -1,0 +1,55 @@
+<script src="./js/components/CustomAccordionMenu.js"></script>
+
+<div class="accordions">
+  <custom-accordion-menu>
+    <custom-accordion-menu-group>
+      <label slot="label">Default group</label>
+      <a slot="item" href="#">Link 1</a>
+      <a slot="item" href="#">Link 2</a>
+    </custom-accordion-menu-group>
+    <custom-accordion-menu-group open>
+      <div slot="label">Custom group</div>
+      <button slot="item">Button 1</button>
+      <button slot="item">Button 2</button>
+      <button slot="item">Button 3</button>
+    </custom-accordion-menu-group>
+  </custom-accordion-menu>
+  <custom-accordion-menu single>
+    <custom-accordion-menu-group>
+      <label slot="label">Group 1</label>
+      <a slot="item" href="#">Link 1</a>
+      <a slot="item" href="#">Link 2</a>
+    </custom-accordion-menu-group>
+    <custom-accordion-menu-group open>
+      <div slot="label">Group 2</div>
+      <button slot="item">Button 1</button>
+      <button slot="item">Button 2</button>
+      <button slot="item">Button 3</button>
+    </custom-accordion-menu-group>
+  </custom-accordion-menu>
+</div>
+
+<style>
+  .accordions {
+    display: grid;
+    grid-gap: 1em;
+    grid-template-areas: ". .";
+    grid-template-columns: auto auto;
+  }
+
+  custom-accordion-menu:nth-of-type(1) custom-accordion-menu-group:nth-of-type(2) [slot="label"] {
+    font-weight: bold;
+    text-shadow: 0 2px 1px white;
+    background: linear-gradient(0deg, #dcdcdc, transparent);
+  }
+</style>
+
+<script>
+  document.querySelector('.accordions').addEventListener('click', (ev) => {
+    const type = ev.target.nodeName.toLowerCase();
+    if (type === 'button' || type === 'a') {
+      ev.preventDefault();
+      console.log(`${type === 'a' ? 'Link' : 'Button'} clicked`);
+    }
+  });
+</script>

@@ -1,0 +1,78 @@
+<script src="./js/components/CustomAutoCompleteInput.js"></script>
+
+<custom-auto-complete-input placeholder="Filter Animals">
+  <custom-auto-complete-input-item value="Alligator Snapping Turtle">
+    <span class="icon"></span>Alligator Snapping Turtle
+  </custom-auto-complete-input-item>
+  <custom-auto-complete-input-item value="Baja California Pronghorn Buck">
+    <span class="icon"></span>Baja California Pronghorn Buck
+  </custom-auto-complete-input-item>
+</custom-auto-complete-input>
+
+<style>
+  custom-auto-complete-input {
+    --max-list-height: 30vh;
+    
+    width: 70vw;
+    max-width: 600px;
+    z-index: 1;
+  }
+  
+  custom-auto-complete-input-item .icon {
+    width: 1em;
+    height: 1em;
+    border-radius: 100%;
+    margin-right: 0.5em;
+    background: pink;
+    display: inline-block;
+  }
+</style>
+
+<script>
+  const autoCompleteInput = document.querySelector('custom-auto-complete-input');
+  const itemsMarkup = [
+    "California Condor",
+    "Desert Bighorn Ram",
+    "Eastern Turkey Vulture",
+    "Fer-de-Lance Snake",
+    "Golden Crowned Sparrow",
+    "Hereford Bull",
+    "Java Chicken",
+    "Labrador Retriever",
+    "Mallard Duck",
+    "Neotropic Cormorant",
+    "Old Spot Pig",
+    "Pacific Loon",
+    "Rainbow Boa Snake",
+    "Sandhill Crane",
+    "Timber Rattlesnake",
+    "Virginia Opossum",
+    "Whooping Crane",
+    "Wild Boar",
+    "Yellow-billed Loon",
+  ].map((txt, ndx, arr) => {
+    let icon = '<span class="icon"></span>';
+    let value = `value="${txt.toLowerCase().replace(/\s/g, '-')}"`;
+    
+    if (ndx > arr.length - 3) {
+      // `value` will equal `label`, and no icon will be present
+      icon = '';
+      value = '';
+    }
+    
+    return `
+      <custom-auto-complete-input-item ${value}>
+        ${icon}${txt}
+      </custom-auto-complete-input-item>
+    `;
+  });
+  
+  autoCompleteInput.insertAdjacentHTML('beforeend', itemsMarkup.join('\n'));
+  
+  autoCompleteInput.addEventListener(window.CustomAutoCompleteInput.events.selected, ({
+    detail: { query, results },
+  }) => {
+    const matches = results.map(el => el.value);
+    console.log(`Matches for "${query}":\n${JSON.stringify(matches, null, 2)}`);
+  });
+</script>

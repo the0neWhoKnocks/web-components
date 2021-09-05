@@ -1,0 +1,184 @@
+<html>
+  <head>
+    <title>Web Components</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1 minimum-scale=1">
+    
+    <link rel="stylesheet" href="./css/reset.css">
+    <style>
+      body {
+        background: #eee;
+      }
+    
+      .wrapper,
+      .examples-nav,
+      .examples-section {
+        height: 100%
+      }
+      
+      .examples-nav,
+      .examples-section {
+        overflow: auto;
+      }
+      
+      .wrapper {
+        display: flex;
+      }
+      
+      .examples-nav {
+        padding: 1em 0;
+        flex-shrink: 0;
+      }
+      .examples-nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      .examples-nav__item {
+        width: 100%;
+        text-align: left;
+        white-space: nowrap;
+        padding: 0.5em 1em;
+        border: none;
+        background: transparent;
+        position: relative;
+      }
+      .examples-nav__item:disabled {
+        color: #000;
+        text-shadow: 1px 0 0 #000;
+      }
+      .examples-nav__item:disabled::before {
+        content: '';
+        width: 0.5em;
+        height: 100%;
+        background: currentColor;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .examples-nav__item:not(:disabled):hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      
+      .examples-section {
+        width: 100%;
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .example-title {
+        margin-top: 0;
+      }
+      
+      #iframeWrapper {
+        display: contents;
+      }
+      
+      .examples-section iframe {
+        width: 100%;
+        height: 100%;
+        
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper" class="wrapper">
+      <nav id="examplesNav" class="examples-nav"></nav>
+      <section class="examples-section">
+        <h2 id="examplesTitle" class="example-title"></h2>
+        <div id="iframeWrapper"></div>
+      </section>
+      
+      <script>
+        const examples = [
+          { label: 'Accordion Menu', name: 'accordion-menu' },
+          { label: 'Auto-Complete Input', name: 'auto-complete-input' },
+          { label: 'Carousel', name: 'carousel' },
+          { label: 'Dialog', name: 'dialog' },
+          { label: 'Directory Listing', name: 'directory-listing' },
+          { label: 'Flyout', name: 'flyout' },
+          { label: 'Icons', name: 'icons' },
+          { label: 'Indicators', name: 'indicators' },
+          { label: 'Rating', name: 'rating' },
+          { label: 'Select', name: 'select' },
+          { label: 'Timeline', name: 'timeline' },
+          { label: 'Toggle', name: 'toggle' },
+        ];
+        const navMarkup = examples.map(({ label, name }) => `<li><button class="examples-nav__item" value="${name}">${label}</button></li>`);
+        const examplesNav = document.getElementById('examplesNav');
+        const examplesTitle = document.getElementById('examplesTitle');
+        const iframeWrapper = document.getElementById('iframeWrapper');
+        
+        const cache = {};
+        function fetchCache(url) {
+          return (cache[url])
+            ? Promise.resolve(cache[url])
+            : window.fetch(url).then(resp => resp.text()).then(txt => {
+              cache[url] = txt;
+              return txt;
+            });
+        }
+        
+        function writeToIframe(iframe, markup) {
+          iframe.contentWindow.document.open();
+          iframe.contentWindow.document.write(markup);
+          iframe.contentWindow.document.close();
+        }
+        
+        function loadExample(filename) {
+          // NOTE: Have to recreate the iframe everytime, otherwise the context
+          // gets dirtied when previously loaded content is reloaded.
+          iframeWrapper.innerHTML = '<iframe id="examplesFrame"></iframe>';
+          const examplesFrame = document.getElementById('examplesFrame');
+          const exampleSrc = `examples/${filename}.html`;
+          let exampleLabel;
+          
+          [...examplesNav.querySelectorAll('.examples-nav__item')].forEach((el) => {
+            const selected = el.value === filename;
+            el.disabled = selected;
+            if (selected) exampleLabel = el.textContent;
+          });
+          
+          writeToIframe(examplesFrame, '');
+          
+          fetchCache(exampleSrc).then((ex) => {
+            const styles = [
+              'reset',
+              'examples',
+            ].map((styleFilename) => `<link href="./css/${styleFilename}.css" rel="stylesheet" type="text/css" />`);
+            const scripts = [
+              'CustomControls',
+            ].map((scriptFilename) => {
+              return `<script src="./examples/controls/${scriptFilename}.js"><\/script>`; // eslint-disable-line no-useless-escape
+            });
+            
+            writeToIframe(examplesFrame, `
+              ${styles.join('\n')}
+              ${scripts.join('\n')}
+              ${ex}
+            `);
+            
+            examplesFrame.title = `Example for ${exampleLabel}`;
+            examplesTitle.textContent = exampleLabel;
+            
+            const url = new URL(window.location);
+            url.searchParams.set('e', filename);
+            window.history.replaceState({}, '', url.href);
+          });
+        }
+        
+        examplesNav.innerHTML = `<ul>${navMarkup.join('')}</ul>`;
+        examplesNav.addEventListener('click', ({ target }) => {
+          if (target.nodeName === 'BUTTON') loadExample(target.value);
+        });
+        
+        const params = new URLSearchParams(window.location.search);
+        const firstExample = examplesNav.querySelector('.examples-nav__item').value;
+        loadExample(params.get('e') || firstExample);
+      </script>
+    </div>
+  </body>
+</html>
