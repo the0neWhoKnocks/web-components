@@ -1,0 +1,23 @@
+body {
+  padding: 1em;
+}
+
+
+
+
+section {
+  padding: 1em;
+  border: solid 1px #ccc;
+  margin: 0;
+  background: #fff;
+}
+section > .title {
+  border-bottom: solid 1px #ccc;
+  margin-top: 0;
+}
+
+/* section {
+  border-radius: unset;
+  box-shadow: unset;
+  margin: 0;
+} */

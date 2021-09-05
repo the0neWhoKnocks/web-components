@@ -1,0 +1,91 @@
+<script src="./js/components/indicators/CustomIndicatorLeapfrog.js"></script>
+<script src="./js/components/indicators/CustomIndicatorSpinner.js"></script>
+
+<custom-controls>
+  <custom-control-btn id="indicatorsPlayPause">Play</custom-control-btn>
+  <custom-control-color id="indicatorColorInput">Color</custom-control-color>
+</custom-controls>
+
+<div data-indicator-type="leapfrog">
+  <div data-type="default">
+    <custom-indicator-leapfrog speed="700"></custom-indicator-leapfrog>
+    <custom-indicator-leapfrog></custom-indicator-leapfrog>
+  </div>
+</div>
+
+<div data-indicator-type="spinner">
+  <div data-type="default">
+    <custom-indicator-spinner speed="1000"></custom-indicator-spinner>
+    <custom-indicator-spinner></custom-indicator-spinner>
+    <custom-indicator-spinner speed="300"></custom-indicator-spinner>
+  </div>
+  <div data-type="rounded">
+    <custom-indicator-spinner type="rounded" speed="1000"></custom-indicator-spinner>
+    <custom-indicator-spinner type="rounded"></custom-indicator-spinner>
+    <custom-indicator-spinner type="rounded" speed="300"></custom-indicator-spinner>
+  </div>
+  <div data-type="trail">
+    <custom-indicator-spinner type="trail" speed="1000"></custom-indicator-spinner>
+    <custom-indicator-spinner type="trail"></custom-indicator-spinner>
+    <custom-indicator-spinner type="trail" speed="300"></custom-indicator-spinner>
+  </div>
+</div>
+
+<style>
+  [data-indicator-type]::before {
+    content: 'Indicator Type: "'attr(data-indicator-type)'"';
+    border-bottom: solid 1px;
+    margin-bottom: 0.5em;
+    display: inline-block;
+  }
+  [data-indicator-type]:not(:first-of-type) {
+    margin-top: 1em;
+  }
+  
+  [data-type] {
+    display: flex;
+    align-items: center;
+  }
+  [data-type]::before {
+    content: 'Type: "'attr(data-type)'"';
+    min-width: 7.5em;
+    margin-right: 0.5em;
+  }
+  [data-type]:not(:first-of-type) {
+    margin-top: 0.5em;
+  }
+  
+  #indicatorsPlayPause {
+    width: 6em;
+  }
+
+  custom-indicator-spinner {
+    font-size: 2em;
+    margin: 0 0.25em;
+  }
+</style>
+
+<script>
+  const indicators = document.querySelectorAll(`
+    custom-indicator-leapfrog,
+    custom-indicator-spinner
+  `);
+  
+  document.getElementById('indicatorsPlayPause').addEventListener('click', ({ currentTarget: btn }) => {
+    let btnText, play;
+    if (btn.textContent === 'Play') {
+      btnText = 'Pause';
+      play = true;
+    }
+    else {
+      btnText = 'Play';
+      play = false;
+    }
+    
+    btn.textContent = btnText;
+    indicators.forEach(el => { el.play = play; });
+  });
+  document.getElementById('indicatorColorInput').addEventListener('input', ({ currentTarget: { value } }) => {
+    indicators.forEach(el => { el.color = value; });
+  });
+</script>
