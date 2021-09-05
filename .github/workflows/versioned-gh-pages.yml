@@ -17,7 +17,7 @@ jobs:
       # NOTE: The fallback version value (v<NUMBER>) should be updated only when
       # breaking changes occur. Changes like directory refactors, or functional
       # API changes.
-      VERSION: "${{ github.event.inputs.version || 'v1' }}"
+      VERSION: "${{ github.event.inputs.version || 'v2' }}"
     steps:
       # https://github.com/actions/checkout
       - name: 🛎️ Checkout

@@ -2,9 +2,17 @@
 
 <div class="toggles">
   <form id="toggleForm">
-    <custom-toggle enabled></custom-toggle>
-    <custom-toggle id="custom" name="someName"></custom-toggle>
-    <custom-toggle circle solid></custom-toggle>
+    <custom-toggle on>
+      <label slot="before">Option 1:</label>
+    </custom-toggle>
+    <custom-toggle>
+      <label for="opt2" slot="before">Option 2:</label>
+      <input id="opt2" type="checkbox" name="opt2" value="2" />
+    </custom-toggle>
+    <custom-toggle circle solid>
+      <input id="opt3" type="checkbox" name="opt3" value="3" disabled />
+      <label for="opt3" slot="after">:Option 3</label>
+    </custom-toggle>
   </form>
   <pre></pre>
 </div>
@@ -14,10 +22,12 @@
     display: flex;
     align-items: center;
   }
-  .toggles form {
+  
+  form {
     margin: 0;
   }
-  .toggles pre {
+  
+  pre {
     width: 100%;
     color: #eee;
     font-size: 1.25em;
@@ -28,13 +38,11 @@
     margin-left: 1em;
     background: #333;
   }
-  .toggles custom-toggle {
-    display: block;
-  }
-  .toggles custom-toggle:not(:first-of-type) {
+  
+  custom-toggle:not(:first-of-type) {
     margin-top: 0.5em;
   }
-  .toggles custom-toggle:nth-of-type(3) {
+  custom-toggle:nth-of-type(3) {
     --color--disabled: #ffa4c8;
     --color--enabled: #46ccff;
     --color--focused: #009827;
@@ -44,24 +52,31 @@
 
 <script>
   const toggleForm = document.getElementById('toggleForm');
-  const togglesOutput = document.querySelector('#toggleForm + pre');
+  const outputEl = document.querySelector('pre');
+  const opts = [...document.querySelectorAll('[type="checkbox"]')];
+  const opt1 = document.querySelector('custom-toggle');
+  const opt2 = opts[0];
+  const opt3 = opts[1];
   
   function handleToggle() {
-    const formData = new FormData(toggleForm);
-    const output = [...formData.entries()]
-      .map(([name, value]) => `${name}: ${value}`)
+    opt3.disabled = !opt2.checked;
+    
+    const output = [
+      {
+        checked: opt1.on,
+        disabled: opt1.disabled,
+        name: 'opt1',
+        value: '1',
+      },
+      ...opts,
+    ]
+      .map(({ checked, disabled, name, value }) => {
+        return `${name}: ${(!disabled && checked) ? value : '[empty]'}`;
+      })
       .join('\n');
     
-    togglesOutput.textContent = output;
+    outputEl.textContent = output;
   }
-  
-  // Append any Custom Element data to Form data when it's requested.
-  // Only neccessary for Custom Elements using the Shadow DOM.
-  toggleForm.addEventListener('formdata', ({ formData }) => {
-    [...document.querySelectorAll('custom-toggle')].forEach((toggle) => {
-      formData.append(toggle.name, toggle.enabled);
-    });
-  });
   
   toggleForm.addEventListener(window.CustomToggle.events.toggled, handleToggle);
   
