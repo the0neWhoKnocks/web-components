@@ -12,62 +12,40 @@
   let toggleIDNdx = 1;
   
   class CustomToggle extends HTMLElement {
-    get circle() {
-      return this.hasAttribute('circle');
-    }
-    set circle(value) {
+    setNonValueProp(prop, value) {
       if (value === '' || value === 'true' || value === true) {
-        this.setAttribute('circle', '');
+        this.setAttribute(prop, '');
       }
       else {
-        this.removeAttribute('circle');
+        this.removeAttribute(prop);
       }
     }
     
-    get enabled() {
-      return this.hasAttribute('enabled');
-    }
-    set enabled(value) {
-      const enabled = (value === '' || value === 'true' || value === true);
-      const changed = (
-        enabled !== this.enabled
-        || this.els.input.checked !== enabled
-      );
-      
-      if (changed) {
-        if (enabled) this.setAttribute('enabled', '');
-        else this.removeAttribute('enabled');
-        
-        this.els.input.checked = enabled;
-        
-        this.dispatchEvent(new CustomEvent(EVENT__TOGGLED, {
-          bubbles: true,
-          detail: { enabled },
-        }));
-      }
+    get circle() { return this.hasAttribute('circle'); }
+    set circle(value) { this.setNonValueProp('circle', value); }
+    
+    get disabled() { return this.hasAttribute('disabled'); }
+    set disabled(value) {
+      this.setNonValueProp('disabled', value);
+      if (this.els.slottedInput) this.els.slottedInput.disabled = value;
     }
     
-    get id() {
-      return this.getAttribute('id') || this._id;
-    }
-    set id(val) {
-      this._id = val;
-      this.els.input.id = this._id;
-      this.els.label.setAttribute('for', this._id);
-      this.setAttribute('id', this._id);
+    get on() { return this.hasAttribute('on'); }
+    set on(value) {
+      this.setNonValueProp('on', value);
+      this.els.input.checked = this.on;
     }
     
-    get name() {
-      return this.getAttribute('name') || this._name;
-    }
-    set name(val) {
-      this._name = val;
-      this.els.input.name = this._name;
-      this.setAttribute('name', this._name);
-    }
+    get solid() { return this.hasAttribute('solid'); }
+    set solid(value) { this.setNonValueProp('solid', value); }
     
     static get observedAttributes() {
-      return ['circle', 'enabled', 'id', 'name'];
+      return [
+        'circle',
+        'disabled',
+        'on',
+        'solid',
+      ];
     }
     
     static get events() {
@@ -113,7 +91,29 @@
             ${CSS_VAR__COLOR__TOGGLE}: ${DEFAULT__COLOR__TOGGLE};
             
             font-family: Helvetica, Arial, sans-serif;
+            display: flex;
+            align-items: center;
             position: relative;
+            cursor: pointer;
+          }
+          :host([disabled]) {
+            opacity: 0.25;
+            pointer-events: none;
+          }
+          
+          ::slotted(label) {
+            white-space: nowrap;
+            user-select: none;
+          }
+          ::slotted([slot="before"]) {
+            margin-right: 0.5em;
+          }
+          ::slotted([slot="after"]) {
+            margin-left: 0.5em;
+          }
+          
+          slot:not([name]) {
+            display: none;
           }
           
           .${ROOT_CLASS} {
@@ -121,6 +121,7 @@
             height: 1em;
             position: relative;
           }
+          
           .${ROOT_CLASS} input {
             opacity: 0;
           }
@@ -189,31 +190,89 @@
           }
         </style>
         
+        <slot></slot>
+        
+        <slot name="before"></slot>
         <div class="${ROOT_CLASS}">
           <input id="${this._id}" type="checkbox" name="${this._name}" />
           <label for="${this._id}"></label>
         </div>
+        <slot name="after"></slot>
       `;
       
       this.els = {
         input: shadowRoot.querySelector(`.${ROOT_CLASS} input`),
         label: shadowRoot.querySelector(`.${ROOT_CLASS} label`),
-        toggle: shadowRoot.querySelector(`.${ROOT_CLASS}`),
       };
       
-      this.handleToggleChange = this.handleToggleChange.bind(this);
     }
     
     connectedCallback() {
-      this.els.toggle.addEventListener('change', this.handleToggleChange);
+      this.handleSlottedInputChange = this.handleSlottedInputChange.bind(this);
+      this.handleToggleChange = this.handleToggleChange.bind(this);
+      
+      this.els.input.addEventListener('change', this.handleToggleChange);
+      
+      this.shadowRoot.addEventListener('slotchange', ({ target: slot }) => {
+        slot.assignedNodes().forEach(el => {
+          switch (el.nodeName) {
+            case 'INPUT': {
+              if (el.type === 'checkbox') {
+                this.els.slottedInput = el;
+                this.disabled = this.els.slottedInput.disabled;
+                this.els.input.checked = this.els.slottedInput.checked;
+                
+                this.els.slottedInput.addEventListener('change', this.handleSlottedInputChange);
+                
+                if (this.inputObserver) this.inputObserver.disconnect();
+                this.inputObserver = new MutationObserver((mutations) => {
+                  mutations.forEach((mutation) => {
+                    if (
+                      mutation.attributeName === 'disabled'
+                      && this.disabled !== this.els.slottedInput.disabled
+                    ) {
+                      this.disabled = this.els.slottedInput.disabled;
+                    }
+                  });
+                });
+                this.inputObserver.observe(this.els.slottedInput, { attributes: true });
+              }
+              
+              break;
+            }
+          }
+        });
+      });
     }
     
     disconnectedCallback() {
-      this.els.toggle.removeEventListener('change', this.handleToggleChange);
+      if (this.els.slottedInput) {
+        this.els.slottedInput.addEventListener('change', this.handleSlottedInputChange);
+      }
     }
     
-    handleToggleChange({ target }) {
-      this.enabled = target.checked;
+    dispatchToggleEvent() {
+      const on = this.els.input.checked;
+      this.on = on;
+      
+      this.dispatchEvent(new CustomEvent(EVENT__TOGGLED, {
+        bubbles: true,
+        detail: { on },
+      }));
+    }
+    
+    handleToggleChange({ target: { checked } }) {
+      if (this.els.slottedInput) {
+        this.els.slottedInput.checked = checked;
+        this.els.slottedInput.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+      }
+      
+      this.dispatchToggleEvent();
+    }
+    
+    handleSlottedInputChange({ target: { checked } }) {
+      this.els.input.checked = checked;
+      this.dispatchToggleEvent();
     }
   }
 
