@@ -1,0 +1,87 @@
+<script src="./js/components/CustomRange.js"></script>
+
+<custom-controls>
+  <custom-control-checkbox id="disabled">Disabled</custom-control-checkbox>
+  <custom-control-checkbox id="vertical">Vertical</custom-control-checkbox>
+  <custom-control-checkbox id="animate">Animate</custom-control-checkbox>
+  <custom-control-color id="handleColor">Handle Color</custom-control-color>
+  <custom-control-color id="strokeColor">Stroke Color</custom-control-color>
+  <custom-control-color id="trackColor">Track Color</custom-control-color>
+  <custom-control-color id="valueColor">Value Color</custom-control-color>
+</custom-controls>
+
+<div class="ex">
+  <div class="range-wrapper">
+    <custom-range>
+      <input type="range" min="2" max="50" step="1" value="25" />
+    </custom-range>
+  </div>
+</div>
+
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .ex {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .range-wrapper {
+    padding: 0.5em;
+    border: solid 1px;
+    border-radius: 0.5em;
+    display: inline-block;
+  }
+  body:not(.vertical) .range-wrapper {
+    width: 100%;
+  }
+  body.vertical .range-wrapper {
+    height: 100%;
+  }
+</style>
+
+<script>
+  const customRange = document.querySelector('custom-range');
+  const rangeInput = document.querySelector('[type="range"]');
+  
+  [...document.querySelectorAll('[id*="Color"]')].forEach(el => {
+    el.value = customRange[el.id];
+  });
+  
+  document.querySelector('custom-controls').addEventListener('change', ({ target: { checked, id } }) => {
+    switch (id) {
+      case 'animate':
+      case 'disabled': {
+        customRange[id] = checked;
+        break;
+      }
+      
+      case 'vertical': {
+        customRange[id] = checked;
+      
+        if (document.body.classList.contains('vertical')) {
+          document.body.classList.remove('vertical');
+        }
+        else {
+          document.body.classList.add('vertical');
+        }
+        break;
+      }
+    }
+  });
+  document.querySelector('custom-controls').addEventListener('input', ({ target: { id, value } }) => {
+    if (id.endsWith('Color')) {
+      customRange[id] = value;
+    }
+  });
+  
+  rangeInput.addEventListener('input', ({ currentTarget: { value } }) => {
+    console.log(`Input value changed to: "${value}"`);
+  });
+  customRange.addEventListener(window.CustomRange.events.value, ({ detail: { value } }) => {
+    console.log(`Custom Range value changed to: "${value}"`);
+  });
+</script>
