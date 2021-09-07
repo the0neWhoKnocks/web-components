@@ -1,14 +1,19 @@
 (() => {
-  // const CSS_VAR__STROKE_COLOR = '--stroke-color';
-  // const CSS_VAR__STROKE_WIDTH = '--stroke-width';
-  // const DEFAULT__STROKE_COLOR = '#dedede';
-  // const DEFAULT__STROKE_WIDTH = 0.25;
+  const CSS_VAR__COLOR__HANDLE = '--color--handle';
+  const CSS_VAR__COLOR__STROKE = '--color--stroke';
+  const CSS_VAR__COLOR__TRACK = '--color--track';
+  const CSS_VAR__COLOR__VALUE = '--color--value';
   const EVENT__VALUE = 'value';
   const MODIFIER__SCRUBBING = 'scrubbing';
   const SELECTOR__RANGE = 'range';
   const SELECTOR__TRACK = 'track';
   const SELECTOR__TRACK__VALUE = 'track__value';
   const SELECTOR__HANDLE = 'handle';
+  
+  const DEFAULT__COLOR__HANDLE = '#cccccc';
+  const DEFAULT__COLOR__STROKE = '#000000';
+  const DEFAULT__COLOR__TRACK = '#808080';
+  const DEFAULT__COLOR__VALUE = '#ffff00';
   
   class CustomRange extends HTMLElement {
     setNonValueProp(prop, value) {
@@ -27,6 +32,14 @@
     set disabled(value) {
       this.setNonValueProp('disabled', value);
       if (this.els.slottedInput) this.els.slottedInput.disabled = value;
+    }
+    
+    get handleColor() {
+      return this.getAttribute('handleColor') || DEFAULT__COLOR__HANDLE;
+    }
+    set handleColor(value) {
+      this.setAttribute('handleColor', value);
+      this.style.setProperty(CSS_VAR__COLOR__HANDLE, value);
     }
     
     get min() { return +this.getAttribute('min') || 0; }
@@ -49,8 +62,24 @@
       if (this.els.slottedInput) this.els.slottedInput.step = value;
     }
     
+    get strokeColor() {
+      return this.getAttribute('strokeColor') || DEFAULT__COLOR__STROKE;
+    }
+    set strokeColor(value) {
+      this.setAttribute('strokeColor', value);
+      this.style.setProperty(CSS_VAR__COLOR__STROKE, value);
+    }
+    
     get ticks() { return this.hasAttribute('ticks'); }
     set ticks(value) { this.setNonValueProp('ticks', value); }
+    
+    get trackColor() {
+      return this.getAttribute('trackColor') || DEFAULT__COLOR__TRACK;
+    }
+    set trackColor(value) {
+      this.setAttribute('trackColor', value);
+      this.style.setProperty(CSS_VAR__COLOR__TRACK, value);
+    }
     
     get value() { return +this.getAttribute('value'); }
     set value(value) {
@@ -58,13 +87,6 @@
       
       if (newValue < this.min) newValue = this.min;
       else if (newValue > this.max) newValue = this.max;
-      
-      // TODO
-      // - min/max offset not working for value - working for UI though
-      // - render ticks
-      // - allow for handle focus, and UP/RIGHT increase, DOWN/LEFT decrease
-      // if (this.min > 0) newValue += this.min;
-      // console.log(newValue);
       
       if (this.value !== newValue) {
         this.setAttribute('value', newValue);
@@ -83,12 +105,19 @@
       }
     }
     
+    get valueColor() {
+      return this.getAttribute('valueColor') || DEFAULT__COLOR__VALUE;
+    }
+    set valueColor(value) {
+      this.setAttribute('valueColor', value);
+      this.style.setProperty(CSS_VAR__COLOR__VALUE, value);
+    }
+    
     get valueRange() { return this.max - this.min; }
     
     get vertical() { return this.hasAttribute('vertical'); }
     set vertical(value) {
       this.setNonValueProp('vertical', value);
-      // this.renderFromValue();
       this.render();
     }
     
@@ -96,11 +125,15 @@
       return [
         'animate',
         'disabled',
+        'handlecolor',
         'min',
         'max',
         'step',
+        'strokecolor',
         'ticks',
+        'trackcolor',
         'value',
+        'valuecolor',
         'vertical',
       ];
     }
@@ -118,6 +151,10 @@
         let _newVal = newVal;
         
         switch (attr) {
+          case 'handlecolor': { this.handleColor = _newVal; break; }
+          case 'strokecolor': { this.strokeColor = _newVal; break; }
+          case 'trackcolor': { this.trackColor = _newVal; break; }
+          case 'valuecolor': { this.valueColor = _newVal; break; }
           default: { this[attr] = _newVal; }
         }
       }
@@ -137,10 +174,12 @@
           }
           
           :host {
+            ${CSS_VAR__COLOR__HANDLE}: ${DEFAULT__COLOR__HANDLE};
+            ${CSS_VAR__COLOR__STROKE}: ${DEFAULT__COLOR__STROKE};
+            ${CSS_VAR__COLOR__TRACK}: ${DEFAULT__COLOR__TRACK};
+            ${CSS_VAR__COLOR__VALUE}: ${DEFAULT__COLOR__VALUE};
             --thickness: 1.75em;
             --thickness--handle: 1em;
-            --perc--handle: 0%;
-            --perc--track: 0%;
             
             font-family: Helvetica, Arial, sans-serif;
             display: inline-block;
@@ -164,8 +203,11 @@
           }
           
           .${SELECTOR__RANGE} {
+            --perc: 0%;
+            
             width: 100%;
             height: 100%;
+            color: var(${CSS_VAR__COLOR__STROKE});
             display: flex;
             cursor: pointer;
             position: absolute;
@@ -185,7 +227,7 @@
           
           .${SELECTOR__TRACK} {
             border: solid 1px;
-            background: var(--color--track--bg, gray);
+            background: var(${CSS_VAR__COLOR__TRACK});
             overflow: hidden;
           }
           :host(:not([vertical])) .${SELECTOR__TRACK} {
@@ -200,35 +242,42 @@
           .${SELECTOR__TRACK__VALUE} {
             width: 100%;
             height: 100%;
-            background: var(--color--track--fg, yellow);
+            background: var(${CSS_VAR__COLOR__VALUE});
           }
           
           .${SELECTOR__HANDLE} {
             padding: 0;
             border: solid 1px;
-            background: #ccc;
+            background: var(${CSS_VAR__COLOR__HANDLE});
             position: absolute;
-            opacity: 0.5;
           }
           
           :host(:not([vertical])) .${SELECTOR__HANDLE} {
             width: var(--thickness--handle);
             height: 100%;
-            left: calc(var(--perc--handle) - (var(--thickness--handle) / 2));
+            left: clamp(
+              0%,
+              calc((1% * var(--perc)) - (var(--thickness--handle) / 2)),
+              calc(100% - var(--thickness--handle))
+            );
           }
           :host(:not([vertical])) .${SELECTOR__TRACK__VALUE} {
             transform-origin: left;
-            transform: scale(calc(var(--perc--track) * 0.01), 1);
+            transform: scale(calc(var(--perc) * 0.01), 1);
           }
           
           :host([vertical]) .${SELECTOR__HANDLE} {
             width: 100%;
             height: var(--thickness--handle);
-            bottom: calc(100% - (var(--perc--handle) + (var(--thickness--handle) / 2)));
+            bottom: clamp(
+              0%,
+              calc(100% - ((1% * var(--perc)) + (var(--thickness--handle) / 2))),
+              calc(100% - var(--thickness--handle))
+            );
           }
           :host([vertical]) .${SELECTOR__TRACK__VALUE} {
             transform-origin: bottom;
-            transform: scale(1, calc(1 - (var(--perc--track) * 0.01)));
+            transform: scale(1, calc(1 - (var(--perc) * 0.01)));
           }
           
           :host([animate]) .${SELECTOR__RANGE}:not(.${MODIFIER__SCRUBBING}) .${SELECTOR__TRACK__VALUE} {
@@ -261,10 +310,12 @@
     }
     
     connectedCallback() {
+      this.handleKeyDown = this.handleKeyDown.bind(this);
       this.handlePointerDown = this.handlePointerDown.bind(this);
       this.handlePointerMove = this.handlePointerMove.bind(this);
       this.handlePointerUp = this.handlePointerUp.bind(this);
       
+      this.addEventListener('keydown', this.handleKeyDown);
       this.addEventListener('pointerdown', this.handlePointerDown);
       this.addEventListener('pointerup', this.handlePointerUp);
       
@@ -279,8 +330,6 @@
                 this.max = this.els.slottedInput.max;
                 this.step = this.els.slottedInput.step;
                 this.value = this.els.slottedInput.value;
-                
-                // this.renderFromValue();
               }
               
               break;
@@ -288,8 +337,6 @@
           }
         });
       });
-      
-      // this.renderFromValue();
     }
     
     calcData(pointerX, pointerY) { 
@@ -301,33 +348,33 @@
       const y = pointerY - containerY;
       const pos = (this.vertical) ? y : x;
       const posPerc = (pos / trackLength) || 0;
-      const rawValue = valueRange * posPerc;
-      const steppedValue = Math.round(rawValue / this.step) * this.step;
+      const rawValue = (this.vertical)
+        ? (valueRange * posPerc) - this.min
+        : (valueRange * posPerc) + this.min;
+      let steppedValue = Math.round(rawValue / this.step) * this.step;
       
+      if (this.vertical) steppedValue = valueRange - steppedValue;
       
       this.value = steppedValue;
-      
-      
-      // const fullHandlePerc = (
-      //   (this.vertical)
-      //     ? this.els.handle.offsetHeight / trackLength
-      //     : this.els.handle.offsetWidth / trackLength
-      // ) || 0;
-      // const halfHandlePerc = fullHandlePerc / 2;
-      // const trackPerc = steppedPerc * 100;
-      // let handlePerc = (steppedPerc - halfHandlePerc) * 100;
-      // const maxHandlePerc = (100 - (100 * fullHandlePerc));
-      // 
-      // if (handlePerc < 0) handlePerc = 0;
-      // else if (handlePerc > maxHandlePerc) handlePerc = maxHandlePerc;
-      // 
-      // return { handlePerc, steppedValue, trackPerc };
+    }
+    
+    handleKeyDown({ key }) {
+      switch (key) {
+        case 'ArrowRight':
+        case 'ArrowUp': {
+          this.value += this.step;
+          break;
+        }
+        
+        case 'ArrowDown':
+        case 'ArrowLeft': {
+          this.value -= this.step;
+          break;
+        }
+      }
     }
     
     handlePointerDown({ clientX, clientY }) {
-      this.els.range.classList.add(MODIFIER__SCRUBBING);
-      
-      // this.render(this.calcData(clientX, clientY));
       this.calcData(clientX, clientY);
       
       document.addEventListener('pointermove', this.handlePointerMove);
@@ -335,76 +382,26 @@
     }
     
     handlePointerMove({ clientX, clientY }) {
-      // this.render(this.calcData(clientX, clientY));
+      this.els.range.classList.add(MODIFIER__SCRUBBING);
       this.calcData(clientX, clientY);
     }
     
     handlePointerUp({ clientX, clientY }) {
       document.removeEventListener('pointermove', this.handlePointerMove);
       document.removeEventListener('pointerup', this.handlePointerUp);
-      // this.render(this.calcData(clientX, clientY));
+      
       this.calcData(clientX, clientY);
-      delete this.dims;
+      
+      if (this.els.range.classList.contains(MODIFIER__SCRUBBING)) {
+        this.els.range.classList.remove(MODIFIER__SCRUBBING);
+      }
     }
     
-    // render({
-    //   handlePerc,
-    //   steppedValue,
-    //   trackPerc,
-    // }) {
     render() {
-      this.setDims();
-      const {
-        // containerX,
-        // containerY,
-        trackLength,
-      } = this.dims;
+      const steppedPerc = ((this.value - this.min) / this.valueRange) * 100;
+      const normalizedPerc = this.vertical ? 100 - steppedPerc : steppedPerc;
       
-      const steppedPerc = this.value / this.valueRange;
-      // const steppedPerc = (this.value - this.min) / this.valueRange;
-      const fullHandlePerc = (
-        (this.vertical)
-          ? this.els.handle.offsetHeight / trackLength
-          : this.els.handle.offsetWidth / trackLength
-      ) || 0;
-      // const halfHandlePerc = fullHandlePerc / 2;
-      const trackPerc = steppedPerc * 100;
-      // let handlePerc = (steppedPerc - halfHandlePerc) * 100;
-      let handlePerc = trackPerc;
-      const maxHandlePerc = (100 - (100 * fullHandlePerc));
-      
-      if (handlePerc < 0) handlePerc = 0;
-      else if (handlePerc > maxHandlePerc) handlePerc = maxHandlePerc;
-      
-      this.els.range.style.setProperty('--perc--handle', `${handlePerc}%`);
-      this.els.range.style.setProperty('--perc--track', trackPerc);
-      // if (this.vertical) {
-      //   this.els.handle.style.cssText = `bottom: ${100 - trackPerc}%`;
-      //   this.els.trackValue.style.cssText = `transform: scale(1, ${1 - (trackPerc * 0.01)})`;
-      // }
-      // else {
-      //   this.els.handle.style.cssText = `left: ${handlePerc}%`;
-      //   this.els.trackValue.style.cssText = `transform: scale(${trackPerc * 0.01}, 1)`;
-      // }
-    }
-    
-    renderFromValue() {
-      this.setDims();
-      
-      const { trackLength } = this.dims;
-      const perc = this.value / this.valueRange;
-      let clientX, clientY;
-      
-      if (this.vertical) {
-        clientX = 0;
-        clientY = trackLength * perc;
-      }
-      else {
-        clientX = trackLength * perc;
-        clientY = 0;
-      }
-      
-      this.handlePointerUp({ clientX, clientY });
+      this.els.range.style.setProperty('--perc', normalizedPerc);
     }
     
     setDims() {
