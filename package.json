@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A collection of Web Components that I've built",
   "scripts": {
-    "lint": "eslint \"./dist/**/*.{html,js}\""
+    "lint": "eslint \"./src/**/*.{html,js}\""
   },
   "repository": {
     "type": "git",
