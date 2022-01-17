@@ -2,8 +2,13 @@ body {
   padding: 1em;
 }
 
-
-
+code {
+  padding: 0.1em 0.5em;
+  border: solid 1px #bbb;
+  border-radius: 0.25em;
+  background: #eee;
+  display: inline-block;
+}
 
 section {
   padding: 1em;
@@ -15,9 +20,3 @@ section > .title {
   border-bottom: solid 1px #ccc;
   margin-top: 0;
 }
-
-/* section {
-  border-radius: unset;
-  box-shadow: unset;
-  margin: 0;
-} */

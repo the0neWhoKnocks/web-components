@@ -1,0 +1,30 @@
+<script src="./js/components/CustomTag.js"></script>
+<script src="./js/components/CustomTagsInput.js"></script>
+
+<p>
+  Type a tag name, then hit <code>ENTER</code>.
+</p>
+<custom-tags-input
+  autoCompleteItems="[&quot;temp&quot;, &quot;test&quot;]"
+></custom-tags-input>
+<div class="tags"></div>
+
+<style>
+  .tags {
+    padding: 0.5em;
+    margin-top:1em;
+  }
+</style>
+
+<script>
+  const tagsInput = document.querySelector('custom-tags-input');
+  const tagsEl = document.querySelector('.tags');
+  
+  tagsInput.onTagChange = (tags) => {
+    tagsEl.innerHTML = tags
+      .map(tag => `<custom-tag rounded text="${tag}"></custom-tag>`)
+      .join('');
+  };
+  
+  tagsInput.tags = ['temp'];
+</script>
