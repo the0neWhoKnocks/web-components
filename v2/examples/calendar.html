@@ -1,32 +1,84 @@
 <script src="./js/components/CustomCalendar.js"></script>
 
 <div id="calendarExample">
-  <!-- <custom-controls>
-    <custom-control-btn id="carouselRandomize">Randomize</custom-control-btn>
-    <custom-control-number id="carouselItemCount" min="3" max="20" value="10">Item Count</custom-control-number>
-    <custom-control-checkbox id="carouselNav1" checked>Nav 1</custom-control-checkbox>
-    <custom-control-checkbox id="carouselNav2" checked>Nav 2</custom-control-checkbox>
-    <custom-control-select id="carouselNav2Position">
-      Nav 2 Position
-      <option slot="opt" value="before">Before</option>
-      <option slot="opt" value="after" selected>After</option>
+  <custom-controls>
+    <custom-control-checkbox id="monthYearNav" checked>Month/Year Nav</custom-control-checkbox>
+    <custom-control-checkbox id="nextPrevNav" checked>Next/Prev Nav</custom-control-checkbox>
+    <custom-control-select id="startWeekOn">
+      Start Week On
+      <option slot="opt" value="Monday">Monday</option>
+      <option slot="opt" value="Tuesday">Tuesday</option>
+      <option slot="opt" value="Wednesday">Wednesday</option>
+      <option slot="opt" value="Thursday">Thursday</option>
+      <option slot="opt" value="Friday">Friday</option>
+      <option slot="opt" value="Saturday">Saturday</option>
+      <option slot="opt" value="Sunday" selected>Sunday</option>
     </custom-control-select>
-    <custom-control-checkbox id="carouselVertical">Vertical</custom-control-checkbox>
-    <custom-control-checkbox id="carouselMockImgs" checked>Mock Images</custom-control-checkbox>
-    <custom-control-checkbox id="carouselUseImgs" checked>Images</custom-control-checkbox>
-    <custom-control-checkbox id="carouselUseAnchors">Anchors</custom-control-checkbox>
-    <custom-control-checkbox id="carouselUseCards">Cards</custom-control-checkbox>  
-  </custom-controls> -->
+  </custom-controls>
   
-  <custom-calendar></custom-calendar>
+  <custom-calendar
+    monthYearNav
+    nextPrevNav
+    startWeekOn="Sunday"
+  ></custom-calendar>
 </div>
 
 <style>
+  #calendarExample {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 10% 90%;
+  }
   
+  custom-calendar {
+    height: 100%;
+  }
+  
+  .cal-item {
+    padding: 0.25em 0.5em;
+    border: solid 1px;
+    border-radius: 0.25em;
+    margin: 0.4em;
+  }
+  .cal-item.for--fu {
+    background: cyan;
+  }
+  .cal-item.for--bar {
+    background: pink;
+  }
 </style>
 
 <script>
+  const pad = (num, token='00') => token.substring(0, token.length-`${num}`.length) + num;
+
   window.addEventListener('load', () => {
+    const cal = document.querySelector('custom-calendar');
     
+    document.querySelector('custom-controls').addEventListener('change', ({ target: { checked, id, value } }) => {
+      switch (id) {
+        case 'monthYearNav':
+        case 'nextPrevNav': {
+          cal[id] = checked;
+          break;
+        }
+        case 'startWeekOn': {
+          cal[id] = value;
+          break;
+        }
+      }
+    });
+    
+    // add items to the current day
+    const d = new Date();
+    const slotName = `${d.getFullYear()}_${pad(d.getMonth() + 1)}_${pad(d.getDate())}`;
+    cal.innerHTML = ['fu', 'bar']
+      .map((label) => {
+        return `<div class="cal-item for--${label}" slot="${slotName}">${label}</div>`;
+      })
+      .join('');
+    
+    cal.onLayoutChange = (layout) => {
+      console.log('layout changed to:', layout);
+    };
   });
 </script>
