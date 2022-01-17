@@ -1,11 +1,4 @@
 (() => {
-  // const CSS_VAR__COLOR__NAME = '--color--name';
-  // const EVENT__TOGGLED = 'toggled';
-  // const ROOT_CLASS = 'calendar';
-  
-  // const DEFAULT__COLOR__NAME = '#cccccc';
-  
-  
   const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const LAYOUT__MONTH = 'month';
@@ -55,91 +48,51 @@
   }
   
   class CustomCalendar extends HTMLElement {
-    // // prototype getter
-    // static get prop1() { return prop; }
-    
-    // instance props
-    get data() {
-      return this.getAttribute('data');
-    }
-    set data(value) {
-      let _value = value;
-      
-      if (typeof _value === 'object') _value = JSON.stringify(_value);
-      else if (typeof _value === 'string') this.data = JSON.parse(_value);
-      
-      this.setAttribute('data', _value);
-    }
-    
-    get dataComponent() {
-      return this.getAttribute('dataComponent');
-    }
     get layout() {
       return this.getAttribute('layout') || LAYOUT__MONTH;
     }
+    set layout(value) {
+      this.setAttribute('layout', value);
+    }
+    
     get monthYearNav() {
       return this.hasAttribute('monthYearNav');
     }
+    set monthYearNav(value) {
+      (value === '' || value === 'true' || value === true)
+        ? this.setAttribute('monthYearNav', '')
+        : this.removeAttribute('monthYearNav');
+    }
+    
     get nextPrevNav() {
       return this.hasAttribute('nextPrevNav');
     }
-    get onLayoutChange() {
-      return this.getAttribute('onLayoutChange');
+    set nextPrevNav(value) {
+      (value === '' || value === 'true' || value === true)
+        ? this.setAttribute('nextPrevNav', '')
+        : this.removeAttribute('nextPrevNav');
     }
+    
     get startWeekOn() {
       return this.getAttribute('startWeekOn') || DAYS[0];
     }
-    
-    // get prop2() {
-    //   return this.getAttribute('prop2') || DEFAULT__VAL;
-    // }
-    // set prop2(value) {
-    //   this.setAttribute('prop2', value);
-    // }
-    
-    // set expanded(value) {
-    //   (value === '' || value === 'true' || value === true)
-    //     ? this.setAttribute('expanded', '')
-    //     : this.removeAttribute('expanded');
-    // }
-    
-    // get open() { return this.hasAttribute('open'); }
-    // set open(value) {
-    //   const open = value === '' || value === 'true' || value === true;
-    //   const changed = open !== this.open;
-    //   
-    //   const sendEvent = () => {
-    //     this.dispatchEvent(new CustomEvent(EVENT__TOGGLED, {
-    //       bubbles: true,
-    //       detail: { open },
-    //     }));
-    //   };
-    //   
-    //   if (changed) {
-    //     if (open) this.setAttribute('open', '');
-    //     else this.removeAttribute('open');
-    //   }
-    // }
+    set startWeekOn(value) {
+      this.setAttribute('startWeekOn', value);
+      
+      this.weekDays = createDays(DAYS, value);
+      this.days = [...this.weekDays];
+      this.updateCalData();
+    }
     
     // run logic when these DOM attributes are altered
     static get observedAttributes() {
       return [
-        'data',
-        'datacomponent',
         'layout',
         'nextprevnav',
         'monthyearnav',
-        'onlayoutchange',
         'startweekon',
       ];
     }
-    
-    // // export custom events for Users
-    // static get events() {
-    //   return {
-    //     toggled: EVENT__TOGGLED,
-    //   };
-    // }
     
     static get layouts() {
       return {
@@ -159,14 +112,14 @@
         switch (attr) {
           // NOTE: Transform attribute names to camelcase variables since
           // Browsers normalize them to lowercase.
-          case 'datacomponent': { this.dataComponent = _newVal; break; }
           case 'nextprevnav': { this.nextPrevNav = _newVal; break; }
           case 'monthyearnav': { this.monthYearNav = _newVal; break; }
-          case 'onlayoutchange': { this.onLayoutChange = _newVal; break; }
           case 'startweekon': { this.startWeekOn = _newVal; break; }
           default: { this[attr] = _newVal; }
         }
       }
+      
+      if (oldVal !== newVal) this.render();
     }
     
     constructor() {
@@ -176,28 +129,6 @@
       
       const { shadowRoot } = this;
       
-      /*
-      :host {
-        ${CSS_VAR__COLOR__NAME}: ${DEFAULT__COLOR__NAME};
-      }
-      
-      .${ROOT_CLASS} {
-        display: inline-block;
-      }
-      */
-      
-      /*
-      :host([open]) .${ROOT_CLASS} {
-        background: green;
-      }
-      
-      ::slotted([slot="item"]) {
-        background: orange;
-      }
-      
-      <div class="${ROOT_CLASS}"></div>
-      */
-      
       shadowRoot.innerHTML = `
         <style>
           *, *::after, *::before {
@@ -205,7 +136,148 @@
           }
           
           :host {
+            --color--bg--current: #ffffba;
+            --color--bg--primary: #fff;
+            --color--bg--secondary: hsl(0deg 0% 96%);
+            --color--outline--current: #0068ff;
+            --color--text--primary: #000;
+            
             font-family: Helvetica, Arial, sans-serif;
+            display: flex;
+          }
+          
+          button,
+          select {
+            color: var(--color--text--primary);
+            border: solid 1px var(--color--text--primary);
+          }
+          
+          button {
+            background: var(--color--bg--secondary);
+          }
+          button:not(:disabled) {
+            cursor: pointer;
+          }
+          
+          nav {
+            display: flex;
+          }
+          nav button {
+            width: 100%;
+          }
+          nav select {
+            text-align: center;
+            padding-right: 0.5em;
+            padding-left: 0.25em;
+            background: var(--color--bg--primary);
+          }
+          nav select option {
+            text-align: left;
+          }
+
+          .calendar-wrapper {
+            color: var(--color--text--primary);
+            height: 100%;
+            min-height: 0;
+            background: var(--color--bg--primary);
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .calendar-header {
+            margin-bottom: 0.5em;
+            display: flex;
+            justify-content: space-between;
+          }
+          
+          .calendar-title {
+            font-weight: bold;
+            padding-right: 1em;
+            margin: 0;
+          }
+          
+          .calendar-top-navs {
+            display: flex;
+            gap: 1em;
+          }
+          .calendar-top-navs nav button {
+            line-height: 0;
+            padding: 0.5em 1em;
+          }
+          
+          .calendar-next-prev-nav svg {
+            width: 1em;
+            overflow: visible;
+            fill: transparent;
+            stroke: currentColor;
+            stroke-linejoin: round;
+            stroke-width: 0.4em;
+          }
+          
+          .calendar-layout-nav button {
+            padding: 0.25em 0.75em;
+          }
+          .calendar-layout-nav button.is--current {
+            color: #eee;
+            background: #333;
+          }
+          
+          .calendar-scroller {
+            height: 100%;
+            overflow-y: scroll;
+            border: solid 2px;
+            background: var(--color--text--primary);
+          }
+          
+          .calendar {
+            table-layout: fixed;
+            border-collapse: collapse;
+            width: 100%; /* controls td/th width/heights, makes'em equal size */
+            height: 100%;
+          }
+          .calendar__days {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+          }
+          
+          .calendar__day,
+          .calendar__date {
+            color: var(--color--text--primary);
+            outline: solid 1px;
+          }
+          
+          .calendar__day {
+            font-weight: bold;
+            background: var(--color--bg--secondary);
+          }
+          
+          .calendar__date {
+            --color--cal--date--bg: var(--color--bg--primary);
+            
+            height: 6em;
+            vertical-align: top;
+            background: var(--color--cal--date--bg);
+          }
+          .calendar__date.is--current {
+            --color--cal--date--bg: var(--color--bg--current);
+            
+            background: var(--color--cal--date--bg);
+          }
+          .calendar__date.is--prev-month,
+          .calendar__date.is--next-month {
+            --color--cal--date--bg: var(--color--bg--secondary);
+            
+            background-color: var(--color--cal--date--bg);
+          }
+          
+          .calendar__date-label {
+            line-height: 1em;
+            padding: 0.5em;
+            background: inherit;
+            position: sticky;
+            top: 1.68em;
+            z-index: 1;
           }
         </style>
         
@@ -220,29 +292,25 @@
       this.currWeekNdx = undefined;
       this.currentMonth = today.getMonth();
       this.currentYear = year;
-      this.monthSelectRef = undefined;
-      this.mounted = false;
       this.weekDays = createDays(DAYS, this.startWeekOn);
-      this.yearSelectRef = undefined;
-      
+      // the below data props are dependant on the above
+      this.days = [...this.weekDays];
       this.calData = this.genCalData();
       this.selectedCalData = this.calData;
-      this.days = [...this.weekDays];
+      
+      this.handleLayoutChange = this.handleLayoutChange.bind(this);
+      this.handleMonthSelect = this.handleMonthSelect.bind(this);
+      this.handleNextClick = this.handleNextClick.bind(this);
+      this.handlePrevClick = this.handlePrevClick.bind(this);
+      this.handleYearSelect = this.handleYearSelect.bind(this);
     }
     
     genCalData() {
-      const {
-        currentMonth,
-        currentYear,
-        data,
-        startWeekOn,
-      } = this;
-      
-      const firstDay = getFirstDayOfMonthOffset(currentMonth, currentYear, startWeekOn);
-      const prevMonth = (currentMonth === 0) ? 11 : currentMonth - 1;
-      const prevYear = (currentMonth === 0) ? currentYear - 1 : currentYear;
+      const firstDay = getFirstDayOfMonthOffset(this.currentMonth, this.currentYear, this.startWeekOn);
+      const prevMonth = (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
+      const prevYear = (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
       const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
-      const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+      const daysInMonth = getDaysInMonth(this.currentMonth, this.currentYear);
       const currDay = today.getDate();
       const currMonth = today.getMonth();
       const currYear = today.getFullYear();
@@ -270,32 +338,29 @@
             
             if (
               dayNum === currDay
-              && currentMonth === currMonth
-              && currentYear === currYear
+              && this.currentMonth === currMonth
+              && this.currentYear === currYear
             ) obj.current = true;
             
             dayNum += 1;
           }
           
-          if (data) {
-            let month = currentMonth;
-            let year = currentYear;
-            if (obj.prevMonth) {
-              month = month === 0 ? 11 : month - 1;
-              if (month === 11) year -= 1;
-            }
-            else if (obj.nextMonth) {
-              month = month === 11 ? 0 : month + 1;
-              if (month === 0) year += 1;
-            }
-            
-            const formattedMonth = formatMonth(month);
-            const formattedDay = pad(obj.label);
-            
-            if (data?.[year]?.[formattedMonth]?.[formattedDay]) {
-              obj.items = data[year][formattedMonth][formattedDay];
-            }
+          let month = this.currentMonth;
+          let year = this.currentYear;
+          if (obj.prevMonth) {
+            month = month === 0 ? 11 : month - 1;
+            if (month === 11) year -= 1;
           }
+          else if (obj.nextMonth) {
+            month = month === 11 ? 0 : month + 1;
+            if (month === 0) year += 1;
+          }
+          
+          const formattedYear = `${year}`;
+          const formattedMonth = formatMonth(month);
+          const formattedDay = pad(obj.label);
+          
+          obj.slotName = `${formattedYear}_${formattedMonth}_${formattedDay}`;
           
           rowArr.push(obj);
         }
@@ -307,22 +372,15 @@
     }
     
     selectCalData() {
-      const {
-        calData,
-        currDayNdx,
-        currWeekNdx,
-        layout,
-      } = this;
-      
-      switch (layout) {
-        case LAYOUT__MONTH: this.selectedCalData = calData; break;
+      switch (this.layout) {
+        case LAYOUT__MONTH: this.selectedCalData = this.calData; break;
         case LAYOUT__WEEK: {
-          if (currWeekNdx === undefined) {
-            rowLoop: for (let r=0; r<calData.length; r++) {
-              const row = calData[r];
+          if (this.currWeekNdx === undefined) {
+            rowLoop: for (let r=0; r<this.calData.length; r++) {
+              const row = this.calData[r];
               const currNdx = row.findIndex(({ current }) => current);
               
-              if (currNdx >= 0) {
+              if (currNdx > -1) {
                 this.currWeekNdx = r;
                 break rowLoop;
               }
@@ -330,19 +388,19 @@
             
             // if on a month that doesn't have the current day, default to the
             // first week.
-            if (currWeekNdx === undefined) this.currWeekNdx = 0;
+            if (this.currWeekNdx === undefined) this.currWeekNdx = 0;
           }
           
-          this.selectedCalData = [calData[currWeekNdx]];
+          this.selectedCalData = [this.calData[this.currWeekNdx]];
       
           break;
         }
         case LAYOUT__DAY: {
-          if (currDayNdx === undefined) {
+          if (this.currDayNdx === undefined) {
             let firstDayNdx;
             
-            rowLoop: for (let r=0; r<calData.length; r++) {
-              const row = calData[r];
+            rowLoop: for (let r=0; r<this.calData.length; r++) {
+              const row = this.calData[r];
               const currNdx = row.findIndex(({ current }) => current);
               
               if (firstDayNdx === undefined) {
@@ -350,7 +408,7 @@
                 if (dayNdx >= 0) firstDayNdx = dayNdx;
               } 
               
-              if (currNdx >= 0) {
+              if (currNdx > -1) {
                 this.currWeekNdx = r;
                 this.currDayNdx = currNdx;
                 break rowLoop;
@@ -359,13 +417,13 @@
             
             // if on a month that doesn't have the current day, default to the
             // first week and day.
-            if (currWeekNdx === undefined) {
+            if (this.currWeekNdx === undefined) {
               this.currWeekNdx = 0;
               this.currDayNdx = firstDayNdx;
             }
           }
           
-          this.selectedCalData = [[calData[currWeekNdx][currDayNdx]]];
+          this.selectedCalData = [[this.calData[this.currWeekNdx][this.currDayNdx]]];
           
           break;
         }
@@ -378,78 +436,56 @@
     }
     
     updateMonth(newMonth) {
-      const { currentMonth } = this;
-      
-      if (newMonth !== currentMonth) {
+      if (newMonth !== this.currentMonth) {
         this.currentMonth = newMonth;
         this.updateCalData();
       }
     }
     
     updateYear(newYear) {
-      const { currentYear } = this;
-      
-      if (newYear !== currentYear) {
+      if (newYear !== this.currentYear) {
         this.currentYear = newYear;
         this.updateCalData();
       }
     }
     
     updateLayout(newLayout, force) {
-      const {
-        layout,
-        onLayoutChange,
-        selectedCalData,
-        weekDays,
-      } = this;
-      
-      if (force || newLayout !== layout) {
+      if (force || newLayout !== this.layout) {
         this.layout = newLayout;
         this.currWeekNdx = undefined;
         this.currDayNdx = undefined;
         
         this.updateCalData();
         
-        switch (layout) {
+        switch (this.layout) {
           case LAYOUT__MONTH:
           case LAYOUT__WEEK: {
-            this.days = [...weekDays];
+            this.days = [...this.weekDays];
             break;
           }
           case LAYOUT__DAY: {
-            this.days = [weekDays[selectedCalData[0][0].dayNdx]];
+            this.days = [this.weekDays[this.selectedCalData[0][0].dayNdx]];
             break;
           }
         }
         
-        if (onLayoutChange) onLayoutChange(layout);
+        if (this.onLayoutChange) this.onLayoutChange(this.layout);
       }
     }
     
     handleNextClick() {
-      const {
-        calData,
-        currDayNdx,
-        currWeekNdx,
-        currentMonth,
-        currentYear,
-        layout,
-        selectedCalData,
-        weekDays,
-      } = this;
+      if (this.currentMonth === 11 && this.currentYear + 1 > yearOpts[yearOpts.length - 1]) return;
       
-      if (currentMonth === 11 && currentYear + 1 > yearOpts[yearOpts.length - 1]) return;
+      const nextMonth = () => {
+        this.updateYear( (this.currentMonth === 11) ? this.currentYear + 1 : this.currentYear );
+        this.updateMonth( (this.currentMonth + 1) % 12 );
+      };
       
-      function nextMonth() {
-        this.updateYear( (currentMonth === 11) ? currentYear + 1 : currentYear );
-        this.updateMonth( (currentMonth + 1) % 12 );
-      }
-      
-      function nextWeek() {
-        const nextWeek = calData[currWeekNdx + 1];
+      const nextWeek = () => {
+        const nextWeek = this.calData[this.currWeekNdx + 1];
         const noCurrentMonthItems = (nextWeek) ? nextWeek[0].nextMonth : true;
         
-        if (noCurrentMonthItems || currWeekNdx === 5) {
+        if (noCurrentMonthItems || this.currWeekNdx === 5) {
           this.currWeekNdx = 0;
           nextMonth();
         }
@@ -457,13 +493,13 @@
           this.currWeekNdx += 1;
           this.selectCalData();
         }
-      }
+      };
       
-      switch (layout) {
+      switch (this.layout) {
         case LAYOUT__MONTH: nextMonth(); break;
         case LAYOUT__WEEK: nextWeek(); break;
         case LAYOUT__DAY: {
-          if (currDayNdx === 6) {
+          if (this.currDayNdx === 6) {
             this.currDayNdx = 0;
             nextWeek();
           }
@@ -472,46 +508,37 @@
             this.selectCalData();
           }
           
-          let dayNdx = selectedCalData[0][0].dayNdx;
-          if (dayNdx !== undefined) this.days = [weekDays[dayNdx]];
+          let dayNdx = this.selectedCalData[0][0].dayNdx;
+          if (dayNdx !== undefined) this.days = [this.weekDays[dayNdx]];
           else {
             this.currWeekNdx = 0;
             nextMonth();
             this.selectCalData();
             
-            dayNdx = selectedCalData[0][0].dayNdx;
-            this.days = [weekDays[dayNdx]];
+            dayNdx = this.selectedCalData[0][0].dayNdx;
+            this.days = [this.weekDays[dayNdx]];
           }
           
           break;
         }
       }
+      
+      this.render();
     }
     
     handlePrevClick() {
-      const {
-        calData,
-        currDayNdx,
-        currWeekNdx,
-        currentMonth,
-        currentYear,
-        layout,
-        selectedCalData,
-        weekDays,
-      } = this;
+      if (this.currentMonth === 0 && this.currentYear - 1 < yearOpts[0]) return;
       
-      if (currentMonth === 0 && currentYear - 1 < yearOpts[0]) return;
+      const prevMonth = () => {
+        this.updateYear( (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear );
+        this.updateMonth( (this.currentMonth === 0) ? 11 : this.currentMonth - 1 );
+      };
       
-      function prevMonth() {
-        this.updateYear( (currentMonth === 0) ? currentYear - 1 : currentYear );
-        this.updateMonth( (currentMonth === 0) ? 11 : currentMonth - 1 );
-      }
-      
-      function prevWeek() {
-        const prevWeek = calData[currWeekNdx - 1];
+      const prevWeek = () => {
+        const prevWeek = this.calData[this.currWeekNdx - 1];
         const noCurrentMonthItems = (prevWeek) ? prevWeek[prevWeek.length - 1].prevMonth : true;
         
-        if (noCurrentMonthItems || currWeekNdx === 0) {
+        if (noCurrentMonthItems || this.currWeekNdx === 0) {
           this.currWeekNdx = 4;
           prevMonth();
         }
@@ -519,13 +546,13 @@
           this.currWeekNdx -= 1;
           this.selectCalData();
         }
-      }
+      };
       
-      switch (layout) {
+      switch (this.layout) {
         case LAYOUT__MONTH: prevMonth(); break;
         case LAYOUT__WEEK: prevWeek(); break;
         case LAYOUT__DAY: {
-          if (currDayNdx === 0) {
+          if (this.currDayNdx === 0) {
             this.currDayNdx = 6;
             prevWeek();
           }
@@ -534,13 +561,13 @@
             this.selectCalData();
           }
           
-          let dayNdx = selectedCalData[0][0].dayNdx;
-          if (dayNdx !== undefined) this.days = [weekDays[dayNdx]];
+          let dayNdx = this.selectedCalData[0][0].dayNdx;
+          if (dayNdx !== undefined) this.days = [this.weekDays[dayNdx]];
           else {
             prevMonth();
             
-            rowLoop: for (let r=0; r<calData.length; r++) {
-              const row = calData[r];
+            rowLoop: for (let r=0; r<this.calData.length; r++) {
+              const row = this.calData[r];
               const ndx = row.findIndex(({ nextMonth }) => nextMonth);
               if (ndx >= 0) {
                 this.currWeekNdx = r;
@@ -550,54 +577,45 @@
             
             this.selectCalData();
             
-            dayNdx = selectedCalData[0][0].dayNdx;
-            this.days = [weekDays[dayNdx]];
+            dayNdx = this.selectedCalData[0][0].dayNdx;
+            this.days = [this.weekDays[dayNdx]];
           }
           
           break;
         }
       }
+      
+      this.render();
     }
     
     handleMonthSelect() {
-      const { monthSelectRef } = this;
-      
-      this.updateMonth( parseInt(monthSelectRef.value) );
+      this.updateMonth( parseInt(this.els.monthSelect.value) );
+      this.render();
     }
     
     handleYearSelect() {
-      const { yearSelectRef } = this;
-      
-      this.updateYear( parseInt(yearSelectRef.value) );
+      this.updateYear( parseInt(this.els.yearSelect.value) );
+      this.render();
     }
     
     handleLayoutChange({ target }) {
-      if (target.nodeName === 'BUTTON') this.updateLayout(target.value);
+      if (target.nodeName === 'BUTTON') {
+        this.updateLayout(target.value);
+        this.render();
+      }
     }
     
     // component has been added to the DOM
     connectedCallback() {
-      const { layout } = this;
-      
-      if (layout === LAYOUT__DAY) this.updateLayout(layout, true);
-      
-      // TODO: 'mounted' may not be needed
-      this.mounted = true;
+      if (this.layout === LAYOUT__DAY) this.updateLayout(this.layout, true);
       
       this.render();
-      
-      // this.shadowRoot.addEventListener('slotchange', ({ target: slot }) => {
-      //   slot.assignedNodes().map((node) => {
-      //     console.log(node);
-      //   });
-      // });  
     }
     
     render() {
       const {
         currentMonth,
         currentYear,
-        dataComponent,
         days,
         layout,
         monthYearNav,
@@ -618,15 +636,14 @@
       
       let nextPrevNavMarkup = '';
       if (nextPrevNav) {
-        // TODO: wire up handlers
         nextPrevNavMarkup = `
           <nav class="calendar-next-prev-nav">
-            <button on:click={handlePrevClick} title="${`Previous ${layout}`}">
+            <button id="prevBtn" title="${`Previous ${layout}`}">
               <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <polygon points="0 50, 100 0, 100 100, 0 50" />
               </svg>
             </button>
-            <button on:click={handleNextClick} title="${`Next ${layout}`}">
+            <button id="nextBtn" title="${`Next ${layout}`}">
               <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <polygon points="0 0, 100 50, 0 100, 0 0" />
               </svg>
@@ -637,41 +654,32 @@
       
       let monthYearNavMarkup = '';
       if (monthYearNav && layout === LAYOUT__MONTH) {
-        // TODO: wire up handlers
         monthYearNavMarkup = `
-          <nav>
-            <select
-              bind:this={monthSelectRef}
-              on:change={handleMonthSelect}
-            >
+          <nav class="calendar-month-year-nav">
+            <select id="monthSelect">
               ${MONTHS.map((monthOpt, monthNdx) => {
-                return `<option value="${monthNdx}" selected="${currentMonth === monthNdx}">${monthOpt}</option>`;
+                const selected = currentMonth === monthNdx ? 'selected' : '';
+                return `<option value="${monthNdx}" ${selected}>${monthOpt}</option>`;
               }).join('')}
             </select>
-            
-            <select
-              bind:this={yearSelectRef}
-              on:change={handleYearSelect}
-            >
+            <select id="yearSelect">
               ${yearOpts.map((yearOpt) => {
-                return `<option value="${yearOpt}" selected="${currentYear === yearOpt}">${yearOpt}</option>`;
+                const selected = currentYear === yearOpt ? 'selected' : '';
+                return `<option value="${yearOpt}" ${selected}>${yearOpt}</option>`;
               }).join('')}
             </select>
           </nav>
         `;
       }
       
-      // TODO: wire up handlers
       this.els.root.innerHTML = `
         <div class="calendar-wrapper ${wrapperModifiers.join(' ')}">
           <div class="calendar-header">
             <h2 class="calendar-title">${MONTHS[currentMonth]} ${currentYear}</h2>
             <div class="calendar-top-navs">
+              ${monthYearNavMarkup}
               ${nextPrevNavMarkup}
-              <nav
-                class="calendar-layout-nav"
-                on:click={handleLayoutChange}
-              >
+              <nav class="calendar-layout-nav" id="layoutNav">
                 ${LAYOUT_NAV_ITEMS.map(([val, label]) => {
                   const _class = (layout === val) ? 'class="is--current"' : '';
                   return `<button type="button" ${_class} value="${val}">${label}</button>`;
@@ -700,13 +708,10 @@
                         let labelMarkup = '';
                         if (day.label) labelMarkup = `<div class="calendar__date-label">${day.label}</div>`;
                         
-                        let itemsMarkup = '';
-                        if (day.items && dataComponent) itemsMarkup = dataComponent(day.items);
-                        
                         return `
                           <td class="calendar__date ${dateModifiers.join(' ')}">
                             ${labelMarkup}
-                            ${itemsMarkup}
+                            <slot name="${day.slotName}"></slot>
                           </td>
                         `;
                       }).join('')}
@@ -716,10 +721,29 @@
               </tbody>
             </table>
           </div>
-          
-          ${monthYearNavMarkup}
         </div>
       `;
+      
+      if (nextPrevNavMarkup) {
+        this.shadowRoot
+          .getElementById('nextBtn')
+          .addEventListener('click', this.handleNextClick);
+        this.shadowRoot
+          .getElementById('prevBtn')
+          .addEventListener('click', this.handlePrevClick);
+      }
+      
+      if (monthYearNavMarkup) {
+        this.els.monthSelect = this.shadowRoot.getElementById('monthSelect');
+        this.els.monthSelect.addEventListener('change', this.handleMonthSelect);
+        
+        this.els.yearSelect = this.shadowRoot.getElementById('yearSelect');
+        this.els.yearSelect.addEventListener('change', this.handleYearSelect);
+      }
+      
+      this.shadowRoot
+        .getElementById('layoutNav')
+        .addEventListener('click', this.handleLayoutChange);
     }
   }
 
