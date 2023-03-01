@@ -493,10 +493,19 @@
         const containsNextMonthItems = (nextWeek)
           ? !!nextWeek.find(({ nextMonth }) => nextMonth)
           : false;
+        const currDayInThisMonth = (nextWeek)
+          ? !!nextWeek.find(({ current, nextMonth }) => current && !nextMonth)
+          : false;
         
         if (noCurrentMonthItems || this.currWeekNdx === 5 || containsNextMonthItems) {
-          this.currWeekNdx = 0;
-          nextMonth();
+          if (currDayInThisMonth) {
+            this.currWeekNdx += 1;
+            this.selectCalData();
+          }
+          else {
+            this.currWeekNdx = (this.calData[this.currWeekNdx][6].nextMonth) ? 1 : 0;
+            nextMonth();
+          }
         }
         else {
           this.currWeekNdx += 1;
@@ -540,6 +549,15 @@
       
       const determineYear = () => (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
       const determineMonth = () => (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
+      const determineWeekNdx = () => {
+        return this.genCalData({
+          currentMonth: determineMonth(),
+          currentYear: determineYear(),
+        }).findIndex((week, ndx) => {
+          const currMonthItem = !!week.find(({ nextMonth }) => nextMonth);
+          if (currMonthItem) return ndx;
+        }) - 1;
+      };
       
       const prevMonth = () => {
         this.updateYear( determineYear() );
@@ -550,16 +568,12 @@
         const prevWeek = this.calData[this.currWeekNdx - 1];
         const noCurrentMonthItems = (prevWeek) ? prevWeek[prevWeek.length - 1].prevMonth : true;
         const containsPrevMonthItems = !!this.calData[this.currWeekNdx].find(({ prevMonth }) => prevMonth);
+        const currDayInThisMonth = (prevWeek)
+          ? !!prevWeek.find(({ current, prevMonth }) => current && !prevMonth)
+          : false;
       
         if (containsPrevMonthItems) {
-          this.currWeekNdx = this.genCalData({
-            currentMonth: determineMonth(),
-            currentYear: determineYear(),
-          }).findIndex((week, ndx) => {
-            const currMonthItem = !!week.find(({ nextMonth }) => nextMonth);
-            if (currMonthItem) return ndx;
-          }) - 1;
-          
+          this.currWeekNdx = determineWeekNdx();
           prevMonth();
         }
         else if (noCurrentMonthItems || this.currWeekNdx === 0) {
@@ -568,6 +582,12 @@
         }
         else {
           this.currWeekNdx -= 1;
+          
+          if (!currDayInThisMonth && this.currWeekNdx === 0 && prevWeek[0].prevMonth) {
+            prevMonth();
+            this.currWeekNdx = determineWeekNdx();
+          }
+          
           this.selectCalData();
         }
       };
