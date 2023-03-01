@@ -257,16 +257,16 @@
             
             height: 6em;
             vertical-align: top;
-            background: var(--color--cal--date--bg);
-          }
-          .calendar__date.is--current {
-            --color--cal--date--bg: var(--color--bg--current);
-            
-            background: var(--color--cal--date--bg);
+            background-color: var(--color--cal--date--bg);
           }
           .calendar__date.is--prev-month,
           .calendar__date.is--next-month {
             --color--cal--date--bg: var(--color--bg--secondary);
+            
+            background-color: var(--color--cal--date--bg);
+          }
+          .calendar__date.is--current {
+            --color--cal--date--bg: var(--color--bg--current);
             
             background-color: var(--color--cal--date--bg);
           }
@@ -295,7 +295,10 @@
       this.weekDays = createDays(DAYS, this.startWeekOn);
       // the below data props are dependant on the above
       this.days = [...this.weekDays];
-      this.calData = this.genCalData();
+      this.calData = this.genCalData({
+        currentMonth: this.currentMonth,
+        currentYear: this.currentYear,
+      });
       this.selectedCalData = this.calData;
       
       this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -305,12 +308,12 @@
       this.handleYearSelect = this.handleYearSelect.bind(this);
     }
     
-    genCalData() {
-      const firstDay = getFirstDayOfMonthOffset(this.currentMonth, this.currentYear, this.startWeekOn);
-      const prevMonth = (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
-      const prevYear = (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
+    genCalData(opts) {
+      const firstDay = getFirstDayOfMonthOffset(opts.currentMonth, opts.currentYear, this.startWeekOn);
+      const prevMonth = (opts.currentMonth === 0) ? 11 : opts.currentMonth - 1;
+      const prevYear = (opts.currentMonth === 0) ? opts.currentYear - 1 : opts.currentYear;
       const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
-      const daysInMonth = getDaysInMonth(this.currentMonth, this.currentYear);
+      const daysInMonth = getDaysInMonth(opts.currentMonth, opts.currentYear);
       const currDay = today.getDate();
       const currMonth = today.getMonth();
       const currYear = today.getFullYear();
@@ -338,15 +341,15 @@
             
             if (
               dayNum === currDay
-              && this.currentMonth === currMonth
-              && this.currentYear === currYear
+              && opts.currentMonth === currMonth
+              && opts.currentYear === currYear
             ) obj.current = true;
             
             dayNum += 1;
           }
           
-          let month = this.currentMonth;
-          let year = this.currentYear;
+          let month = opts.currentMonth;
+          let year = opts.currentYear;
           if (obj.prevMonth) {
             month = month === 0 ? 11 : month - 1;
             if (month === 11) year -= 1;
@@ -431,7 +434,10 @@
     }
     
     updateCalData() {
-      this.calData = this.genCalData();
+      this.calData = this.genCalData({
+        currentMonth: this.currentMonth,
+        currentYear: this.currentYear,
+      });
       this.selectCalData();
     }
     
@@ -484,10 +490,22 @@
       const nextWeek = () => {
         const nextWeek = this.calData[this.currWeekNdx + 1];
         const noCurrentMonthItems = (nextWeek) ? nextWeek[0].nextMonth : true;
+        const containsNextMonthItems = (nextWeek)
+          ? !!nextWeek.find(({ nextMonth }) => nextMonth)
+          : false;
+        const currDayInThisMonth = (nextWeek)
+          ? !!nextWeek.find(({ current, nextMonth }) => current && !nextMonth)
+          : false;
         
-        if (noCurrentMonthItems || this.currWeekNdx === 5) {
-          this.currWeekNdx = 0;
-          nextMonth();
+        if (noCurrentMonthItems || this.currWeekNdx === 5 || containsNextMonthItems) {
+          if (currDayInThisMonth) {
+            this.currWeekNdx += 1;
+            this.selectCalData();
+          }
+          else {
+            this.currWeekNdx = (this.calData[this.currWeekNdx][6].nextMonth) ? 1 : 0;
+            nextMonth();
+          }
         }
         else {
           this.currWeekNdx += 1;
@@ -529,21 +547,47 @@
     handlePrevClick() {
       if (this.currentMonth === 0 && this.currentYear - 1 < yearOpts[0]) return;
       
+      const determineYear = () => (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
+      const determineMonth = () => (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
+      const determineWeekNdx = () => {
+        return this.genCalData({
+          currentMonth: determineMonth(),
+          currentYear: determineYear(),
+        }).findIndex((week, ndx) => {
+          const currMonthItem = !!week.find(({ nextMonth }) => nextMonth);
+          if (currMonthItem) return ndx;
+        }) - 1;
+      };
+      
       const prevMonth = () => {
-        this.updateYear( (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear );
-        this.updateMonth( (this.currentMonth === 0) ? 11 : this.currentMonth - 1 );
+        this.updateYear( determineYear() );
+        this.updateMonth( determineMonth() );
       };
       
       const prevWeek = () => {
         const prevWeek = this.calData[this.currWeekNdx - 1];
         const noCurrentMonthItems = (prevWeek) ? prevWeek[prevWeek.length - 1].prevMonth : true;
-        
-        if (noCurrentMonthItems || this.currWeekNdx === 0) {
+        const containsPrevMonthItems = !!this.calData[this.currWeekNdx].find(({ prevMonth }) => prevMonth);
+        const currDayInThisMonth = (prevWeek)
+          ? !!prevWeek.find(({ current, prevMonth }) => current && !prevMonth)
+          : false;
+      
+        if (containsPrevMonthItems) {
+          this.currWeekNdx = determineWeekNdx();
+          prevMonth();
+        }
+        else if (noCurrentMonthItems || this.currWeekNdx === 0) {
           this.currWeekNdx = 4;
           prevMonth();
         }
         else {
           this.currWeekNdx -= 1;
+          
+          if (!currDayInThisMonth && this.currWeekNdx === 0 && prevWeek[0].prevMonth) {
+            prevMonth();
+            this.currWeekNdx = determineWeekNdx();
+          }
+          
           this.selectCalData();
         }
       };
