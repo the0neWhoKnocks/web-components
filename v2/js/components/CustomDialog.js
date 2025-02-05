@@ -181,7 +181,8 @@
           }
           
           .${ROOT_CLASS} {
-            max-height: 100vh;
+            max-width: calc(100vw - 2em);
+            max-height: calc(100vh - 2em);
             overflow: hidden;
             padding: 0;
             border: solid 4px var(${CSS_VAR__COLOR__BORDER});
@@ -217,7 +218,8 @@
           
           .${ROOT_CLASS}__close-btn {
             color: var(${CSS_VAR__COLOR__TITLE__TEXT});
-            padding: 0 1em;
+            font-size: 1.25em;
+            padding: 0 0.5em;
             border: none;
             background: var(${CSS_VAR__COLOR__TITLE__BG});
           }
@@ -239,13 +241,13 @@
             animation: maskIn ${DEFAULT__ANIM_DURATION}ms;
           }
           .${ROOT_CLASS}-wrapper.out .${ROOT_CLASS}-mask {
-            animation: maskOut ${DEFAULT__ANIM_DURATION}ms;
+            animation: maskOut ${DEFAULT__ANIM_DURATION}ms forwards;
           }
           .${ROOT_CLASS}-wrapper.in .${ROOT_CLASS} {
             animation: dialogIn ${DEFAULT__ANIM_DURATION}ms;
           }
           .${ROOT_CLASS}-wrapper.out .${ROOT_CLASS} {
-            animation: dialogOut ${DEFAULT__ANIM_DURATION}ms;
+            animation: dialogOut ${DEFAULT__ANIM_DURATION}ms forwards;
           }
         </style>
         
