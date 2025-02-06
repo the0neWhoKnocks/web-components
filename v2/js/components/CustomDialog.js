@@ -98,21 +98,21 @@
           @keyframes dialogIn {
             0% {
               opacity: 0;
-              transform: translate(-50%, -90%);
+              transform: translateY(-30%);
             }
             100% {
               opacity: 1;
-              transform: translate(-50%, -50%);
+              transform: translateY(0%);
             }
           }
           @keyframes dialogOut {
             0% {
               opacity: 1;
-              transform: translate(-50%, -50%);
+              transform: translateY(0%);
             }
             100% {
               opacity: 0;
-              transform: translate(-50%, -10%);
+              transform: translateY(30%);
             }
           }
           @keyframes maskIn {
@@ -137,10 +137,7 @@
             
             font: 16px Helvetica, Arial, sans-serif;
             position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
+            inset: 0;
             z-index: 10;
           }
           :host(:not([open])) {
@@ -155,6 +152,14 @@
         	}
           button:not(disabled) {
             cursor: pointer;
+          }
+          
+          .${ROOT_CLASS}-wrapper {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
           }
           
           .${ROOT_CLASS}__body button {
@@ -187,13 +192,8 @@
             padding: 0;
             border: solid 4px var(${CSS_VAR__COLOR__BORDER});
             border-radius: 0.5em;
-            margin: 0;
             background: var(${CSS_VAR__COLOR__BORDER});
             box-shadow: 0 0.75em 2em 0.25em rgba(0, 0, 0, 0.75);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
           }
           
           .${ROOT_CLASS}__nav {
