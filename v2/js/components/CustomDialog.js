@@ -34,6 +34,8 @@
     }
     set open(value) {
       if (value === '' || value === 'true' || value === true) {
+        this.prevFocused = document.activeElement;
+        
         this.render();
         
         this.setAttribute('open', '');
@@ -43,6 +45,7 @@
         setTimeout(() => {
           this.els.wrapper.addEventListener('click', this.handleCloseClick);
           window.addEventListener('keydown', this.handleKeyDown);
+          this.els.dialog.focus();
         }, DEFAULT__ANIM_DURATION);
       }
       else {
@@ -55,6 +58,8 @@
           
           this.removeAttribute('open');  
           this.els.dialog.removeAttribute('open');
+          
+          if (this.prevFocused) this.prevFocused.focus();
           
           this.dispatchEvent(new CustomEvent(EVENT__CLOSED, {
             bubbles: true,
@@ -221,7 +226,12 @@
             font-size: 1.25em;
             padding: 0 0.5em;
             border: none;
+            border-radius: 0.3em; /* for focus border */
             background: var(${CSS_VAR__COLOR__TITLE__BG});
+          }
+          .${ROOT_CLASS}__close-btn:focus-visible {
+            outline: solid 2px color-mix(in srgb, currentColor 40%, transparent);
+            outline-offset: -4px;
           }
           :host([modal]) .${ROOT_CLASS}__close-btn {
             display: none;
